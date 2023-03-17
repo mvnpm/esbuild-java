@@ -22,6 +22,14 @@ public class BundleDependencies {
         MVNPM,
     }
 
+    /**
+     * Use esbuild to bundle either webjar or mvnpm dependencies into a bundle.
+     * @param dependencies the locations of the webjar or mvnpm bundles
+     * @param type to indicate the type of bundles, so either web_jar or mvnpm
+     * @param entry the entry javascript file
+     * @return the folder that has the result of the transformation
+     * @throws IOException when something could not be written
+     */
     public Path bundle(List<Path> dependencies, BundleType type, Path entry) throws IOException {
         final Path path = getPath(dependencies, type, entry);
         final Path dist = path.resolve("dist");
