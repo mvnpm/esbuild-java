@@ -1,4 +1,4 @@
-package io.quarkus.esbuild.util;
+package ch.nerdin.esbuild.util;
 
 import org.junit.jupiter.api.Test;
 

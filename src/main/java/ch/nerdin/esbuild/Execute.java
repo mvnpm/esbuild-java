@@ -1,13 +1,12 @@
-package io.quarkus.esbuild;
+package ch.nerdin.esbuild;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Execute implements BuildStep {
+public class Execute {
 
     private final File esBuildExec;
     private Config config;
@@ -23,8 +22,7 @@ public class Execute implements BuildStep {
         this.args = args;
     }
 
-    @Override
-    public Path execute() throws IOException {
+    public void execute() throws IOException {
         ProcessBuilder builder = new ProcessBuilder();
 
         final String[] command = args != null ? getCommand(args) : getCommand(config);
@@ -36,8 +34,6 @@ public class Execute implements BuildStep {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
-        return null;
     }
 
     private String[] getCommand(Config config) {

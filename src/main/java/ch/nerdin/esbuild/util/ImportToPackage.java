@@ -1,4 +1,4 @@
-package io.quarkus.esbuild.util;
+package ch.nerdin.esbuild.util;
 
 import io.quarkus.qute.Engine;
 import io.quarkus.qute.Template;

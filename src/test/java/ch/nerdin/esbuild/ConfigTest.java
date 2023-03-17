@@ -1,4 +1,4 @@
-package io.quarkus.esbuild;
+package ch.nerdin.esbuild;
 
 import org.junit.jupiter.api.Test;
 
@@ -38,12 +38,12 @@ public class ConfigTest {
     @Test
     public void shouldOutputStandardFlags() {
         // given
-        final Config config = new ConfigBuilder().bundle(true).entryPoint("application-mvnpm.js").outDir("/tmp").minify(true).build();
+        final Config config = new ConfigBuilder().bundle().entryPoint("main.js").outDir("/tmp").minify().build();
 
         // when
         final String[] params = config.toParams();
 
         // then
-        assertArrayEquals(new String[]{"--bundle", "application-mvnpm.js", "--minify", "--outdir=/tmp"}, params);
+        assertArrayEquals(new String[]{"--bundle", "main.js", "--minify", "--outdir=/tmp"}, params);
     }
 }

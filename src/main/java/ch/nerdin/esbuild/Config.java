@@ -1,4 +1,4 @@
-package io.quarkus.esbuild;
+package ch.nerdin.esbuild;
 
 
 import java.lang.reflect.Field;
@@ -42,8 +42,10 @@ public class Config {
 
     private Platform platform;
 
-    private String serve;
+    private boolean serve;
     private boolean sourceMap;
+
+    private boolean splitting;
 
     enum Target {
         ES2017, CHROME58, FIREFOX57,
@@ -142,11 +144,11 @@ public class Config {
         this.platform = platform;
     }
 
-    public String getServe() {
+    public boolean isServe() {
         return serve;
     }
 
-    public void setServe(String serve) {
+    public void setServe(boolean serve) {
         this.serve = serve;
     }
 
@@ -156,6 +158,14 @@ public class Config {
 
     public void setSourceMap(boolean sourceMap) {
         this.sourceMap = sourceMap;
+    }
+
+    public boolean isSplitting() {
+        return splitting;
+    }
+
+    public void setSplitting(boolean splitting) {
+        this.splitting = splitting;
     }
 
     public Target getTarget() {
@@ -184,7 +194,7 @@ public class Config {
                 if (value != null) {
                     final String fieldName = field.getName();
                     if (value == Boolean.TRUE) {
-                        result.add("--" + fieldName);
+                        result.add("--" + fieldName.toLowerCase());
                     } else if (value instanceof Map) {
                         result.add("--" + fieldName + mapToString((Map<?, ?>) value));
                     } else if ("entryPoint".equals(field.getName())) {

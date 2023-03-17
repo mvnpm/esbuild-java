@@ -4,10 +4,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>io.quarkus</groupId>
-  <artifactId>esbuild-maven</artifactId>
+  <groupId>ch.nerdin</groupId>
+  <artifactId>esbuild-java</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <packaging>maven-plugin</packaging>
+  <packaging>jar</packaging>
 
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
@@ -16,25 +16,6 @@
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-plugin-api</artifactId>
-      <version>3.6.3</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.plugin-tools</groupId>
-      <artifactId>maven-plugin-annotations</artifactId>
-      <version>3.6.0</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-project</artifactId>
-      <version>2.2.1</version>
-      <scope>provided</scope>
-    </dependency>
-
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-text</artifactId>
@@ -68,50 +49,57 @@
   </dependencies>
 
   <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <artifactId>maven-plugin-plugin</artifactId>
-          <version>3.6.4</version>
-        </plugin>
-
-      </plugins>
-    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.1.2</version>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>3.1.0</version>
         <executions>
           <execution>
-            <id>copy-dependencies</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
+            <id>download</id>
+            <phase>generate-resources</phase>
             <configuration>
-              <outputDirectory>
-                ${project.build.directory}/libs
-              </outputDirectory>
+              <target>
+                <get dest="src/main/resources">
+                  <url url="https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-0.17.10.tgz"/>
+                  <url url="https://registry.npmjs.org/@esbuild/darwin-x64/-/darwin-x64-0.17.10.tgz"/>
+                  <url url="https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-0.17.10.tgz"/>
+                  <url url="https://registry.npmjs.org/@esbuild/win32-ia32/-/win32-ia32-0.17.10.tgz"/>
+                  <url url="https://registry.npmjs.org/@esbuild/linux-arm64/-/linux-arm64-0.17.10.tgz"/>
+                  <url url="https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-0.17.10.tgz"/>
+                  <url url="https://registry.npmjs.org/@esbuild/linux-ia32/-/linux-ia32-0.17.10.tgz"/>
+                </get>
+              </target>
             </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>3.1.2</version>
-        <configuration>
-          <archive>
-            <manifest>
-              <addClasspath>true</addClasspath>
-              <classpathPrefix>libs/</classpathPrefix>
-              <mainClass>
-                io.quarkus.esbuild.Main
-              </mainClass>
-            </manifest>
-          </archive>
-        </configuration>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <archive>
+                <manifest>
+                  <mainClass>
+                    ch.nerdin.esbuild.Main
+                  </mainClass>
+                </manifest>
+              </archive>
+              <descriptorRefs>
+                <descriptorRef>jar-with-dependencies</descriptorRef>
+              </descriptorRefs>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

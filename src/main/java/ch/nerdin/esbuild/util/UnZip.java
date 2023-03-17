@@ -1,4 +1,4 @@
-package io.quarkus.esbuild.util;
+package ch.nerdin.esbuild.util;
 
 import java.io.File;
 import java.io.FileInputStream;

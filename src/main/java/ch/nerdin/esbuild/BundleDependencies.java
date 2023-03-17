@@ -1,22 +1,52 @@
-package io.quarkus.esbuild;
+package ch.nerdin.esbuild;
 
-import io.quarkus.esbuild.util.ImportToPackage;
-import io.quarkus.esbuild.util.UnZip;
+import ch.nerdin.esbuild.resolve.ExecutableResolver;
+import ch.nerdin.esbuild.util.ImportToPackage;
+import ch.nerdin.esbuild.util.UnZip;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 public class BundleDependencies {
     private static final String IMPORT_FILE_NAME = "META-INF/importmap.json";
     private static final String MVNPM_PACKAGE_PREFIX = "resources/_static";
     private static final String WEBJAR_PACKAGE_PREFIX = "META-INF/resources/webjars";
-    private static final String ESBUILD_VERSION = "0.17.10";
+    public static final String ESBUILD_VERSION = "0.17.10";
 
     enum BundleType {
         WEB_JAR,
         MVNPM,
+    }
+
+    public Path bundle(List<Path> dependencies, BundleType type, Path entry) throws IOException {
+        final Path path = getPath(dependencies, type, entry);
+        final Path dist = path.resolve("dist");
+        final Config config = new ConfigBuilder().bundle().minify().sourceMap().splitting().format(Config.Format.ESM)
+                .outDir(dist.toString()).entryPoint(path.resolve(entry.getFileName()).toFile().toString()).build();
+
+        esBuild(config);
+
+        return dist;
+    }
+
+    public Path bundle(List<Path> dependencies, BundleType type, Path entry, Config config) throws IOException {
+        final Path path = extract(dependencies, type);
+        config.setEntryPoint(path.resolve(entry.getFileName()).toFile().toString());
+
+        esBuild(config);
+
+        return path;
+    }
+
+    private Path getPath(List<Path> dependencies, BundleType type, Path entry) throws IOException {
+        final Path path = extract(dependencies, type);
+        final Path target = path.resolve(entry.getFileName());
+        Files.copy(entry, target, REPLACE_EXISTING);
+        return path;
     }
 
     protected Path extract(List<Path> dependencies, BundleType type) throws IOException {
@@ -37,10 +67,8 @@ public class BundleDependencies {
         return bundleDirectory;
     }
 
-    protected void esBuild(Path script) throws IOException {
-        final Path esBuildExec = new Download(ESBUILD_VERSION).execute();
-        final Config config = new ConfigBuilder().bundle(true).minify(true).outDir(script.getParent().resolve("dist")
-                .toString()).entryPoint(script.toFile().toString()).build();
+    protected void esBuild(Config config) throws IOException {
+        final Path esBuildExec = new ExecutableResolver().resolve(BundleDependencies.ESBUILD_VERSION);
         new Execute(esBuildExec.toFile(), config).execute();
     }
 

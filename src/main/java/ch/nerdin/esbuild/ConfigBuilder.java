@@ -1,4 +1,4 @@
-package io.quarkus.esbuild;
+package ch.nerdin.esbuild;
 
 import java.util.List;
 import java.util.Map;
@@ -10,8 +10,8 @@ public class ConfigBuilder {
         this.config = new Config();
     }
 
-    public ConfigBuilder bundle(boolean bundle) {
-        config.setBundle(bundle);
+    public ConfigBuilder bundle() {
+        config.setBundle(true);
         return this;
     }
 
@@ -20,13 +20,13 @@ public class ConfigBuilder {
         return this;
     }
 
-    public ConfigBuilder minify(boolean minify) {
-        config.setMinify(minify);
+    public ConfigBuilder minify() {
+        config.setMinify(true);
         return this;
     }
 
-    public ConfigBuilder version(boolean version) {
-        config.setVersion(version);
+    public ConfigBuilder version() {
+        config.setVersion(true);
         return this;
     }
 
@@ -65,13 +65,18 @@ public class ConfigBuilder {
         return this;
     }
 
-    public ConfigBuilder serve(String serve) {
-        config.setServe(serve);
+    public ConfigBuilder serve() {
+        config.setServe(true);
         return this;
     }
 
-    public ConfigBuilder sourceMap(boolean sourceMap) {
-        config.setSourceMap(sourceMap);
+    public ConfigBuilder sourceMap() {
+        config.setSourceMap(true);
+        return this;
+    }
+
+    public ConfigBuilder splitting() {
+        config.setSplitting(true);
         return this;
     }
 
@@ -80,8 +85,8 @@ public class ConfigBuilder {
         return this;
     }
 
-    public ConfigBuilder watch(boolean watch) {
-        config.setWatch(watch);
+    public ConfigBuilder watch() {
+        config.setWatch(true);
         return this;
     }
 
