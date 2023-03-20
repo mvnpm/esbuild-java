@@ -6,13 +6,38 @@
 
   <groupId>ch.nerdin</groupId>
   <artifactId>esbuild-java</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <name>esbuild wrapper for java</name>
+  <version>1.0.0-alpha1</version>
   <packaging>jar</packaging>
+  <description>Small wrapper around esbuild to be able to use it in java</description>
+
+  <url>https://github.com/edewit/esbuild-java/</url>
+  <scm>
+    <connection>scm:git:git://github.com/edewit/esbuild-java.git</connection>
+    <developerConnection>scm:git:ssh://github.com:edewit/esbuild-java.git</developerConnection>
+    <url>http://github.com/edewit/esbuild-java/tree/master</url>
+  </scm>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>http://www.opensource.org/licenses/mit-license.php</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <name>Erik Jan de Wit</name>
+      <email>erikjan.dewit@gmail.com</email>
+      <organization>Red Hat</organization>
+      <organizationUrl>http://blog.nerdin.ch</organizationUrl>
+    </developer>
+  </developers>
+
 
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <esbuild.version>0.17.10</esbuild.version>
   </properties>
 
   <dependencies>
@@ -50,15 +75,9 @@
 
   <distributionManagement>
     <snapshotRepository>
-      <id>sonatype-nexus-snapshots</id>
-      <name>Sonatype Nexus Snapshots</name>
+      <id>ossrh</id>
       <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
-    <repository>
-      <id>sonatype-nexus-staging</id>
-      <name>Nexus Release Repository</name>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-    </repository>
   </distributionManagement>
 
   <build>
@@ -73,14 +92,14 @@
             <phase>generate-resources</phase>
             <configuration>
               <target>
-                <get dest="src/main/resources">
-                  <url url="https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-0.17.10.tgz"/>
-                  <url url="https://registry.npmjs.org/@esbuild/darwin-x64/-/darwin-x64-0.17.10.tgz"/>
-                  <url url="https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-0.17.10.tgz"/>
-                  <url url="https://registry.npmjs.org/@esbuild/win32-ia32/-/win32-ia32-0.17.10.tgz"/>
-                  <url url="https://registry.npmjs.org/@esbuild/linux-arm64/-/linux-arm64-0.17.10.tgz"/>
-                  <url url="https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-0.17.10.tgz"/>
-                  <url url="https://registry.npmjs.org/@esbuild/linux-ia32/-/linux-ia32-0.17.10.tgz"/>
+                <get dest="src/main/resources" skipexisting="true">
+                  <url url="https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-${esbuild.version}.tgz"/>
+                  <url url="https://registry.npmjs.org/@esbuild/darwin-x64/-/darwin-x64-${esbuild.version}.tgz"/>
+                  <url url="https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-${esbuild.version}.tgz"/>
+                  <url url="https://registry.npmjs.org/@esbuild/win32-ia32/-/win32-ia32-${esbuild.version}.tgz"/>
+                  <url url="https://registry.npmjs.org/@esbuild/linux-arm64/-/linux-arm64-${esbuild.version}.tgz"/>
+                  <url url="https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-${esbuild.version}.tgz"/>
+                  <url url="https://registry.npmjs.org/@esbuild/linux-ia32/-/linux-ia32-${esbuild.version}.tgz"/>
                 </get>
               </target>
             </configuration>
@@ -115,15 +134,38 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <version>1.6.13</version>
+        <extensions>true</extensions>
+        <configuration>
+          <serverId>ossrh</serverId>
+          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+          <autoReleaseAfterClose>true</autoReleaseAfterClose>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>3.2.1</version>
+        <version>2.2.1</version>
         <executions>
           <execution>
-            <id>attach-source</id>
-            <phase>compile</phase>
+            <id>attach-sources</id>
             <goals>
               <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.1.1</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
             </goals>
           </execution>
         </executions>
