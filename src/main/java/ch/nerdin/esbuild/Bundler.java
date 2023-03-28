@@ -13,14 +13,14 @@ import java.util.stream.Collectors;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
-public class BundleDependencies {
+public class Bundler {
     private static final String IMPORT_FILE_NAME = "META-INF/importmap.json";
     private static final String MVNPM_PACKAGE_PREFIX = "resources/_static";
     private static final String WEBJAR_PACKAGE_PREFIX = "META-INF/resources/webjars";
     public static final String ESBUILD_VERSION = "0.17.10";
 
     public enum BundleType {
-        WEBJAR,
+        WEBJARS,
         MVNPM,
     }
 
@@ -91,7 +91,7 @@ public class BundleDependencies {
             final NameVersion nameVersion = parseName(path.getFileName().toString());
             switch (type) {
                 case MVNPM -> createPackage(bundleDirectory, nameVersion);
-                case WEBJAR -> Files.move(bundleDirectory.resolve(WEBJAR_PACKAGE_PREFIX).resolve(nameVersion.name)
+                case WEBJARS -> Files.move(bundleDirectory.resolve(WEBJAR_PACKAGE_PREFIX).resolve(nameVersion.name)
                         .resolve(nameVersion.version), nodeModules.resolve(nameVersion.name));
             }
         }
@@ -100,7 +100,7 @@ public class BundleDependencies {
     }
 
     protected static void esBuild(Config config) throws IOException {
-        final Path esBuildExec = new ExecutableResolver().resolve(BundleDependencies.ESBUILD_VERSION);
+        final Path esBuildExec = new ExecutableResolver().resolve(Bundler.ESBUILD_VERSION);
         new Execute(esBuildExec.toFile(), config).execute();
     }
 

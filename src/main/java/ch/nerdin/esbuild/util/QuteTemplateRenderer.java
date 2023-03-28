@@ -3,26 +3,23 @@ package ch.nerdin.esbuild.util;
 import io.quarkus.qute.Engine;
 import io.quarkus.qute.Template;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
 
 public class QuteTemplateRenderer {
 
     public static String render(String templateName, Object data) {
         Engine engine = Engine.builder().addDefaults().build();
-        final URL location = ImportToPackage.class.getResource("/%s".formatted(templateName));
-        final List<String> template;
-        try {
-            template = Files.readAllLines(new File(location.toURI()).toPath());
-        } catch (IOException | URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+        final InputStream inputStream = ImportToPackage.class.getResourceAsStream("/%s".formatted(templateName));
+        String template = new BufferedReader(
+            new InputStreamReader(inputStream, StandardCharsets.UTF_8))
+            .lines()
+            .collect(Collectors.joining("\n"));
 
-        final Template parsed = engine.parse(String.join("\n", template));
+        final Template parsed = engine.parse(template);
         return parsed.render(data);
     }
 }
