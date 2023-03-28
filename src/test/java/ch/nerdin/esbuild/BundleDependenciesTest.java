@@ -20,7 +20,7 @@ public class BundleDependenciesTest {
 
     @Test
     public void shouldBundle() throws URISyntaxException, IOException {
-        executeTest("/htmx.org-1.8.4.jar", BundleDependencies.BundleType.WEB_JAR, "/application-webjar.js");
+        executeTest("/htmx.org-1.8.4.jar", BundleDependencies.BundleType.WEBJAR, "/application-webjar.js");
     }
 
     private void executeTest(String jarName, BundleDependencies.BundleType type, String scriptName) throws URISyntaxException, IOException {
@@ -28,8 +28,7 @@ public class BundleDependenciesTest {
         final List<Path> dependencies = Collections.singletonList(jar.toPath());
         final Path entry = new File(getClass().getResource(scriptName).toURI()).toPath();
 
-        final BundleDependencies bundleDependencies = new BundleDependencies();
-        final Path path = bundleDependencies.bundle(dependencies, type, entry);
+        final Path path = BundleDependencies.bundle(dependencies, type, entry);
 
         assertTrue(path.toFile().exists());
     }

@@ -28,8 +28,13 @@ public class DownloadResolver extends BaseResolver implements Resolver {
 
         final Path destination = createDestination(version);
         final Path tarFile = destination.resolve(FILE_NAME);
-        downloadFile(new URL(url), tarFile);
-        return extract(Files.newInputStream(tarFile), destination.toFile());
+
+        try {
+            downloadFile(new URL(url), tarFile);
+            return extract(Files.newInputStream(tarFile), destination.toFile());
+        } catch (IOException e) {
+            return resolver.resolve(version);
+        }
     }
 
     void downloadFile(URL url, Path destination) throws IOException {

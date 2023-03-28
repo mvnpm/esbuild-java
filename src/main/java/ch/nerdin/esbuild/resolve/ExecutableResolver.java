@@ -6,8 +6,11 @@ import java.nio.file.Path;
 public class ExecutableResolver implements Resolver {
 
     private final Resolver resolver;
+
     public ExecutableResolver() {
-        final DownloadResolver downloadResolver = new DownloadResolver(null);
+        final DownloadResolver downloadResolver = new DownloadResolver((version) -> {
+            throw new RuntimeException("could not resolve esbuild with version " + version);
+        });
         final BundledResolver bundledResolver = new BundledResolver(downloadResolver);
         this.resolver = new CacheResolver(bundledResolver);
     }
