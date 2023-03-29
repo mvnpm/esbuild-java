@@ -7,7 +7,7 @@
   <groupId>ch.nerdin</groupId>
   <artifactId>esbuild-java</artifactId>
   <name>esbuild wrapper for java</name>
-  <version>1.0.0-alpha2</version>
+  <version>1.0.0-alpha3</version>
   <packaging>jar</packaging>
   <description>Small wrapper around esbuild to be able to use it in java</description>
 
