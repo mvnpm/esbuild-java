@@ -14,8 +14,8 @@ import java.util.stream.Collectors;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class Bundler {
-    private static final String IMPORT_FILE_NAME = "META-INF/importmap.json";
-    private static final String MVNPM_PACKAGE_PREFIX = "resources/_static";
+
+
     private static final String WEBJAR_PACKAGE_PREFIX = "META-INF/resources/webjars";
     public static final String ESBUILD_VERSION = "0.17.10";
 
@@ -59,7 +59,7 @@ public class Bundler {
 
     private static Path createOneEntryPointScript(List<Path> entries, Path location) throws IOException {
         final String entryString = EntryPoint.convert(entries.stream().map(Path::toFile).collect(Collectors.toList()));
-        final Path entry = location.resolve("index.js");
+        final Path entry = location.resolve("bundle.js");
         Files.writeString(entry, entryString);
         return entry;
     }
@@ -90,7 +90,7 @@ public class Bundler {
             UnZip.unzip(path, bundleDirectory);
             final NameVersion nameVersion = parseName(path.getFileName().toString());
             switch (type) {
-                case MVNPM -> createPackage(bundleDirectory, nameVersion);
+                case MVNPM -> ImportToPackage.createPackage(bundleDirectory, nameVersion.name, nameVersion.version);
                 case WEBJARS -> Files.move(bundleDirectory.resolve(WEBJAR_PACKAGE_PREFIX).resolve(nameVersion.name)
                         .resolve(nameVersion.version), nodeModules.resolve(nameVersion.name));
             }
@@ -110,18 +110,6 @@ public class Bundler {
         String version = fileName.substring(separatorIndex + 1, fileName.lastIndexOf('.'));
 
         return new NameVersion(name, version);
-    }
-
-    private static void createPackage(Path location, NameVersion nameVersion) throws IOException {
-        String name = nameVersion.name;
-
-        final Path importPackage = location.resolve(IMPORT_FILE_NAME);
-
-        final String packageContents = ImportToPackage.createPackage(importPackage, name, nameVersion.version);
-        final Path packageFile = importPackage.getParent().resolve(MVNPM_PACKAGE_PREFIX).resolve(name).resolve("package.json");
-        Files.writeString(packageFile, packageContents);
-
-        Files.move(packageFile.getParent(), location.resolve("node_modules").resolve(name));
     }
 
     static class NameVersion {

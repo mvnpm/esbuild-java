@@ -25,8 +25,8 @@ public class ImportToPackageTest {
     @Test
     public void convert() throws URISyntaxException {
         final File file = new File(getClass().getResource("/import-map.json").toURI());
-        final String stimulus = ImportToPackage.extractInfo(file.toPath());
+        final String[] stimulus = ImportToPackage.extractInfo(file.toPath());
 
-        assertEquals("/_static/stimulus/./dist/stimulus.js", stimulus);
+        assertEquals("/_static/stimulus/./dist/stimulus.js", stimulus[1]);
     }
 }
