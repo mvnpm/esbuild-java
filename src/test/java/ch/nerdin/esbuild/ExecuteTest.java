@@ -12,7 +12,7 @@ public class ExecuteTest {
     public void shouldExecuteEsBuild() throws IOException {
         final Config config = new Config();
         config.setVersion(true);
-        final Path path = new DownloadResolver(null).resolve(BundleDependencies.ESBUILD_VERSION);
+        final Path path = new DownloadResolver(null).resolve(Bundler.ESBUILD_VERSION);
         new Execute(path.toFile(), config).execute();
     }
 }

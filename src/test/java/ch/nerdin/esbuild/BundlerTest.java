@@ -11,24 +11,24 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class BundleDependenciesTest {
+public class BundlerTest {
 
     @Test
     public void shouldBundleMvnpm() throws URISyntaxException, IOException {
-        executeTest("/stimulus-3.2.1-mvnpm.jar", BundleDependencies.BundleType.MVNPM, "/application-mvnpm.js");
+        executeTest("/stimulus-3.2.1-mvnpm.jar", Bundler.BundleType.MVNPM, "/application-mvnpm.js");
     }
 
     @Test
     public void shouldBundle() throws URISyntaxException, IOException {
-        executeTest("/htmx.org-1.8.4.jar", BundleDependencies.BundleType.WEBJAR, "/application-webjar.js");
+        executeTest("/htmx.org-1.8.4.jar", Bundler.BundleType.WEBJARS, "/application-webjar.js");
     }
 
-    private void executeTest(String jarName, BundleDependencies.BundleType type, String scriptName) throws URISyntaxException, IOException {
+    private void executeTest(String jarName, Bundler.BundleType type, String scriptName) throws URISyntaxException, IOException {
         final File jar = new File(getClass().getResource(jarName).toURI());
         final List<Path> dependencies = Collections.singletonList(jar.toPath());
         final Path entry = new File(getClass().getResource(scriptName).toURI()).toPath();
 
-        final Path path = BundleDependencies.bundle(dependencies, type, entry);
+        final Path path = Bundler.bundle(dependencies, type, entry);
 
         assertTrue(path.toFile().exists());
     }

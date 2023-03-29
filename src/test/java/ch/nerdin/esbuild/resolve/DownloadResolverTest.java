@@ -1,6 +1,6 @@
 package ch.nerdin.esbuild.resolve;
 
-import ch.nerdin.esbuild.BundleDependencies;
+import ch.nerdin.esbuild.Bundler;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -13,7 +13,7 @@ public class DownloadResolverTest {
     @Test
     public void download() throws IOException {
         // when
-        final Path path = new DownloadResolver(null).resolve(BundleDependencies.ESBUILD_VERSION);
+        final Path path = new DownloadResolver(null).resolve(Bundler.ESBUILD_VERSION);
 
         // then
         assertTrue(path.toFile().exists());
