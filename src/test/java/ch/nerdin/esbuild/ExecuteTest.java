@@ -10,9 +10,9 @@ public class ExecuteTest {
 
     @Test
     public void shouldExecuteEsBuild() throws IOException {
-        final Config config = new Config();
-        config.setVersion(true);
+        final EsBuildConfig esBuildConfig = new EsBuildConfig();
+        esBuildConfig.setVersion(true);
         final Path path = new DownloadResolver(null).resolve(Bundler.ESBUILD_VERSION);
-        new Execute(path.toFile(), config).execute();
+        new Execute(path.toFile(), esBuildConfig).execute();
     }
 }

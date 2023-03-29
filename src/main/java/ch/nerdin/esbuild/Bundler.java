@@ -26,46 +26,29 @@ public class Bundler {
 
     /**
      * Use esbuild to bundle either webjar or mvnpm dependencies into a bundle.
-     * @param dependencies the locations of the webjar or mvnpm bundles
-     * @param type to indicate the type of bundles, so either web_jar or mvnpm
-     * @param entry the entry javascript file
+     * @param bundleOptions
      * @return the folder that has the result of the transformation
      * @throws IOException when something could not be written
      */
-    public static Path bundle(List<Path> dependencies, BundleType type, Path entry) throws IOException {
-        return bundle(dependencies, type, List.of(entry));
-    }
-
-    public static Path bundle(List<Path> dependencies, BundleType type, List<Path> entries) throws IOException {
-        return bundle(dependencies, type, entries, useDefaultConfig());
-    }
-
-    public static Path bundle(List<Path> dependencies, BundleType type, Path entry, Config config) throws IOException {
-        return bundle(dependencies, type, List.of(entry), config);
-    }
-
-    public static Path bundle(List<Path> dependencies, BundleType type, List<Path> entries, Config config) throws IOException {
-        final Path location = createWorkingTempFolder(dependencies, type, entries);
+    public static Path bundle(BundleOptions bundleOptions) throws IOException {
+        final Path location = createWorkingTempFolder(bundleOptions.getDependencies(), bundleOptions.getType(), bundleOptions.getEntries());
         final Path dist = location.resolve("dist");
 
-        final Path entry = createOneEntryPointScript(entries, location);
-        config.setOutDir(dist.toString());
-        config.setEntryPoint(entry.toFile().toString());
+        final Path entry = createOneEntryPointScript(bundleOptions.getBundleName(), bundleOptions.getEntries(), location);
+        final EsBuildConfig esBuildConfig = bundleOptions.getEsBuildConfig();
+        esBuildConfig.setOutDir(dist.toString());
+        esBuildConfig.setEntryPoint(entry.toFile().toString());
 
-        esBuild(config);
+        esBuild(esBuildConfig);
 
         return dist;
     }
 
-    private static Path createOneEntryPointScript(List<Path> entries, Path location) throws IOException {
+    private static Path createOneEntryPointScript(String bundleName, List<Path> entries, Path location) throws IOException {
         final String entryString = EntryPoint.convert(entries.stream().map(Path::toFile).collect(Collectors.toList()));
-        final Path entry = location.resolve("bundle.js");
+        final Path entry = location.resolve("%s.js".formatted(bundleName));
         Files.writeString(entry, entryString);
         return entry;
-    }
-
-    private static Config useDefaultConfig() {
-        return new ConfigBuilder().bundle().minify().sourceMap().splitting().format(Config.Format.ESM).build();
     }
 
     private static Path createWorkingTempFolder(List<Path> dependencies, BundleType type, List<Path> entries) throws IOException {
@@ -99,9 +82,9 @@ public class Bundler {
         return bundleDirectory;
     }
 
-    protected static void esBuild(Config config) throws IOException {
+    protected static void esBuild(EsBuildConfig esBuildConfig) throws IOException {
         final Path esBuildExec = new ExecutableResolver().resolve(Bundler.ESBUILD_VERSION);
-        new Execute(esBuildExec.toFile(), config).execute();
+        new Execute(esBuildExec.toFile(), esBuildConfig).execute();
     }
 
     private static NameVersion parseName(String fileName) {

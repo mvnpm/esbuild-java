@@ -9,12 +9,12 @@ import java.util.List;
 public class Execute {
 
     private final File esBuildExec;
-    private Config config;
+    private EsBuildConfig esBuildConfig;
     private String[] args;
 
-    public Execute(File esBuildExec, Config config) {
+    public Execute(File esBuildExec, EsBuildConfig esBuildConfig) {
         this.esBuildExec = esBuildExec;
-        this.config = config;
+        this.esBuildConfig = esBuildConfig;
     }
 
     public Execute(File esBuildExec, String[] args) {
@@ -25,7 +25,7 @@ public class Execute {
     public void execute() throws IOException {
         ProcessBuilder builder = new ProcessBuilder();
 
-        final String[] command = args != null ? getCommand(args) : getCommand(config);
+        final String[] command = args != null ? getCommand(args) : getCommand(esBuildConfig);
         builder.command(command);
         builder.inheritIO();
         Process process = builder.start();
@@ -36,8 +36,8 @@ public class Execute {
         }
     }
 
-    private String[] getCommand(Config config) {
-        String[] params = config.toParams();
+    private String[] getCommand(EsBuildConfig esBuildConfig) {
+        String[] params = esBuildConfig.toParams();
         return getCommand(params);
     }
 

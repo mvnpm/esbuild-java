@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class Config {
+public class EsBuildConfig {
     private boolean bundle;
 
     private String entryPoint;
@@ -185,7 +185,7 @@ public class Config {
     }
 
     protected String[] toParams() {
-        final Field[] fields = Config.class.getDeclaredFields();
+        final Field[] fields = EsBuildConfig.class.getDeclaredFields();
         List<String> result = new ArrayList<>(fields.length);
         for (Field field : fields) {
             field.setAccessible(true);

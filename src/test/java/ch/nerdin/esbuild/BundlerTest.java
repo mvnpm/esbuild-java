@@ -28,7 +28,9 @@ public class BundlerTest {
         final List<Path> dependencies = Collections.singletonList(jar.toPath());
         final Path entry = new File(getClass().getResource(scriptName).toURI()).toPath();
 
-        final Path path = Bundler.bundle(dependencies, type, entry);
+        final BundleOptions bundleOptions = new BundleOptionsBuilder().withDependencies(dependencies)
+                .withEntry(entry).withType(type).build();
+        final Path path = Bundler.bundle(bundleOptions);
 
         assertTrue(path.toFile().exists());
     }

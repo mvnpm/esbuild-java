@@ -6,17 +6,17 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-public class ConfigTest {
+public class EsBuildConfigTest {
 
     @Test
     public void shouldOutputFlags() {
         // given
-        final Config config = new Config();
-        config.setBundle(true);
-        config.setFormat(Config.Format.ESM);
+        final EsBuildConfig esBuildConfig = new EsBuildConfig();
+        esBuildConfig.setBundle(true);
+        esBuildConfig.setFormat(EsBuildConfig.Format.ESM);
 
         // when
-        final String[] params = config.toParams();
+        final String[] params = esBuildConfig.toParams();
 
         // then
         assertArrayEquals(new String[]{"--bundle", "--format=esm"}, params);
@@ -25,11 +25,11 @@ public class ConfigTest {
     @Test
     public void shouldOutputLoaderFlags() {
         // given
-        final Config config = new Config();
-        config.setLoader(Map.of(".js", Config.Loader.JSX));
+        final EsBuildConfig esBuildConfig = new EsBuildConfig();
+        esBuildConfig.setLoader(Map.of(".js", EsBuildConfig.Loader.JSX));
 
         // when
-        final String[] params = config.toParams();
+        final String[] params = esBuildConfig.toParams();
 
         // then
         assertArrayEquals(new String[]{"--loader:.js=jsx"}, params);
@@ -38,10 +38,10 @@ public class ConfigTest {
     @Test
     public void shouldOutputStandardFlags() {
         // given
-        final Config config = new ConfigBuilder().bundle().entryPoint("main.js").outDir("/tmp").minify().build();
+        final EsBuildConfig esBuildConfig = new EsBuildConfigBuilder().bundle().entryPoint("main.js").outDir("/tmp").minify().build();
 
         // when
-        final String[] params = config.toParams();
+        final String[] params = esBuildConfig.toParams();
 
         // then
         assertArrayEquals(new String[]{"--bundle", "main.js", "--minify", "--outdir=/tmp"}, params);
