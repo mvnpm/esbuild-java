@@ -88,7 +88,7 @@ public class Bundler {
     }
 
     private static NameVersion parseName(String fileName) {
-        final int separatorIndex = fileName.indexOf("-");
+        final int separatorIndex = fileName.lastIndexOf("-");
         String name = fileName.substring(0, separatorIndex);
         String version = fileName.substring(separatorIndex + 1, fileName.lastIndexOf('.'));
 
