@@ -26,6 +26,7 @@ public class Bundler {
 
     /**
      * Use esbuild to bundle either webjar or mvnpm dependencies into a bundle.
+     *
      * @param bundleOptions
      * @return the folder that has the result of the transformation
      * @throws IOException when something could not be written
@@ -34,14 +35,30 @@ public class Bundler {
         final Path location = createWorkingTempFolder(bundleOptions.getDependencies(), bundleOptions.getType(), bundleOptions.getEntries());
         final Path dist = location.resolve("dist");
 
+        final EsBuildConfig esBuildConfig = createBundle(bundleOptions, location, dist);
+
+        esBuild(esBuildConfig, null);
+
+        return dist;
+    }
+
+    private static EsBuildConfig createBundle(BundleOptions bundleOptions, Path location, Path dist) throws IOException {
         final Path entry = createOneEntryPointScript(bundleOptions.getBundleName(), bundleOptions.getEntries(), location);
         final EsBuildConfig esBuildConfig = bundleOptions.getEsBuildConfig();
         esBuildConfig.setOutDir(dist.toString());
         esBuildConfig.setEntryPoint(entry.toFile().toString());
+        return esBuildConfig;
+    }
 
-        esBuild(esBuildConfig);
+    public static Watch watch(BundleOptions bundleOptions, BuildEventListener eventListener) throws IOException {
+        final Path location = createWorkingTempFolder(bundleOptions.getDependencies(), bundleOptions.getType(), bundleOptions.getEntries());
+        final Path dist = location.resolve("dist");
+        final EsBuildConfig esBuildConfig = createBundle(bundleOptions, location, dist);
 
-        return dist;
+        bundleOptions.getEsBuildConfig().setWatch(true);
+        final Process process = esBuild(esBuildConfig, eventListener);
+
+        return new Watch(process, location, bundleOptions.getType());
     }
 
     private static Path createOneEntryPointScript(String bundleName, List<Path> entries, Path location) throws IOException {
@@ -52,22 +69,24 @@ public class Bundler {
     }
 
     private static Path createWorkingTempFolder(List<Path> dependencies, BundleType type, List<Path> entries) throws IOException {
-        final Path location = extract(dependencies, type);
-        for (Path entry : entries) {
-            copy(entry, location);
-        }
+        final Path bundleDirectory = Files.createTempDirectory("bundle");
+        final Path location = extract(bundleDirectory, dependencies, type);
+        copy(entries, location);
         return location;
     }
 
-    private static void copy(Path entry, Path location) throws IOException {
-        final Path target = location.resolve(entry.getFileName());
-        Files.copy(entry, target, REPLACE_EXISTING);
+    protected static void copy(List<Path> entries, Path location) throws IOException {
+        for (Path entry : entries) {
+            final Path target = location.resolve(entry.getFileName());
+            Files.copy(entry, target, REPLACE_EXISTING);
+        }
     }
 
-    protected static Path extract(List<Path> dependencies, BundleType type) throws IOException {
-        final Path bundleDirectory = Files.createTempDirectory("bundle");
+    protected static Path extract(Path bundleDirectory, List<Path> dependencies, BundleType type) throws IOException {
         final Path nodeModules = bundleDirectory.resolve("node_modules");
-        nodeModules.toFile().mkdir();
+        if (!nodeModules.toFile().exists()) {
+            nodeModules.toFile().mkdir();
+        }
 
         for (Path path : dependencies) {
             UnZip.unzip(path, bundleDirectory);
@@ -82,9 +101,15 @@ public class Bundler {
         return bundleDirectory;
     }
 
-    protected static void esBuild(EsBuildConfig esBuildConfig) throws IOException {
+    protected static Process esBuild(EsBuildConfig esBuildConfig, BuildEventListener listener) throws IOException {
         final Path esBuildExec = new ExecutableResolver().resolve(Bundler.ESBUILD_VERSION);
-        new Execute(esBuildExec.toFile(), esBuildConfig).execute();
+        final Execute execute = new Execute(esBuildExec.toFile(), esBuildConfig);
+        if (listener != null) {
+            return execute.execute(listener);
+        } else {
+            execute.executeAndWait();
+        }
+        return null;
     }
 
     private static NameVersion parseName(String fileName) {
