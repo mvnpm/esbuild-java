@@ -2,6 +2,9 @@ package ch.nerdin.esbuild;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
+
+import static ch.nerdin.esbuild.EsBuildConfig.Loader.FILE;
 
 public class BundleOptionsBuilder {
     private String bundleName;
@@ -17,7 +20,9 @@ public class BundleOptionsBuilder {
     }
 
     private static EsBuildConfig useDefaultConfig() {
-        return new EsBuildConfigBuilder().bundle().minify().sourceMap().splitting().format(EsBuildConfig.Format.ESM).build();
+        return new EsBuildConfigBuilder().bundle().minify().sourceMap().splitting().format(EsBuildConfig.Format.ESM)
+                .loader(Map.of(".svg", FILE, ".gif", FILE, ".png", FILE, ".jpg", FILE,
+                        ".woff", FILE, ".ttf", FILE, ".eot", FILE)).build();
     }
 
     public BundleOptionsBuilder withBundleName(String bundleName) {
@@ -42,6 +47,11 @@ public class BundleOptionsBuilder {
 
     public BundleOptionsBuilder withEntry(Path entry) {
         this.entries = List.of(entry);
+        return this;
+    }
+
+    public BundleOptionsBuilder withEsConfig(EsBuildConfig esBuildConfig) {
+        this.esBuildConfig = esBuildConfig;
         return this;
     }
 

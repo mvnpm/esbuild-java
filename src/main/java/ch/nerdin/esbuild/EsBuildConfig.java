@@ -196,7 +196,7 @@ public class EsBuildConfig {
                     if (value == Boolean.TRUE) {
                         result.add("--" + fieldName.toLowerCase());
                     } else if (value instanceof Map) {
-                        result.add("--" + fieldName + mapToString((Map<?, ?>) value));
+                        result.addAll(mapToString(fieldName, (Map<?, ?>) value));
                     } else if ("entryPoint".equals(field.getName())) {
                         result.add(value.toString());
                     } else if (!(value instanceof Boolean)) {
@@ -211,12 +211,12 @@ public class EsBuildConfig {
         return result.toArray(String[]::new);
     }
 
-    private static String mapToString(Map<?, ?> map) {
-        StringBuilder sb = new StringBuilder(":");
+    private static List<String> mapToString(String fieldName, Map<?, ?> map) {
+        List<String> result = new ArrayList<>(map.size());
         for (Map.Entry<?, ?> entry : map.entrySet()) {
-            sb.append(entry.getKey()).append("=").append(entry.getValue().toString().toLowerCase());
+            result.add("--%s:%s=%s".formatted(fieldName, entry.getKey(), entry.getValue().toString().toLowerCase()));
         }
 
-        return sb.toString();
+        return result;
     }
 }
