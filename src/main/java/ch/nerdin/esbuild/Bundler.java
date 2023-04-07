@@ -62,7 +62,7 @@ public class Bundler {
     }
 
     private static Path createOneEntryPointScript(String bundleName, List<Path> entries, Path location) throws IOException {
-        final String entryString = EntryPoint.convert(entries.stream().map(Path::toFile).collect(Collectors.toList()));
+        final String entryString = EntryPoint.convert(entries.stream().map(Path::getFileName).map(Path::toString).collect(Collectors.toList()));
         final Path entry = location.resolve("%s.js".formatted(bundleName));
         Files.writeString(entry, entryString);
         return entry;
@@ -77,14 +77,14 @@ public class Bundler {
 
     protected static void copy(List<Path> entries, Path location) throws IOException {
         for (Path entry : entries) {
-            final Path target = location.resolve(entry.getFileName());
+            final Path target = location.resolve(entry.getFileName().toString());
             Files.copy(entry, target, REPLACE_EXISTING);
         }
     }
 
     protected static Path extract(Path bundleDirectory, List<Path> dependencies, BundleType type) throws IOException {
         final Path nodeModules = bundleDirectory.resolve("node_modules");
-        if (!nodeModules.toFile().exists()) {
+        if (!Files.exists(nodeModules)) {
             nodeModules.toFile().mkdir();
         }
 
