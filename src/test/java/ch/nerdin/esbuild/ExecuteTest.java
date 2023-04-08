@@ -13,6 +13,6 @@ public class ExecuteTest {
         final EsBuildConfig esBuildConfig = new EsBuildConfig();
         esBuildConfig.setVersion(true);
         final Path path = new DownloadResolver(null).resolve(Bundler.ESBUILD_VERSION);
-        new Execute(path.toFile(), esBuildConfig).execute();
+        new Execute(path.toFile(), esBuildConfig).executeAndWait();
     }
 }
