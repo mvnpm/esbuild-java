@@ -17,7 +17,7 @@ public class EntryPointTest {
         final File resource2 = new File(getClass().getResource("/multi/script2.js").toURI());
 
         // when
-        final String convert = EntryPoint.convert(List.of(resource1, resource2));
+        final String convert = EntryPoint.convert(List.of(resource1.getName(), resource2.getName()));
 
         // then
         assertEquals("""

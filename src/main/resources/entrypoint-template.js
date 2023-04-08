@@ -1,3 +1,7 @@
-{#for script in scripts}
-import * as {script.name} from "./{script.file}";
+{#for i in imports}
+{#if i.as}
+import * as {i.as} from "./{i.from}";
+{#else}
+import "./{i.from}";
+{/if}
 {/for}
