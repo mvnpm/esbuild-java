@@ -1,5 +1,7 @@
 package ch.nerdin.esbuild;
 
+import ch.nerdin.esbuild.modal.BundleOptions;
+import ch.nerdin.esbuild.modal.BundleOptionsBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -35,7 +37,6 @@ public class BundlerTest {
 
         // then
         Thread.sleep(2000);
-        watch.change(options.getEntries());
         watch.stop();
         assertTrue(isCalled.get());
     }
@@ -52,9 +53,8 @@ public class BundlerTest {
         final List<Path> dependencies = Collections.singletonList(jar.toPath());
         final Path entry = new File(getClass().getResource(scriptName).toURI()).toPath();
 
-        final BundleOptions bundleOptions = new BundleOptionsBuilder().withDependencies(dependencies)
-                .withEntry(entry).withType(type).build();
-        return bundleOptions;
+        return new BundleOptionsBuilder().withDependencies(dependencies)
+                .addEntryPoint(entry).withType(type).build();
     }
 
 }

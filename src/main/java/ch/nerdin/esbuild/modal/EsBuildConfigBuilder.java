@@ -1,4 +1,4 @@
-package ch.nerdin.esbuild;
+package ch.nerdin.esbuild.modal;
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +15,7 @@ public class EsBuildConfigBuilder {
         return this;
     }
 
-    public EsBuildConfigBuilder entryPoint(String entryPoint) {
+    public EsBuildConfigBuilder entryPoint(String[] entryPoint) {
         esBuildConfig.setEntryPoint(entryPoint);
         return this;
     }

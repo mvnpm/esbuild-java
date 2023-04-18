@@ -1,4 +1,4 @@
-package ch.nerdin.esbuild;
+package ch.nerdin.esbuild.modal;
 
 import org.junit.jupiter.api.Test;
 
@@ -38,12 +38,13 @@ public class EsBuildConfigTest {
     @Test
     public void shouldOutputStandardFlags() {
         // given
-        final EsBuildConfig esBuildConfig = new EsBuildConfigBuilder().bundle().entryPoint("main.js").outDir("/tmp").minify().build();
+        final EsBuildConfig esBuildConfig = new EsBuildConfigBuilder().bundle()
+                .entryPoint(new String[]{"main.js", "bundle.js"}).outDir("/tmp").minify().build();
 
         // when
         final String[] params = esBuildConfig.toParams();
 
         // then
-        assertArrayEquals(new String[]{"--bundle", "main.js", "--minify", "--outdir=/tmp"}, params);
+        assertArrayEquals(new String[]{"--bundle", "main.js", "bundle.js", "--minify", "--outdir=/tmp"}, params);
     }
 }
