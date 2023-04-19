@@ -3,8 +3,11 @@ package ch.nerdin.esbuild;
 import ch.nerdin.esbuild.Bundler.BundleType;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class Watch {
 
@@ -27,7 +30,13 @@ public class Watch {
         change(entries);
     }
 
-    public void change(List<Path> entries) throws IOException {
-        Bundler.copy(entries, workingFolder);
+    public void change(List<Path> entries) {
+        entries.stream().map(script -> {
+            try {
+                return Files.copy(script, workingFolder.resolve(script.getFileName()), REPLACE_EXISTING);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 }

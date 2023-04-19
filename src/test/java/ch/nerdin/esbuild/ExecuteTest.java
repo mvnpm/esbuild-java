@@ -1,5 +1,6 @@
 package ch.nerdin.esbuild;
 
+import ch.nerdin.esbuild.modal.EsBuildConfig;
 import ch.nerdin.esbuild.resolve.DownloadResolver;
 import org.junit.jupiter.api.Test;
 

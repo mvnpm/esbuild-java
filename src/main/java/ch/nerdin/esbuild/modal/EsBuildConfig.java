@@ -1,4 +1,4 @@
-package ch.nerdin.esbuild;
+package ch.nerdin.esbuild.modal;
 
 
 import java.lang.reflect.Field;
@@ -9,7 +9,7 @@ import java.util.Map;
 public class EsBuildConfig {
     private boolean bundle;
 
-    private String entryPoint;
+    private String[] entryPoint;
     private boolean minify;
 
     private boolean version;
@@ -65,11 +65,11 @@ public class EsBuildConfig {
         this.bundle = bundle;
     }
 
-    public String getEntryPoint() {
+    public String[] getEntryPoint() {
         return entryPoint;
     }
 
-    public void setEntryPoint(String entryPoint) {
+    public void setEntryPoint(String[] entryPoint) {
         this.entryPoint = entryPoint;
     }
     public boolean isMinify() {
@@ -184,7 +184,7 @@ public class EsBuildConfig {
         this.watch = watch;
     }
 
-    protected String[] toParams() {
+    public String[] toParams() {
         final Field[] fields = EsBuildConfig.class.getDeclaredFields();
         List<String> result = new ArrayList<>(fields.length);
         for (Field field : fields) {
@@ -198,7 +198,7 @@ public class EsBuildConfig {
                     } else if (value instanceof Map) {
                         result.addAll(mapToString(fieldName, (Map<?, ?>) value));
                     } else if ("entryPoint".equals(field.getName())) {
-                        result.add(value.toString());
+                        result.addAll(List.of((String[]) value));
                     } else if (!(value instanceof Boolean)) {
                         result.add("--%s=%s".formatted(fieldName.toLowerCase(), value.toString().toLowerCase()));
                     }

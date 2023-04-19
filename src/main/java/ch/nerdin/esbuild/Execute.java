@@ -1,5 +1,7 @@
 package ch.nerdin.esbuild;
 
+import ch.nerdin.esbuild.modal.EsBuildConfig;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
