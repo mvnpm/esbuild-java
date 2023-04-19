@@ -7,19 +7,36 @@ import ch.nerdin.esbuild.util.ImportToPackage;
 import ch.nerdin.esbuild.util.UnZip;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Properties;
 
 public class Bundler {
 
 
     private static final String WEBJAR_PACKAGE_PREFIX = "META-INF/resources/webjars";
-    public static final String ESBUILD_VERSION = "0.17.10";
+    private static String VERSION;
 
     public enum BundleType {
         WEBJARS,
         MVNPM,
+    }
+
+    public static String getDefaultVersion() {
+        if (VERSION == null) {
+            final InputStream resource = Bundler.class.getResourceAsStream("/version.properties");
+            Properties properties = new Properties();
+            try {
+                properties.load(resource);
+            } catch (IOException e) {
+                // ignore we use the default
+            }
+            VERSION = properties.getProperty("esbuild.version", "0.17.17");
+        }
+
+        return VERSION;
     }
 
     /**
@@ -84,7 +101,7 @@ public class Bundler {
     }
 
     protected static Process esBuild(EsBuildConfig esBuildConfig, BuildEventListener listener) throws IOException {
-        final Path esBuildExec = new ExecutableResolver().resolve(Bundler.ESBUILD_VERSION);
+        final Path esBuildExec = new ExecutableResolver().resolve(Bundler.getDefaultVersion());
         final Execute execute = new Execute(esBuildExec.toFile(), esBuildConfig);
         if (listener != null) {
             return execute.execute(listener);

@@ -13,7 +13,7 @@ public class DownloadResolverTest {
     @Test
     public void download() throws IOException {
         // when
-        final Path path = new DownloadResolver(null).resolve(Bundler.ESBUILD_VERSION);
+        final Path path = new DownloadResolver(null).resolve(Bundler.getDefaultVersion());
 
         // then
         assertTrue(path.toFile().exists());

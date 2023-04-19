@@ -8,7 +8,7 @@ import java.nio.file.Path;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        final Path esBuildExec = new ExecutableResolver().resolve(Bundler.ESBUILD_VERSION);
+        final Path esBuildExec = new ExecutableResolver().resolve(Bundler.getDefaultVersion());
         new Execute(esBuildExec.toFile(), args).executeAndWait();
     }
 }
