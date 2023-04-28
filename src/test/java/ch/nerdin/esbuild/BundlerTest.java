@@ -18,12 +18,12 @@ public class BundlerTest {
 
     @Test
     public void shouldBundleMvnpm() throws URISyntaxException, IOException {
-        executeTest("/stimulus-3.2.1.jar", Bundler.BundleType.MVNPM, "/application-mvnpm.js");
+        executeTest("/stimulus-3.2.1.jar", Bundler.BundleType.MVNPM, "/application-mvnpm.js", true);
     }
 
     @Test
     public void shouldBundle() throws URISyntaxException, IOException {
-        executeTest("/htmx.org-1.8.4.jar", Bundler.BundleType.WEBJARS, "/application-webjar.js");
+        executeTest("/htmx.org-1.8.4.jar", Bundler.BundleType.WEBJARS, "/application-webjar.js", true);
     }
 
     @Test
@@ -41,11 +41,21 @@ public class BundlerTest {
         assertTrue(isCalled.get());
     }
 
-    private void executeTest(String jarName, Bundler.BundleType type, String scriptName) throws URISyntaxException, IOException {
+    @Test
+    public void shouldTrowException() throws IOException, URISyntaxException {
+        try {
+            executeTest("/stimulus-3.2.1.jar", Bundler.BundleType.MVNPM, "/application-error.js", false);
+        } catch (RuntimeException e) {
+            assertTrue(e.getMessage().contains("ERROR"));
+        }
+    }
+
+    private void executeTest(String jarName, Bundler.BundleType type, String scriptName, boolean check) throws URISyntaxException, IOException {
         final BundleOptions bundleOptions = getBundleOptions(jarName, type, scriptName);
         final Path path = Bundler.bundle(bundleOptions);
 
-        assertTrue(path.toFile().exists());
+        if (check)
+            assertTrue(path.toFile().exists());
     }
 
     private BundleOptions getBundleOptions(String jarName, Bundler.BundleType type, String scriptName) throws URISyntaxException {
