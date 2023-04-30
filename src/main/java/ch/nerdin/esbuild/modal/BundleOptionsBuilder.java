@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import static ch.nerdin.esbuild.modal.EsBuildConfig.Loader.FILE;
+import static ch.nerdin.esbuild.modal.EsBuildConfig.Loader.JSX;
 
 public class BundleOptionsBuilder {
     private BundleOptions options = new BundleOptions();
@@ -17,9 +18,7 @@ public class BundleOptionsBuilder {
     }
 
     private static EsBuildConfig useDefaultConfig() {
-        return new EsBuildConfigBuilder().bundle().minify().sourceMap().splitting().format(EsBuildConfig.Format.ESM)
-                .loader(Map.of(".svg", FILE, ".gif", FILE, ".png", FILE, ".jpg", FILE,
-                        ".woff", FILE, ".ttf", FILE, ".eot", FILE)).build();
+        return new EsBuildConfigBuilder().build();
     }
 
     public BundleOptionsBuilder addEntryPoint(String name, List<Path> scripts) {
