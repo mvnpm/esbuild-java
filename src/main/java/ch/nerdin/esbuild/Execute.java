@@ -1,6 +1,8 @@
 package ch.nerdin.esbuild;
 
 import ch.nerdin.esbuild.modal.EsBuildConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,6 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Execute {
+    private static final Logger logger = LoggerFactory.getLogger(Execute.class);
 
     private final File esBuildExec;
     private EsBuildConfig esBuildConfig;
@@ -31,7 +34,9 @@ public class Execute {
 
     public void executeAndWait() throws IOException {
         final String[] command = args != null ? getCommand(args) : getCommand(esBuildConfig);
-        final Process process =  new ProcessBuilder().command(command).inheritIO().start();
+        watchOutput(command, () -> {
+
+        });
         try {
             process.waitFor();
         } catch (InterruptedException e) {
@@ -41,8 +46,7 @@ public class Execute {
 
     public Process execute(BuildEventListener listener) throws IOException {
         final String[] command = args != null ? getCommand(args) : getCommand(esBuildConfig);
-        process = new ProcessBuilder().command(command).start();
-        watchOutput(process, listener);
+        watchOutput(command, listener);
         return process;
     }
 
@@ -59,7 +63,8 @@ public class Execute {
         return argList.toArray(new String[0]);
     }
 
-    public static void watchOutput(final Process process, final BuildEventListener listener) {
+    public void watchOutput(final String[] command, final BuildEventListener listener) throws IOException {
+        process = new ProcessBuilder().command(command).start();
         final InputStream errorStream = process.getErrorStream();
         final Thread t = new Thread(new Streamer(errorStream, listener));
         t.setName("Process stdout streamer");
@@ -67,29 +72,28 @@ public class Execute {
         t.start();
     }
 
-    private static final class Streamer implements Runnable {
-
-        private final InputStream processStream;
-        private final BuildEventListener listener;
-
-        private Streamer(final InputStream processStream, final BuildEventListener listener) {
-            this.processStream = processStream;
-            this.listener = listener;
-        }
+    private record Streamer(InputStream processStream, BuildEventListener listener) implements Runnable {
 
         @Override
         public void run() {
+            StringBuilder error = new StringBuilder();
             try (final BufferedReader reader = new BufferedReader(
                     new InputStreamReader(processStream, StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    System.out.println(line);
-                    if (line.contains("build finished")) {
+                    logger.debug(line);
+                    if (line.contains("✘ [ERROR]") || !error.isEmpty()) {
+                        error.append(line);
+                    } else if (line.contains("build finished")) {
+                        logger.info("Build finished!");
                         listener.onChange();
                     }
                 }
             } catch (IOException e) {
                 // ignore
+            }
+            if (!error.isEmpty()) {
+                throw new BundleException(error.toString());
             }
         }
     }
