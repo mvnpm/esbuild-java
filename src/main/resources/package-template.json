@@ -1,5 +1,10 @@
 {
   "name": "{name}",
   "version": "{version}",
-  "main": "{main}"
+  "main": "{main}",
+  "browser": {
+    "fs": false,
+    "path": false,
+    "os": false
+  }
 }
