@@ -18,7 +18,12 @@ public class ImportToPackageTest {
                 {
                   "name": "easymde",
                   "version": "2.16.2",
-                  "main": "dist/test.js"
+                  "main": "dist/test.js",
+                  "browser": {
+                    "fs": false,
+                    "path": false,
+                    "os": false
+                  }
                 }""", convert);
     }
 
