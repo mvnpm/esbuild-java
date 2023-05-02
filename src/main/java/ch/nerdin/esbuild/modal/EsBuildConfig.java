@@ -3,8 +3,10 @@ package ch.nerdin.esbuild.modal;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class EsBuildConfig {
     private boolean bundle;
@@ -33,7 +35,7 @@ public class EsBuildConfig {
 
     private Map<String, Loader> loader;
 
-    private String outDir;
+    private String outdir;
     private String packages;
 
     enum Platform {
@@ -55,6 +57,10 @@ public class EsBuildConfig {
     private Target target;
 
     private boolean watch;
+
+    private String chunkNames;
+
+    private String entryNames;
 
 
     public boolean isBundle() {
@@ -120,12 +126,12 @@ public class EsBuildConfig {
         this.loader = loader;
     }
 
-    public String getOutDir() {
-        return outDir;
+    public String getOutdir() {
+        return outdir;
     }
 
-    public void setOutDir(String outDir) {
-        this.outDir = outDir;
+    public void setOutdir(String outdir) {
+        this.outdir = outdir;
     }
 
     public String getPackages() {
@@ -184,6 +190,22 @@ public class EsBuildConfig {
         this.watch = watch;
     }
 
+    public String getChunkNames() {
+        return chunkNames;
+    }
+
+    public void setChunkNames(String chunkNames) {
+        this.chunkNames = chunkNames;
+    }
+
+    public String getEntryNames() {
+        return entryNames;
+    }
+
+    public void setEntryNames(String entryNames) {
+        this.entryNames = entryNames;
+    }
+
     public String[] toParams() {
         final Field[] fields = EsBuildConfig.class.getDeclaredFields();
         List<String> result = new ArrayList<>(fields.length);
@@ -200,7 +222,7 @@ public class EsBuildConfig {
                     } else if ("entryPoint".equals(field.getName())) {
                         result.addAll(List.of((String[]) value));
                     } else if (!(value instanceof Boolean)) {
-                        result.add("--%s=%s".formatted(fieldName.toLowerCase(), value.toString().toLowerCase()));
+                        result.add("--%s=%s".formatted(convertField(fieldName), value.toString().toLowerCase()));
                     }
                 }
             } catch (IllegalAccessException e) {
@@ -209,6 +231,11 @@ public class EsBuildConfig {
         }
 
         return result.toArray(String[]::new);
+    }
+
+    private String convertField(String field) {
+        final String[] split = field.split("(?=\\p{Upper})");
+        return Arrays.stream(split).map(String::toLowerCase).collect(Collectors.joining("-"));
     }
 
     private static List<String> mapToString(String fieldName, Map<?, ?> map) {

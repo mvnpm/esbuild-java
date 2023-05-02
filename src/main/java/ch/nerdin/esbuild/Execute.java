@@ -33,8 +33,7 @@ public class Execute {
     }
 
     public void executeAndWait() throws IOException {
-        final String[] command = args != null ? getCommand(args) : getCommand(esBuildConfig);
-        watchOutput(command, () -> {
+        watchOutput(getCommand(), () -> {
 
         });
         try {
@@ -45,9 +44,16 @@ public class Execute {
     }
 
     public Process execute(BuildEventListener listener) throws IOException {
-        final String[] command = args != null ? getCommand(args) : getCommand(esBuildConfig);
-        watchOutput(command, listener);
+        watchOutput(getCommand(), listener);
         return process;
+    }
+
+    private String[] getCommand() {
+        String[] command = args != null ? getCommand(args) : getCommand(esBuildConfig);
+        if (logger.isDebugEnabled()) {
+            logger.debug("running esbuild with flags: `{}`.", String.join(" ", command));
+        }
+        return command;
     }
 
     private String[] getCommand(EsBuildConfig esBuildConfig) {
