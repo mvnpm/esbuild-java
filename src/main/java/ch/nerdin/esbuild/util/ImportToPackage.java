@@ -57,8 +57,9 @@ public class ImportToPackage {
         Files.writeString(packageFile, packageContents);
 
         // in case there is a / in the name
-        if (!Files.exists(nodeModules)) Files.createDirectories(nodeModules);
-        Files.move(packageFile.getParent(), nodeModules.resolve(name));
+        final Path targetDir = nodeModules.resolve(name);
+        if (!Files.exists(targetDir.getParent())) Files.createDirectories(targetDir.getParent());
+        Files.move(packageFile.getParent(), targetDir);
 
     }
 }
