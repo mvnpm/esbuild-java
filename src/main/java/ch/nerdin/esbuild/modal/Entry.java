@@ -13,7 +13,7 @@ public abstract class Entry {
     List<Path> copyToLocation(Path location, List<Path> scripts) {
         return scripts.stream().map(script -> {
             try {
-                final Path target = location.resolve(script.getFileName());
+                final Path target = location.resolve(script.getFileName().toString());
                 Files.copy(script, target, REPLACE_EXISTING);
                 return target;
             } catch (IOException e) {
