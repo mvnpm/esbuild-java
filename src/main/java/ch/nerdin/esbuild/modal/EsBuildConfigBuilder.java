@@ -21,11 +21,12 @@ public class EsBuildConfigBuilder {
 
     private void initDefault() {
         this.bundle()
-            .minify()
-            .sourceMap()
-            .splitting()
-            .format(EsBuildConfig.Format.ESM)
-            .loader(getDefaultLoadersMap());
+                .minify()
+                .sourceMap()
+                .splitting()
+                .entryNames("[name]-[hash]")
+                .format(EsBuildConfig.Format.ESM)
+                .loader(getDefaultLoadersMap());
     }
 
     public static Map<String, EsBuildConfig.Loader> getDefaultLoadersMap() {
@@ -92,7 +93,7 @@ public class EsBuildConfigBuilder {
     }
 
     public EsBuildConfigBuilder outDir(String outDir) {
-        esBuildConfig.setOutDir(outDir);
+        esBuildConfig.setOutdir(outDir);
         return this;
     }
 
@@ -138,6 +139,16 @@ public class EsBuildConfigBuilder {
 
     public EsBuildConfigBuilder watch() {
         esBuildConfig.setWatch(true);
+        return this;
+    }
+
+    public EsBuildConfigBuilder chunkNames(String template) {
+        esBuildConfig.setChunkNames(template);
+        return this;
+    }
+
+    public EsBuildConfigBuilder entryNames(String template) {
+        esBuildConfig.setEntryNames(template);
         return this;
     }
 

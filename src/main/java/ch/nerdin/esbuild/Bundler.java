@@ -59,7 +59,7 @@ public class Bundler {
 
     private static EsBuildConfig createBundle(BundleOptions bundleOptions, Path location, Path dist) {
         final EsBuildConfig esBuildConfig = bundleOptions.getEsBuildConfig();
-        esBuildConfig.setOutDir(dist.toString());
+        esBuildConfig.setOutdir(dist.toString());
         final List<String> paths = bundleOptions.getEntries().stream().map(entry -> entry.getEntry(location).toString()).toList();
         esBuildConfig.setEntryPoint(paths.toArray(new String[0]));
         return esBuildConfig;

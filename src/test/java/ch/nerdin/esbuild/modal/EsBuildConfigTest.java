@@ -47,4 +47,17 @@ public class EsBuildConfigTest {
         // then
         assertArrayEquals(new String[]{"--bundle", "main.js", "bundle.js", "--minify", "--outdir=/tmp"}, params);
     }
+
+    @Test
+    public void shouldAddChunkNames() {
+        // given
+        final EsBuildConfig esBuildConfig = new EsBuildConfig();
+        esBuildConfig.setChunkNames("chunks/[name]-[hash]");
+
+        //when
+        final String[] params = esBuildConfig.toParams();
+
+        // then
+        assertArrayEquals(new String[]{"--chunk-names=chunks/[name]-[hash]"}, params);
+    }
 }
