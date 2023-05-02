@@ -88,11 +88,12 @@ public class Bundler {
         }
 
         for (Path path : dependencies) {
-            UnZip.unzip(path, bundleDirectory);
             final NameVersion nameVersion = parseName(path.getFileName().toString());
+            final Path temp = Files.createTempDirectory(nameVersion.toString());
+            UnZip.unzip(path, temp);
             switch (type) {
-                case MVNPM -> ImportToPackage.createPackage(bundleDirectory, nameVersion.name, nameVersion.version);
-                case WEBJARS -> Files.move(bundleDirectory.resolve(WEBJAR_PACKAGE_PREFIX).resolve(nameVersion.name)
+                case MVNPM -> ImportToPackage.createPackage(nodeModules, temp, nameVersion.name, nameVersion.version);
+                case WEBJARS -> Files.move(temp.resolve(WEBJAR_PACKAGE_PREFIX).resolve(nameVersion.name)
                         .resolve(nameVersion.version), nodeModules.resolve(nameVersion.name));
             }
         }
@@ -126,6 +127,11 @@ public class Bundler {
         public NameVersion(String name, String version) {
             this.name = name;
             this.version = version;
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder().append(name).append("-").append(version).toString();
         }
     }
 }

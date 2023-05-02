@@ -40,8 +40,12 @@ public class ImportToPackage {
         }
     }
 
-    public static void createPackage(Path location, String moduleName, String version) throws IOException {
+    public static void createPackage(Path nodeModules, Path location, String moduleName, String version) throws IOException {
         final Path importMapFile = location.resolve(IMPORT_FILE_NAME);
+        if(!Files.isRegularFile(importMapFile)) {
+            // This is not a valid MVNPM dependency
+            return;
+        }
         final String[] result = extractInfo(importMapFile);
         final String name = result[0];
         final String packageContents = convert(name, version,  result[1].substring( result[1].indexOf(name) + name.length() + 1));
@@ -52,10 +56,9 @@ public class ImportToPackage {
 
         Files.writeString(packageFile, packageContents);
 
-        final Path nodeModules = location.resolve("node_modules").resolve(name);
-        final File parent = nodeModules.getParent().toFile();
         // in case there is a / in the name
-        if (!parent.exists()) parent.mkdirs();
-        Files.move(packageFile.getParent(), nodeModules);
+        if (!Files.exists(nodeModules)) Files.createDirectories(nodeModules);
+        Files.move(packageFile.getParent(), nodeModules.resolve(name));
+
     }
 }
