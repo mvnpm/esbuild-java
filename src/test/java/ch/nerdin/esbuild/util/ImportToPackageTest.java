@@ -30,8 +30,20 @@ public class ImportToPackageTest {
     @Test
     public void convert() throws URISyntaxException {
         final File file = new File(getClass().getResource("/import-map.json").toURI());
-        final String[] stimulus = ImportToPackage.extractInfo(file.toPath());
+        final ImportToPackage.PackageInfo stimulus = ImportToPackage.extractInfo(file.toPath());
 
-        assertEquals("/_static/stimulus/./dist/stimulus.js", stimulus[1]);
+        assertEquals("./dist/stimulus.js", stimulus.getMain());
+        assertEquals("/_static/stimulus/", stimulus.getDirectory());
+        assertEquals("stimulus", stimulus.getName());
+    }
+
+    @Test
+    public void convert2() throws URISyntaxException {
+        final File file = new File(getClass().getResource("/import-map-2.json").toURI());
+        final ImportToPackage.PackageInfo babelRuntime = ImportToPackage.extractInfo(file.toPath());
+
+        assertEquals("index.js", babelRuntime.getMain());
+        assertEquals("/_static/babel-runtime/", babelRuntime.getDirectory());
+        assertEquals("@babel/runtime", babelRuntime.getName());
     }
 }
