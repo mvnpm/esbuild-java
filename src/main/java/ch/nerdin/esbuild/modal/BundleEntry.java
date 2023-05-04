@@ -42,7 +42,7 @@ public class BundleEntry extends Entry {
     }
 
     @Override
-    public Path getEntry(Path location) {
+    public Path process(Path location) {
         try {
             return bundleScripts(name, copyToLocation(location, scripts), location);
         } catch (IOException e) {

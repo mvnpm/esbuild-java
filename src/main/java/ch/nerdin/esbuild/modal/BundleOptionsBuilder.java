@@ -5,13 +5,10 @@ import ch.nerdin.esbuild.Bundler;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import static ch.nerdin.esbuild.modal.EsBuildConfig.Loader.FILE;
-import static ch.nerdin.esbuild.modal.EsBuildConfig.Loader.JSX;
 
 public class BundleOptionsBuilder {
-    private BundleOptions options = new BundleOptions();
+    private final BundleOptions options = new BundleOptions();
 
     public BundleOptionsBuilder() {
         options.setEsBuildConfig(useDefaultConfig());
@@ -35,6 +32,11 @@ public class BundleOptionsBuilder {
             options.setEntries(new ArrayList<>());
         }
         options.getEntries().add(entry);
+        return this;
+    }
+
+    public BundleOptionsBuilder setRoot(Path root) {
+        this.options.setRoot(root);
         return this;
     }
 

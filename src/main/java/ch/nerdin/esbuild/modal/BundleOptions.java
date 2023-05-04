@@ -3,17 +3,20 @@ package ch.nerdin.esbuild.modal;
 import ch.nerdin.esbuild.Bundler;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public class BundleOptions {
 
     private List<Entry> entries;
 
-    private List<Path> dependencies;
+    private List<Path> dependencies = new ArrayList<>();
 
     private Bundler.BundleType type;
 
     private EsBuildConfig esBuildConfig;
+
+    private Path root;
 
     public List<Entry> getEntries() {
         return entries;
@@ -45,5 +48,13 @@ public class BundleOptions {
 
     public void setEsBuildConfig(EsBuildConfig esBuildConfig) {
         this.esBuildConfig = esBuildConfig;
+    }
+
+    public Path getRoot() {
+        return root;
+    }
+
+    public void setRoot(Path root) {
+        this.root = root;
     }
 }
