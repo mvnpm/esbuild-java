@@ -36,7 +36,7 @@ public class BundleEntry extends Entry {
             final boolean isScript = SCRIPTS.contains(ext);
             final Map<String, String> imports = new HashMap<>();
             final String pathName = path.toString();
-            imports.put("from", isScript ? pathName.substring(0, pathName.lastIndexOf(".")) : fileName);
+            imports.put("from", isScript ? pathName.substring(0, pathName.lastIndexOf(".")) : path.toString());
             imports.put("as", isScript ? name.replaceAll("-", "") : null);
             return imports;
         })));
