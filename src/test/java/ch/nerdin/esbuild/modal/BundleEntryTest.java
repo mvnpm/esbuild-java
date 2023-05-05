@@ -23,8 +23,8 @@ public class BundleEntryTest {
     public void testScript() throws URISyntaxException, IOException {
         // given
         final Path tempDirectory = Files.createTempDirectory("test");
-        final Path script1 = createTempScript("script1.js", tempDirectory);
-        final Path script2 = createTempScript("script2-test.js", tempDirectory);
+        final Path script1 = createTempScript("script1.js");
+        final Path script2 = createTempScript("script2-test.js");
 
         // when
         final BundleEntry entry = new BundleEntry("bundle", List.of(script1, script2));
@@ -40,7 +40,7 @@ public class BundleEntryTest {
     public void testCss() throws URISyntaxException, IOException {
         // given
         final Path tempDirectory = Files.createTempDirectory("test");
-        final Path css = createTempScript("style.css", tempDirectory);
+        final Path css = createTempScript("style.css");
 
         // when
         final BundleEntry entry = new BundleEntry("name", List.of(css));
@@ -50,12 +50,12 @@ public class BundleEntryTest {
         assertEquals("import \"./style.css\";", entryContents);
     }
 
-    private Path createTempScript(String name, Path tempDirectory) throws URISyntaxException, IOException {
+    private Path createTempScript(String name) throws URISyntaxException {
         return new File(getClass().getResource("/multi/%s".formatted(name)).toURI()).toPath();
     }
 
     private static String readEntry(BundleEntry entry, Path tempDirectory) throws FileNotFoundException {
-        final FileInputStream inputStream = new FileInputStream(entry.getEntry(tempDirectory).toFile());
+        final FileInputStream inputStream = new FileInputStream(entry.process(tempDirectory).toFile());
         return new BufferedReader(
                 new InputStreamReader(inputStream, StandardCharsets.UTF_8))
                 .lines()

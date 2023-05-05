@@ -50,6 +50,20 @@ public class BundlerTest {
         }
     }
 
+    @Test
+    public void shouldResolveRelativeFolders() throws URISyntaxException, IOException {
+        // given
+        final Path root = new File(getClass().getResource("/path/").toURI()).toPath();
+        final Path script = new File(getClass().getResource("/path/baz.js").toURI()).toPath();
+        final BundleOptions bundleOptions = new BundleOptionsBuilder().setRoot(root).addEntryPoint(script).build();
+
+        // when
+        final Path result = Bundler.bundle(bundleOptions);
+
+        // then
+        assertTrue(result.toFile().exists());
+    }
+
     private void executeTest(String jarName, Bundler.BundleType type, String scriptName, boolean check) throws URISyntaxException, IOException {
         final BundleOptions bundleOptions = getBundleOptions(jarName, type, scriptName);
         final Path path = Bundler.bundle(bundleOptions);

@@ -3,6 +3,7 @@ package ch.nerdin.esbuild;
 import ch.nerdin.esbuild.modal.BundleOptions;
 import ch.nerdin.esbuild.modal.EsBuildConfig;
 import ch.nerdin.esbuild.resolve.ExecutableResolver;
+import ch.nerdin.esbuild.util.Copy;
 import ch.nerdin.esbuild.util.ImportToPackage;
 import ch.nerdin.esbuild.util.UnZip;
 
@@ -60,7 +61,17 @@ public class Bundler {
     private static EsBuildConfig createBundle(BundleOptions bundleOptions, Path location, Path dist) {
         final EsBuildConfig esBuildConfig = bundleOptions.getEsBuildConfig();
         esBuildConfig.setOutdir(dist.toString());
-        final List<String> paths = bundleOptions.getEntries().stream().map(entry -> entry.getEntry(location).toString()).toList();
+
+        Path target;
+        if (bundleOptions.getRoot() != null) {
+            target = location.resolve("src");
+            target.toFile().mkdir();
+            Copy.copyFolder(bundleOptions.getRoot(), target);
+        } else {
+            target = location;
+        }
+
+        final List<String> paths = bundleOptions.getEntries().stream().map(entry -> entry.process(target).toString()).toList();
         esBuildConfig.setEntryPoint(paths.toArray(new String[0]));
         return esBuildConfig;
     }
@@ -131,7 +142,7 @@ public class Bundler {
 
         @Override
         public String toString() {
-            return new StringBuilder().append(name).append("-").append(version).toString();
+            return "%s-%s".formatted(name, version);
         }
     }
 }

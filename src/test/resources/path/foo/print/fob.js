@@ -1,0 +1,1 @@
+export const print = (value) => console.log(value);
