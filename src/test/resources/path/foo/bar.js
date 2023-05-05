@@ -1,3 +1,3 @@
-import { print } from "./print/fob";
+import { hello } from "../baz.js";
 
-export const hello = (name) => print(`Hello ${name}!`);
+hello("Erik");

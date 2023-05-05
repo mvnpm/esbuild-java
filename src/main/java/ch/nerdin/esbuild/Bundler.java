@@ -26,9 +26,9 @@ public class Bundler {
 
     public static String getDefaultVersion() {
         if (VERSION == null) {
-            final InputStream resource = Bundler.class.getResourceAsStream("/version.properties");
             Properties properties = new Properties();
             try {
+                final InputStream resource = Bundler.class.getResourceAsStream("/version.properties");
                 properties.load(resource);
             } catch (IOException e) {
                 // ignore we use the default
@@ -42,7 +42,7 @@ public class Bundler {
     /**
      * Use esbuild to bundle either webjar or mvnpm dependencies into a bundle.
      *
-     * @param bundleOptions
+     * @param bundleOptions options to do the bundling with
      * @return the folder that has the result of the transformation
      * @throws IOException when something could not be written
      */

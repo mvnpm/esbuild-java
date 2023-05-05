@@ -11,10 +11,12 @@ public abstract class Entry {
     List<Path> copyToLocation(Path location, List<Path> scripts) {
         return scripts.stream().map(script -> {
             try {
-                final Path target = location.resolve(script.getFileName().toString());
-                if (!target.toFile().exists())
-                    Files.copy(script, target);
-                return target;
+                final Path relative = location.relativize(script);
+                if (!location.startsWith(script)) {
+                    Files.copy(script, location.resolve(script.getFileName().toString()));
+                    return script.getFileName();
+                }
+                return relative;
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

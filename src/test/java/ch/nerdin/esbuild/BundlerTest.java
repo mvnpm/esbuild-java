@@ -54,8 +54,8 @@ public class BundlerTest {
     public void shouldResolveRelativeFolders() throws URISyntaxException, IOException {
         // given
         final Path root = new File(getClass().getResource("/path/").toURI()).toPath();
-        final Path script = new File(getClass().getResource("/path/baz.js").toURI()).toPath();
-        final BundleOptions bundleOptions = new BundleOptionsBuilder().setWorkFolder(root).addEntryPoint(script).build();
+        final Path script = new File(getClass().getResource("/path/foo/bar.js").toURI()).toPath();
+        final BundleOptions bundleOptions = new BundleOptionsBuilder().setWorkFolder(root).addEntryPoint("main", List.of(script)).build();
 
         // when
         final Path result = Bundler.bundle(bundleOptions);

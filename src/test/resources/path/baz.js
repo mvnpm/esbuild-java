@@ -1,4 +1,3 @@
+import { print } from "./foo/print/fob";
 
-import { hello } from "./foo/bar.js";
-
-hello("Erik");
+export const hello = (name) => print(`Hello ${name}!`);

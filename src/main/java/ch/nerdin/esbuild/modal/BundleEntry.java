@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class BundleEntry extends Entry {
     private static final Set<String> SCRIPTS = Set.of("js", "ts", "jsx", "tsx");
@@ -22,20 +21,22 @@ public class BundleEntry extends Entry {
     }
 
     private Path bundleScripts(String bundleName, List<Path> resources, Path location) throws IOException {
-        final String entryString = convert(resources.stream().map(Path::getFileName).map(Path::toString).collect(Collectors.toList()));
+        final String entryString = convert(resources);
         final Path entry = location.resolve("%s.js".formatted(bundleName));
         Files.writeString(entry, entryString);
         return entry;
     }
 
-    private String convert(List<String> resources) {
-        return QuteTemplateRenderer.render("entrypoint-template.js", Map.of("imports", resources.stream().map(fileName -> {
+    private String convert(List<Path> resources) {
+        return QuteTemplateRenderer.render("entrypoint-template.js", Map.of("imports", resources.stream().map(path -> {
+            final String fileName = path.getFileName().toString();
             final int index = fileName.lastIndexOf(".");
             final String name = fileName.substring(0, index);
             final String ext = fileName.substring(index + 1);
             final boolean isScript = SCRIPTS.contains(ext);
             final Map<String, String> imports = new HashMap<>();
-            imports.put("from", isScript ? name : fileName);
+            final String pathName = path.toString();
+            imports.put("from", isScript ? pathName.substring(0, pathName.lastIndexOf(".")) : fileName);
             imports.put("as", isScript ? name.replaceAll("-", "") : null);
             return imports;
         })));
