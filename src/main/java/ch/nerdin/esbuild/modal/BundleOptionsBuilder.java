@@ -35,8 +35,8 @@ public class BundleOptionsBuilder {
         return this;
     }
 
-    public BundleOptionsBuilder setRoot(Path root) {
-        this.options.setRoot(root);
+    public BundleOptionsBuilder setWorkFolder(Path workFolder) {
+        this.options.setWorkFolder(workFolder);
         return this;
     }
 

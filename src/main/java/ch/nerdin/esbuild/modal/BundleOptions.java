@@ -16,7 +16,7 @@ public class BundleOptions {
 
     private EsBuildConfig esBuildConfig;
 
-    private Path root;
+    private Path workFolder;
 
     public List<Entry> getEntries() {
         return entries;
@@ -50,11 +50,11 @@ public class BundleOptions {
         this.esBuildConfig = esBuildConfig;
     }
 
-    public Path getRoot() {
-        return root;
+    public Path getWorkFolder() {
+        return workFolder;
     }
 
-    public void setRoot(Path root) {
-        this.root = root;
+    public void setWorkFolder(Path workFolder) {
+        this.workFolder = workFolder;
     }
 }

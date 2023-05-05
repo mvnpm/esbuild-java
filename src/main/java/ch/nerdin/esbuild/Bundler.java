@@ -3,7 +3,6 @@ package ch.nerdin.esbuild;
 import ch.nerdin.esbuild.modal.BundleOptions;
 import ch.nerdin.esbuild.modal.EsBuildConfig;
 import ch.nerdin.esbuild.resolve.ExecutableResolver;
-import ch.nerdin.esbuild.util.Copy;
 import ch.nerdin.esbuild.util.ImportToPackage;
 import ch.nerdin.esbuild.util.UnZip;
 
@@ -48,7 +47,7 @@ public class Bundler {
      * @throws IOException when something could not be written
      */
     public static Path bundle(BundleOptions bundleOptions) throws IOException {
-        final Path location = createWorkingTempFolder(bundleOptions.getDependencies(), bundleOptions.getType());
+        final Path location = extractDependencies(bundleOptions);
         final Path dist = location.resolve("dist");
 
         final EsBuildConfig esBuildConfig = createBundle(bundleOptions, location, dist);
@@ -62,22 +61,14 @@ public class Bundler {
         final EsBuildConfig esBuildConfig = bundleOptions.getEsBuildConfig();
         esBuildConfig.setOutdir(dist.toString());
 
-        Path target;
-        if (bundleOptions.getRoot() != null) {
-            target = location.resolve("src");
-            target.toFile().mkdir();
-            Copy.copyFolder(bundleOptions.getRoot(), target);
-        } else {
-            target = location;
-        }
-
-        final List<String> paths = bundleOptions.getEntries().stream().map(entry -> entry.process(target).toString()).toList();
+        final Path path = bundleOptions.getWorkFolder() != null ? bundleOptions.getWorkFolder() : location;
+        final List<String> paths = bundleOptions.getEntries().stream().map(entry -> entry.process(path).toString()).toList();
         esBuildConfig.setEntryPoint(paths.toArray(new String[0]));
         return esBuildConfig;
     }
 
     public static Watch watch(BundleOptions bundleOptions, BuildEventListener eventListener) throws IOException {
-        final Path location = createWorkingTempFolder(bundleOptions.getDependencies(), bundleOptions.getType());
+        final Path location = extractDependencies(bundleOptions);
         final Path dist = location.resolve("dist");
         final EsBuildConfig esBuildConfig = createBundle(bundleOptions, location, dist);
 
@@ -87,9 +78,9 @@ public class Bundler {
         return new Watch(process, location, bundleOptions.getType());
     }
 
-    private static Path createWorkingTempFolder(List<Path> dependencies, BundleType type) throws IOException {
-        final Path bundleDirectory = Files.createTempDirectory("bundle");
-        return extract(bundleDirectory, dependencies, type);
+    private static Path extractDependencies(BundleOptions bundleOptions) throws IOException {
+        final Path bundleDirectory = bundleOptions.getWorkFolder() != null ? bundleOptions.getWorkFolder() : Files.createTempDirectory("bundle");
+        return extract(bundleDirectory, bundleOptions.getDependencies(), bundleOptions.getType());
     }
 
     protected static Path extract(Path bundleDirectory, List<Path> dependencies, BundleType type) throws IOException {

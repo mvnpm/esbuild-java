@@ -55,7 +55,7 @@ public class BundlerTest {
         // given
         final Path root = new File(getClass().getResource("/path/").toURI()).toPath();
         final Path script = new File(getClass().getResource("/path/baz.js").toURI()).toPath();
-        final BundleOptions bundleOptions = new BundleOptionsBuilder().setRoot(root).addEntryPoint(script).build();
+        final BundleOptions bundleOptions = new BundleOptionsBuilder().setWorkFolder(root).addEntryPoint(script).build();
 
         // when
         final Path result = Bundler.bundle(bundleOptions);
