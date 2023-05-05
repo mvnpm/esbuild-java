@@ -61,7 +61,7 @@ public class BundlerTest {
         final Path result = Bundler.bundle(bundleOptions);
 
         // then
-        assertTrue(result.toFile().exists());
+        assertTrue(result.resolve("dist").toFile().exists());
     }
 
     private void executeTest(String jarName, Bundler.BundleType type, String scriptName, boolean check) throws URISyntaxException, IOException {
