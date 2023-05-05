@@ -12,7 +12,7 @@ public abstract class Entry {
         return scripts.stream().map(script -> {
             try {
                 final Path relative = location.relativize(script);
-                if (!location.startsWith(script)) {
+                if (!script.startsWith(location)) {
                     Files.copy(script, location.resolve(script.getFileName().toString()));
                     return script.getFileName();
                 }
