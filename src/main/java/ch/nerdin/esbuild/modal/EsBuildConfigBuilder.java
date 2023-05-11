@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static ch.nerdin.esbuild.modal.EsBuildConfig.Loader.CSS;
 import static ch.nerdin.esbuild.modal.EsBuildConfig.Loader.FILE;
 import static ch.nerdin.esbuild.modal.EsBuildConfig.Loader.JS;
 import static ch.nerdin.esbuild.modal.EsBuildConfig.Loader.JSON;
@@ -31,6 +32,7 @@ public class EsBuildConfigBuilder {
 
     public static Map<String, EsBuildConfig.Loader> getDefaultLoadersMap() {
         Map<String, EsBuildConfig.Loader> loaders = new HashMap<>();
+        loaders.put(".css", CSS);
         loaders.put(".json", JSON);
         loaders.put(".jsx", JSX);
         loaders.put(".tsx", TSX);
