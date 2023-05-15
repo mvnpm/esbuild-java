@@ -94,7 +94,7 @@ public class Bundler {
             final Path temp = Files.createTempDirectory(nameVersion.toString());
             UnZip.unzip(path, temp);
             switch (type) {
-                case MVNPM -> ImportToPackage.createPackage(nodeModules, temp, nameVersion.name, nameVersion.version);
+                case MVNPM -> ImportToPackage.createPackage(nodeModules, temp, nameVersion.version);
                 case WEBJARS -> Files.move(temp.resolve(WEBJAR_PACKAGE_PREFIX).resolve(nameVersion.name)
                         .resolve(nameVersion.version), nodeModules.resolve(nameVersion.name));
             }
