@@ -71,7 +71,7 @@ public class ImportToPackage {
         final List<PackageInfo> packages = extractPackages(importMapFile);
         for (PackageInfo info : packages) {
             final String packageContents = convert(info.getName(), version, info.getMain());
-            final Path packageDir = importMapFile.getParent().resolve(MVNPM_PACKAGE_PREFIX + info.getDirectory());
+            final Path packageDir = importMapFile.getParent().resolve(MVNPM_PACKAGE_PREFIX + info.getDirectory()).normalize();
             if (!Files.isDirectory(packageDir)) {
                 throw new IllegalStateException("Invalid MVNPM dependency structure: " + packageDir);
             }
@@ -79,7 +79,7 @@ public class ImportToPackage {
             Files.writeString(packageFile, packageContents);
 
             // in case there is a / in the name
-            final Path targetDir = nodeModules.resolve(info.getName());
+            final Path targetDir = nodeModules.resolve(info.getName()).normalize();
             if (!Files.exists(targetDir.getParent())) Files.createDirectories(targetDir.getParent());
             smartMove(packageDir, targetDir);
         }
