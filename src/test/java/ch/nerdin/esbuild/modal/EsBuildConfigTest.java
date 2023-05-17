@@ -45,7 +45,11 @@ public class EsBuildConfigTest {
         final String[] params = esBuildConfig.toParams();
 
         // then
-        assertArrayEquals(new String[]{"--bundle", "main.js", "bundle.js", "--minify", "--outdir=/tmp"}, params);
+        assertArrayEquals(new String[]{"--bundle", "main.js", "bundle.js", "--minify", "--format=esm", "--loader:.svg=file",
+                "--loader:.gif=file", "--loader:.css=css", "--loader:.jpg=file", "--loader:.eot=file", "--loader:.json=json",
+                "--loader:.ts=ts", "--loader:.png=file", "--loader:.ttf=file", "--loader:.woff2=file", "--loader:.jsx=jsx",
+                "--loader:.js=js", "--loader:.woff=file", "--loader:.tsx=tsx", "--outdir=/tmp", "--sourcemap",
+                "--splitting", "--entry-names=[name]-[hash]"}, params);
     }
 
     @Test

@@ -89,7 +89,7 @@ public class Execute {
                 while ((line = reader.readLine()) != null) {
                     logger.debug(line);
                     if (line.contains("✘ [ERROR]") || !error.isEmpty()) {
-                        error.append(line);
+                        error.append("\n").append(line);
                     } else if (line.contains("build finished")) {
                         logger.info("Build finished!");
                         listener.onChange();
