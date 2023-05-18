@@ -57,8 +57,9 @@ public class Bundler {
         return dist;
     }
 
-    private static EsBuildConfig createBundle(BundleOptions bundleOptions, Path location, Path dist) {
+    private static EsBuildConfig createBundle(BundleOptions bundleOptions, Path location, Path dist) throws IOException {
         final EsBuildConfig esBuildConfig = bundleOptions.getEsBuildConfig();
+        Files.createDirectories(dist);
         esBuildConfig.setOutdir(dist.toString());
 
         final Path path = bundleOptions.getWorkFolder() != null ? bundleOptions.getWorkFolder() : location;

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.Comparator;
 import java.util.stream.Stream;
@@ -37,10 +38,9 @@ public class Copy {
     }
 
     public static void smartMove(Path source, Path dest) throws IOException {
-        FileSystemProvider providerSrc = source.getFileSystem().provider();
-        FileSystemProvider providerDest = source.getFileSystem().provider();
-
-        if (providerSrc == providerDest) {
+        Files.createDirectories(source);
+        Files.createDirectories(dest);
+        if(Files.isSameFile(source, dest)){
             Files.move(source, dest);
         } else {
             copyFolder(source, dest);
