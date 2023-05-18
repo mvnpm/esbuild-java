@@ -57,6 +57,10 @@ public abstract class BaseResolver {
     }
 
     Path createDestination(String version) throws IOException {
-        return Files.createTempDirectory("esbuild-" + version);
+        return Files.createDirectory(getLocation(version));
+    }
+
+    Path getLocation(String version) {
+        return Path.of(System.getProperty("java.io.tmpdir")).resolve("esbuild-" + version);
     }
 }

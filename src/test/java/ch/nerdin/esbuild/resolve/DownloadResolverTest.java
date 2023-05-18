@@ -1,6 +1,7 @@
 package ch.nerdin.esbuild.resolve;
 
 import ch.nerdin.esbuild.Bundler;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -8,7 +9,12 @@ import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class DownloadResolverTest {
+public class DownloadResolverTest extends BundleTester {
+
+    @BeforeAll
+    public static void cleanUp() throws IOException {
+        cleanUpDefault();
+    }
 
     @Test
     public void download() throws IOException {

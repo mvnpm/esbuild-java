@@ -3,7 +3,6 @@ package ch.nerdin.esbuild;
 import ch.nerdin.esbuild.modal.BundleOptions;
 import ch.nerdin.esbuild.modal.EsBuildConfig;
 import ch.nerdin.esbuild.resolve.ExecutableResolver;
-import ch.nerdin.esbuild.util.ImportToPackage;
 import ch.nerdin.esbuild.util.UnZip;
 
 import java.io.IOException;
@@ -17,6 +16,7 @@ public class Bundler {
 
 
     private static final String WEBJAR_PACKAGE_PREFIX = "META-INF/resources/webjars";
+    private static final String MVNPM_PACKAGE_PREFIX = "META-INF/resources/_static";
     private static String VERSION;
 
     public enum BundleType {
@@ -92,12 +92,13 @@ public class Bundler {
 
         for (Path path : dependencies) {
             final NameVersion nameVersion = parseName(path.getFileName().toString());
-            final Path temp = Files.createTempDirectory(nameVersion.toString());
-            UnZip.unzip(path, temp);
+            final Path packageFolder = nodeModules.resolve(nameVersion.toString());
+            UnZip.unzip(path, packageFolder);
+            final Path target = nodeModules.resolve(nameVersion.name);
             switch (type) {
-                case MVNPM -> ImportToPackage.createPackage(nodeModules, temp, nameVersion.version);
-                case WEBJARS -> Files.move(temp.resolve(WEBJAR_PACKAGE_PREFIX).resolve(nameVersion.name)
-                        .resolve(nameVersion.version), nodeModules.resolve(nameVersion.name));
+                case MVNPM -> Files.move(packageFolder.resolve(MVNPM_PACKAGE_PREFIX).resolve(nameVersion.name), target);
+                case WEBJARS -> Files.move(packageFolder.resolve(WEBJAR_PACKAGE_PREFIX).resolve(nameVersion.name)
+                        .resolve(nameVersion.version), target);
             }
         }
 
