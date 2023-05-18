@@ -4,6 +4,8 @@ import ch.nerdin.esbuild.modal.BundleOptions;
 import ch.nerdin.esbuild.modal.EsBuildConfig;
 import ch.nerdin.esbuild.resolve.ExecutableResolver;
 import ch.nerdin.esbuild.util.UnZip;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,7 +15,7 @@ import java.util.List;
 import java.util.Properties;
 
 public class Bundler {
-
+    private static final Logger logger = LoggerFactory.getLogger(Bundler.class);
 
     private static final String WEBJAR_PACKAGE_PREFIX = "META-INF/resources/webjars";
     private static final String MVNPM_PACKAGE_PREFIX = "META-INF/resources/_static";
@@ -96,7 +98,13 @@ public class Bundler {
             UnZip.unzip(path, packageFolder);
             final Path target = nodeModules.resolve(nameVersion.name);
             switch (type) {
-                case MVNPM -> Files.move(packageFolder.resolve(MVNPM_PACKAGE_PREFIX).resolve(nameVersion.name), target);
+                case MVNPM -> {
+                    final Path source = packageFolder.resolve(MVNPM_PACKAGE_PREFIX).resolve(nameVersion.name);
+                    if (source.toFile().exists())
+                        Files.move(source, target);
+                    else
+                        logger.info("skipping invalid package '{}'", nameVersion);
+                }
                 case WEBJARS -> Files.move(packageFolder.resolve(WEBJAR_PACKAGE_PREFIX).resolve(nameVersion.name)
                         .resolve(nameVersion.version), target);
             }
