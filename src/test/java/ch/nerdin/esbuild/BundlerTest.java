@@ -42,7 +42,7 @@ public class BundlerTest {
     }
 
     @Test
-    public void shouldTrowException() throws IOException, URISyntaxException {
+    public void shouldThrowException() throws IOException, URISyntaxException {
         try {
             executeTest("/mvnpm/stimulus-3.2.1.jar", Bundler.BundleType.MVNPM, "/application-error.js", false);
         } catch (RuntimeException e) {
