@@ -18,18 +18,18 @@ public class BundlerTest {
 
     @Test
     public void shouldBundleMvnpm() throws URISyntaxException, IOException {
-        executeTest("/stimulus-3.2.1.jar", Bundler.BundleType.MVNPM, "/application-mvnpm.js", true);
+        executeTest("/mvnpm/stimulus-3.2.1.jar", Bundler.BundleType.MVNPM, "/application-mvnpm.js", true);
     }
 
     @Test
     public void shouldBundle() throws URISyntaxException, IOException {
-        executeTest("/htmx.org-1.8.4.jar", Bundler.BundleType.WEBJARS, "/application-webjar.js", true);
+        executeTest("/webjars/htmx.org-1.8.4.jar", Bundler.BundleType.WEBJARS, "/application-webjar.js", true);
     }
 
     @Test
     public void shouldWatch() throws URISyntaxException, IOException, InterruptedException {
         // given
-        final BundleOptions options = getBundleOptions("/stimulus-3.2.1.jar", Bundler.BundleType.MVNPM, "/application-mvnpm.js");
+        final BundleOptions options = getBundleOptions("/mvnpm/stimulus-3.2.1.jar", Bundler.BundleType.MVNPM, "/application-mvnpm.js");
 
         // when
         AtomicBoolean isCalled = new AtomicBoolean(false);
@@ -44,7 +44,7 @@ public class BundlerTest {
     @Test
     public void shouldTrowException() throws IOException, URISyntaxException {
         try {
-            executeTest("/stimulus-3.2.1.jar", Bundler.BundleType.MVNPM, "/application-error.js", false);
+            executeTest("/mvnpm/stimulus-3.2.1.jar", Bundler.BundleType.MVNPM, "/application-error.js", false);
         } catch (RuntimeException e) {
             assertTrue(e.getMessage().contains("ERROR"));
         }
