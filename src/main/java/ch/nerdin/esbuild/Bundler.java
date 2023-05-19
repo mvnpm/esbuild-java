@@ -3,6 +3,8 @@ package ch.nerdin.esbuild;
 import ch.nerdin.esbuild.modal.BundleOptions;
 import ch.nerdin.esbuild.modal.EsBuildConfig;
 import ch.nerdin.esbuild.resolve.ExecutableResolver;
+import ch.nerdin.esbuild.util.Copy;
+import ch.nerdin.esbuild.util.PackageJson;
 import ch.nerdin.esbuild.util.UnZip;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +13,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 public class Bundler {
@@ -89,27 +93,32 @@ public class Bundler {
     protected static Path extract(Path bundleDirectory, List<Path> dependencies, BundleType type) throws IOException {
         final Path nodeModules = bundleDirectory.resolve("node_modules");
         if (!Files.exists(nodeModules)) {
-            nodeModules.toFile().mkdir();
+            Files.createDirectories(nodeModules);
         }
-
+        final Path tmp = Files.createTempDirectory(nodeModules, "extract");
         for (Path path : dependencies) {
-            final NameVersion nameVersion = parseName(path.getFileName().toString());
-            final Path packageFolder = nodeModules.resolve(nameVersion.toString());
-            UnZip.unzip(path, packageFolder);
-            final Path target = nodeModules.resolve(nameVersion.name);
-            switch (type) {
-                case MVNPM -> {
-                    final Path source = packageFolder.resolve(MVNPM_PACKAGE_PREFIX).resolve(nameVersion.name);
-                    if (source.toFile().exists())
-                        Files.move(source, target);
-                    else
-                        logger.info("skipping invalid package '{}'", nameVersion);
+            final String fileName = path.getFileName().toString();
+            final Path extractDir = tmp.resolve(fileName.substring(0, fileName.lastIndexOf(".")));
+            UnZip.unzip(path, extractDir);
+            final Optional<Path> packageJson = switch (type) {
+                case MVNPM -> PackageJson.findPackageJson(extractDir.resolve(MVNPM_PACKAGE_PREFIX));
+                case WEBJARS -> PackageJson.findPackageJson(extractDir.resolve(WEBJAR_PACKAGE_PREFIX));
+            };
+            if(packageJson.isPresent()) {
+                final String packageName = PackageJson.readPackageName(packageJson.get());
+                final Path source = packageJson.get().getParent();
+                final Path target = nodeModules.resolve(packageName);
+                if (!Files.isDirectory(target)) {
+                    Files.createDirectories(target.getParent());
+                    Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+                } else {
+                    logger.info("skipping package as it already exists '{}'", target);
                 }
-                case WEBJARS -> Files.move(packageFolder.resolve(WEBJAR_PACKAGE_PREFIX).resolve(nameVersion.name)
-                        .resolve(nameVersion.version), target);
+            } else {
+                logger.info("package.json not found in package '{}'", fileName);
             }
         }
-
+        Copy.deleteRecursive(tmp);
         return bundleDirectory;
     }
 
@@ -124,28 +133,7 @@ public class Bundler {
         return null;
     }
 
-    private static NameVersion parseName(String fileName) {
-        final int separatorIndex = fileName.lastIndexOf("-");
-        String name = fileName.substring(0, separatorIndex);
-        String version = fileName.substring(separatorIndex + 1, fileName.lastIndexOf('.'));
 
-        return new NameVersion(name, version);
-    }
-
-    static class NameVersion {
-        public String name;
-        public String version;
-
-        public NameVersion(String name, String version) {
-            this.name = name;
-            this.version = version;
-        }
-
-        @Override
-        public String toString() {
-            return "%s-%s".formatted(name, version);
-        }
-    }
 }
 
 
