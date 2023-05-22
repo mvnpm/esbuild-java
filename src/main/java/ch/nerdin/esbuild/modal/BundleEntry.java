@@ -5,6 +5,7 @@ import ch.nerdin.esbuild.util.QuteTemplateRenderer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,7 @@ public class BundleEntry extends Entry {
     private Path bundleScripts(String bundleName, List<Path> resources, Path location) throws IOException {
         final String entryString = convert(resources);
         final Path entry = location.resolve("%s.js".formatted(bundleName));
-        Files.writeString(entry, entryString);
+        Files.writeString(entry, entryString, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         return entry;
     }
 
