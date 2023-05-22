@@ -1,34 +1,42 @@
 package ch.nerdin.esbuild.resolve;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CacheResolverTest {
+public class CacheResolverTest extends BundleTester {
+
+
+    @AfterAll
+    public static void cleanUp() throws IOException {
+        cleanUp("dummy");
+        cleanUp("other");
+    }
 
     @Test
     public void notResolve() throws IOException {
         // given
         String version = "dummy";
-        Files.createTempDirectory("esbuild-" + version);
+        final Path folder = createEsBuildFolder(version);
 
         // when
         final Path path = new CacheResolver(version1 -> Path.of("/")).resolve(version);
 
         //then
-        assertEquals(Path.of("/"), path);
+        assertTrue(path.startsWith(folder));
     }
 
     @Test
     public void resolve() throws IOException {
         // given
         String version = "other";
-        final Path tempDirectory = Files.createTempDirectory("esbuild-" + version);
-        final Path resolve = tempDirectory.resolve(BaseResolver.EXECUTABLE_PATH);
+        final Path folder = createEsBuildFolder(version);
+        final Path resolve = folder.resolve(BaseResolver.EXECUTABLE_PATH);
         resolve.toFile().mkdirs();
 
         // when
@@ -36,5 +44,12 @@ public class CacheResolverTest {
 
         //then
         assertEquals(resolve, path);
+        assertTrue(path.startsWith(folder));
+        assertTrue(folder.toFile().list().length > 0);
+    }
+
+    private Path createEsBuildFolder(String version) throws IOException {
+        final BaseResolver resolver = new BaseResolver(null) { };
+        return resolver.createDestination(version);
     }
 }

@@ -1,6 +1,0 @@
-{
-  "imports" : {
-    "react-bootstrap" : "/_static/react-bootstrap/esm/index.js",
-    "react-bootstrap/" : "/_static/react-bootstrap/"
-  }
-}

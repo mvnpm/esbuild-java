@@ -1,6 +1,0 @@
-{
-  "imports":{
-    "stimulus":"/_static/stimulus/./dist/stimulus.js",
-    "stimulus/":"/_static/stimulus/"
-  }
-}

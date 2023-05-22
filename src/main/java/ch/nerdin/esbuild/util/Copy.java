@@ -5,21 +5,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.spi.FileSystemProvider;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class Copy {
-
-    public static void copyFolder(Path src, Path dest) {
-        try (Stream<Path> stream = Files.walk(src)) {
-            stream.forEach(source -> copy(source, dest.resolve(src.relativize(source))));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     public static void copy(Path source, Path dest) {
         try {
@@ -34,17 +25,6 @@ public class Copy {
             paths.sorted(Comparator.reverseOrder())
                     .map(Path::toFile)
                     .forEach(File::delete);
-        }
-    }
-
-    public static void smartMove(Path source, Path dest) throws IOException {
-        Files.createDirectories(source);
-        Files.createDirectories(dest);
-        if(Files.isSameFile(source, dest)){
-            Files.move(source, dest);
-        } else {
-            copyFolder(source, dest);
-            deleteRecursive(source);
         }
     }
 }

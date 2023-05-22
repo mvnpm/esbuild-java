@@ -15,7 +15,7 @@ public class UnZipTest {
     @Test
     public void unzip() throws URISyntaxException, IOException {
         // given
-        final File jarFile = new File(this.getClass().getResource("/stimulus-3.2.1.jar").toURI());
+        final File jarFile = new File(this.getClass().getResource("/mvnpm/stimulus-3.2.1.jar").toURI());
         final Path junit = Files.createTempDirectory("junit");
 
         // when

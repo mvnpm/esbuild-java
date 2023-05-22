@@ -13,7 +13,7 @@ public class QuteTemplateRenderer {
 
     public static String render(String templateName, Object data) {
         Engine engine = Engine.builder().addDefaults().build();
-        final InputStream inputStream = ImportToPackage.class.getResourceAsStream("/%s".formatted(templateName));
+        final InputStream inputStream = QuteTemplateRenderer.class.getResourceAsStream("/%s".formatted(templateName));
         String template = new BufferedReader(
             new InputStreamReader(inputStream, StandardCharsets.UTF_8))
             .lines()
