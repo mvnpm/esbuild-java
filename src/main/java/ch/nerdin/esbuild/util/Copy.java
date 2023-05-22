@@ -21,6 +21,9 @@ public class Copy {
     }
 
     public static void deleteRecursive(Path source) throws IOException {
+        if (!Files.exists(source)){
+            return;
+        }
         try (final Stream<Path> paths = Files.walk(source)) {
             paths.sorted(Comparator.reverseOrder())
                     .map(Path::toFile)
