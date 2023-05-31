@@ -1,15 +1,14 @@
 package ch.nerdin.esbuild;
 
 import ch.nerdin.esbuild.modal.EsBuildConfig;
+import ch.vorburger.exec.ManagedProcess;
+import ch.vorburger.exec.ManagedProcessBuilder;
+import ch.vorburger.exec.ManagedProcessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,7 +19,6 @@ public class Execute {
     private final File esBuildExec;
     private EsBuildConfig esBuildConfig;
     private String[] args;
-    private Process process;
 
     public Execute(File esBuildExec, EsBuildConfig esBuildConfig) {
         this.esBuildExec = esBuildExec;
@@ -32,20 +30,12 @@ public class Execute {
         this.args = args;
     }
 
-    public void executeAndWait() throws IOException {
-        watchOutput(getCommand(), () -> {
-
-        });
-        try {
-            process.waitFor();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+    public void executeAndWait() {
+        watchOutput(getCommand(), null);
     }
 
-    public Process execute(BuildEventListener listener) throws IOException {
-        watchOutput(getCommand(), listener);
-        return process;
+    protected ManagedProcess execute(BuildEventListener listener) {
+        return watchOutput(getCommand(), listener);
     }
 
     private String[] getCommand() {
@@ -63,44 +53,42 @@ public class Execute {
 
     private String[] getCommand(String[] args) {
         List<String> argList = new ArrayList<>(args.length + 1);
-        argList.add(esBuildExec.toString());
         argList.addAll(Arrays.asList(args));
 
         return argList.toArray(new String[0]);
     }
 
-    public void watchOutput(final String[] command, final BuildEventListener listener) throws IOException {
-        process = new ProcessBuilder().command(command).start();
-        final InputStream errorStream = process.getErrorStream();
-        final Thread t = new Thread(new Streamer(errorStream, listener));
-        t.setName("Process stdout streamer");
-        t.setDaemon(true);
-        t.start();
-    }
+    public ManagedProcess watchOutput(final String[] command, final BuildEventListener listener) {
+        try {
+            ManagedProcessBuilder pb = new ManagedProcessBuilder(esBuildExec.toString());
+            Arrays.stream(command).forEach(pb::addArgument);
 
-    private record Streamer(InputStream processStream, BuildEventListener listener) implements Runnable {
+            if (listener != null) {
+                pb.addStdErr(new OutputStream() {
+                    private StringBuilder buffer = new StringBuilder();
 
-        @Override
-        public void run() {
-            StringBuilder error = new StringBuilder();
-            try (final BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(processStream, StandardCharsets.UTF_8))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    logger.debug(line);
-                    if (line.contains("✘ [ERROR]") || !error.isEmpty()) {
-                        error.append("\n").append(line);
-                    } else if (line.contains("build finished")) {
-                        logger.info("Build finished!");
-                        listener.onChange();
+                    @Override
+                    public void write(int b) {
+                        if (buffer.toString().toLowerCase().contains("build finished")) {
+                            listener.onChange();
+                        }
+                        if (b == '\n') {
+                            buffer = new StringBuilder();
+                        }
+                        buffer.append((char) b);
                     }
-                }
-            } catch (IOException e) {
-                // ignore
+                });
             }
-            if (!error.isEmpty()) {
-                throw new BundleException(error.toString());
+
+            final ManagedProcess managedProcess = pb.build();
+            managedProcess.start();
+            if (listener == null) {
+                managedProcess.waitForExit();
             }
+
+            return managedProcess;
+        } catch (ManagedProcessException e) {
+            throw new BundleException(e);
         }
     }
 }

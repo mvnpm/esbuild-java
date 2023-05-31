@@ -3,9 +3,9 @@ package ch.nerdin.esbuild;
 import ch.nerdin.esbuild.modal.BundleOptions;
 import ch.nerdin.esbuild.modal.EsBuildConfig;
 import ch.nerdin.esbuild.resolve.ExecutableResolver;
-import ch.nerdin.esbuild.util.Copy;
 import ch.nerdin.esbuild.util.PackageJson;
 import ch.nerdin.esbuild.util.UnZip;
+import ch.vorburger.exec.ManagedProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,11 +39,12 @@ public class Bundler {
             Properties properties = new Properties();
             try {
                 final InputStream resource = Bundler.class.getResourceAsStream("/version.properties");
-                properties.load(resource);
+                if (resource != null)
+                    properties.load(resource);
             } catch (IOException e) {
                 // ignore we use the default
             }
-            VERSION = properties.getProperty("esbuild.version", "0.17.17");
+            VERSION = properties.getProperty("esbuild.version", "0.17.19");
         }
 
         return VERSION;
@@ -85,12 +86,12 @@ public class Bundler {
         final EsBuildConfig esBuildConfig = createBundle(bundleOptions, location, dist);
 
         bundleOptions.getEsBuildConfig().setWatch(true);
-        final Process process = esBuild(esBuildConfig, eventListener);
-        return new Watch(process);
+        final ManagedProcess process = esBuild(esBuildConfig, eventListener);
+        return new Watch(process, location);
     }
 
     public static Path installIfNeeded(BundleOptions bundleOptions) throws IOException {
-        if(bundleOptions.getWorkFolder() != null && Files.isDirectory(bundleOptions.getWorkFolder().resolve(NODE_MODULES))) {
+        if (bundleOptions.getWorkFolder() != null && Files.isDirectory(bundleOptions.getWorkFolder().resolve(NODE_MODULES))) {
             return bundleOptions.getWorkFolder();
         }
         return install(bundleOptions);
@@ -125,7 +126,7 @@ public class Bundler {
                     case MVNPM -> PackageJson.findPackageJson(extractDir.resolve(MVNPM_PACKAGE_PREFIX));
                     case WEBJARS -> PackageJson.findPackageJson(extractDir.resolve(WEBJAR_PACKAGE_PREFIX));
                 };
-                if(packageJson.isPresent()) {
+                if (packageJson.isPresent()) {
                     final String packageName = PackageJson.readPackageName(packageJson.get());
                     final Path source = packageJson.get().getParent();
                     final Path target = nodeModules.resolve(packageName);
@@ -143,15 +144,10 @@ public class Bundler {
         return bundleDirectory;
     }
 
-    protected static Process esBuild(EsBuildConfig esBuildConfig, BuildEventListener listener) throws IOException {
+    protected static ManagedProcess esBuild(EsBuildConfig esBuildConfig, BuildEventListener listener) throws IOException {
         final Path esBuildExec = new ExecutableResolver().resolve(Bundler.getDefaultVersion());
         final Execute execute = new Execute(esBuildExec.toFile(), esBuildConfig);
-        if (listener != null) {
-            return execute.execute(listener);
-        } else {
-            execute.executeAndWait();
-        }
-        return null;
+        return execute.execute(listener);
     }
 
 

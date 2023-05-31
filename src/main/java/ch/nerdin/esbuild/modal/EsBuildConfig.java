@@ -56,7 +56,7 @@ public class EsBuildConfig {
 
     private Target target;
 
-    private boolean watch;
+    private String watch;
 
     private String chunkNames;
 
@@ -183,11 +183,11 @@ public class EsBuildConfig {
     }
 
     public boolean isWatch() {
-        return watch;
+        return watch != null;
     }
 
     public void setWatch(boolean watch) {
-        this.watch = watch;
+        this.watch = watch ? "forever" : null;
     }
 
     public String getChunkNames() {
