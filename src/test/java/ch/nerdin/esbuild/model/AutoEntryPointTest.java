@@ -1,4 +1,4 @@
-package ch.nerdin.esbuild.modal;
+package ch.nerdin.esbuild.model;
 
 import org.junit.jupiter.api.Test;
 
@@ -17,44 +17,44 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class BundleEntryTest {
+public class AutoEntryPointTest {
 
     @Test
     public void testScript() throws URISyntaxException, IOException {
         // given
-        final Path tempDirectory = Files.createTempDirectory("test");
-        final Path script1 = createTempScript("script1.js");
-        final Path script2 = createTempScript("script2-test.js");
-
+        final Path workDir = Files.createTempDirectory("test");
+        final Path rootDir = getRootScriptsDir();
         // when
-        final BundleEntry entry = new BundleEntry("bundle", List.of(script1, script2));
-        String entryContents = readEntry(entry, tempDirectory);
+        final AutoEntryPoint entry = new AutoEntryPoint(rootDir, "bundle", List.of("script1.js", "script2-test.js", "sub/sub.js"));
+        String entryContents = readEntry(entry, workDir);
 
         // then
         assertEquals("""
                 import * as script1 from "./script1";
-                import * as script2test from "./script2-test";""", entryContents);
+                import * as script2test from "./script2-test";
+                import * as sub from "./sub/sub";
+                """, entryContents);
     }
 
     @Test
     public void testCss() throws URISyntaxException, IOException {
         // given
         final Path tempDirectory = Files.createTempDirectory("test");
-        final Path css = createTempScript("style.css");
+        final Path rootDir = getRootScriptsDir();
 
         // when
-        final BundleEntry entry = new BundleEntry("name", List.of(css));
+        final AutoEntryPoint entry = new AutoEntryPoint(rootDir, "name", List.of("style.css"));
         String entryContents = readEntry(entry, tempDirectory);
 
         // then
-        assertEquals("import \"./style.css\";", entryContents);
+        assertEquals("import \"./style.css\";\n", entryContents);
     }
 
-    private Path createTempScript(String name) throws URISyntaxException {
-        return new File(getClass().getResource("/multi/%s".formatted(name)).toURI()).toPath();
+    private Path getRootScriptsDir() throws URISyntaxException {
+        return new File(getClass().getResource("/multi/").toURI()).toPath();
     }
 
-    private static String readEntry(BundleEntry entry, Path tempDirectory) throws FileNotFoundException {
+    private static String readEntry(AutoEntryPoint entry, Path tempDirectory) throws FileNotFoundException {
         final FileInputStream inputStream = new FileInputStream(entry.process(tempDirectory).toFile());
         return new BufferedReader(
                 new InputStreamReader(inputStream, StandardCharsets.UTF_8))

@@ -2,7 +2,13 @@ package ch.nerdin.esbuild;
 
 public class BundleException extends RuntimeException {
 
-    public BundleException(String message) {
+    private final String output;
+    public BundleException(String message, String output) {
         super(message);
+        this.output = output;
+    }
+
+    public String output() {
+        return output;
     }
 }

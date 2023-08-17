@@ -25,21 +25,23 @@ public class PackageJson {
     public static final String PACKAGE_JSON = "package.json";
 
     public static Optional<Path> findPackageJson(Path dir) {
+        if (!Files.isDirectory(dir)) {
+            return Optional.empty();
+        }
         return findBreadthFirst(dir);
     }
 
-    private static Optional<Path> findBreadthFirst(Path dir){
+    private static Optional<Path> findBreadthFirst(Path dir) {
         Queue<Path> queue = new ArrayDeque<>();
         queue.add(dir);
-        while (!queue.isEmpty())
-        {
+        while (!queue.isEmpty()) {
             Path current = queue.poll();
             if (Files.isRegularFile(current.resolve(PACKAGE_JSON))) {
                 logger.debug("package.json found in {}", current);
                 return Optional.of(current.resolve(PACKAGE_JSON));
             }
-            try(final Stream<Path> list = Files.list(current)) {
-                list.filter(Files::isDirectory).filter(not(Files::isSymbolicLink)).forEach(queue::add);
+            try (final Stream<Path> list = Files.list(current)) {
+                list.sorted().filter(Files::isDirectory).filter(not(Files::isSymbolicLink)).forEach(queue::add);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

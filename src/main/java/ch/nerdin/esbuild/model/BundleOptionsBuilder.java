@@ -1,4 +1,4 @@
-package ch.nerdin.esbuild.modal;
+package ch.nerdin.esbuild.model;
 
 import ch.nerdin.esbuild.Bundler;
 
@@ -18,16 +18,16 @@ public class BundleOptionsBuilder {
         return new EsBuildConfigBuilder().build();
     }
 
-    public BundleOptionsBuilder addEntryPoint(String name, List<Path> scripts) {
-        return addEntryPoint(new BundleEntry(name, scripts));
+    public BundleOptionsBuilder addAutoEntryPoint(Path sourceDir, String name, List<String> scripts) {
+        return addEntryPoint(new AutoEntryPoint(sourceDir, name, scripts));
     }
 
-    public BundleOptionsBuilder addEntryPoint(Path script) {
-        addEntryPoint(new FileEntry(script));
+    public BundleOptionsBuilder addEntryPoint(Path rootDir, String script) {
+        addEntryPoint(new FileEntryPoint(rootDir, script));
         return this;
     }
 
-    protected BundleOptionsBuilder addEntryPoint(Entry entry) {
+    protected BundleOptionsBuilder addEntryPoint(EntryPoint entry) {
         if (options.getEntries() == null) {
             options.setEntries(new ArrayList<>());
         }
@@ -36,7 +36,7 @@ public class BundleOptionsBuilder {
     }
 
     public BundleOptionsBuilder setWorkFolder(Path workFolder) {
-        this.options.setWorkFolder(workFolder);
+        this.options.setWorkDir(workFolder);
         return this;
     }
 

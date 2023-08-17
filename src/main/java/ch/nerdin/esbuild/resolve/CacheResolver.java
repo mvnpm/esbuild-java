@@ -1,6 +1,7 @@
 package ch.nerdin.esbuild.resolve;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class CacheResolver extends BaseResolver implements Resolver {
@@ -11,10 +12,9 @@ public class CacheResolver extends BaseResolver implements Resolver {
     @Override
     public Path resolve(String version) throws IOException {
         final Path path = getLocation(version);
-        if (path.toFile().exists()) {
+        if (Files.isRegularFile(path.resolve(EXECUTABLE_PATH))) {
             return path.resolve(EXECUTABLE_PATH);
         }
-
         return resolver.resolve(version);
     }
 }
