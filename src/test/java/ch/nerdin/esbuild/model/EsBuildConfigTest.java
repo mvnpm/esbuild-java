@@ -1,4 +1,4 @@
-package ch.nerdin.esbuild.modal;
+package ch.nerdin.esbuild.model;
 
 import org.junit.jupiter.api.Test;
 

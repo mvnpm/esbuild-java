@@ -9,8 +9,7 @@ public abstract class BundleTester {
 
 
     public static void cleanUp(String version) throws IOException {
-        final BaseResolver resolver = new BaseResolver(null) { };
-        Copy.deleteRecursive(resolver.getLocation(version));
+        Copy.deleteRecursive(BaseResolver.getLocation(version));
     }
 
     public static void cleanUpDefault() throws IOException {

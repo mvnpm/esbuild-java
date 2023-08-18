@@ -6,11 +6,31 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class Copy {
+
+    public static void copyEntries(Path rootDir, List<String> entries, Path targetDir) {
+        for (String entry : entries) {
+            try {
+                final Path src = rootDir.resolve(entry);
+                if (!Files.exists(src)) {
+                    throw new IOException("Entry file not found: " + src);
+                }
+                final Path dest = targetDir.resolve(entry);
+                if (!Files.exists(dest)) {
+                    Files.createDirectories(dest.getParent());
+                    Files.copy(src, dest);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 
     public static void copy(Path source, Path dest) {
         try {

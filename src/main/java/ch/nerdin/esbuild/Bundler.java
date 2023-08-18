@@ -1,9 +1,10 @@
 package ch.nerdin.esbuild;
 
-import ch.nerdin.esbuild.modal.BundleOptions;
-import ch.nerdin.esbuild.modal.EsBuildConfig;
+import ch.nerdin.esbuild.model.BundleOptions;
+import ch.nerdin.esbuild.model.BundleResult;
+import ch.nerdin.esbuild.model.EsBuildConfig;
+import ch.nerdin.esbuild.model.ExecuteResult;
 import ch.nerdin.esbuild.resolve.ExecutableResolver;
-import ch.nerdin.esbuild.util.Copy;
 import ch.nerdin.esbuild.util.PackageJson;
 import ch.nerdin.esbuild.util.UnZip;
 import org.slf4j.Logger;
@@ -39,11 +40,13 @@ public class Bundler {
             Properties properties = new Properties();
             try {
                 final InputStream resource = Bundler.class.getResourceAsStream("/version.properties");
-                properties.load(resource);
+                if (resource != null) {
+                    properties.load(resource);
+                }
             } catch (IOException e) {
                 // ignore we use the default
             }
-            VERSION = properties.getProperty("esbuild.version", "0.17.17");
+            VERSION = properties.getProperty("esbuild.version", "0.17.19");
         }
 
         return VERSION;
@@ -56,48 +59,50 @@ public class Bundler {
      * @return the folder that has the result of the transformation
      * @throws IOException when something could not be written
      */
-    public static Path bundle(BundleOptions bundleOptions) throws IOException {
-        final Path location = installIfNeeded(bundleOptions);
-        final Path dist = location.resolve(DIST);
-        final EsBuildConfig esBuildConfig = createBundle(bundleOptions, location, dist);
+    public static BundleResult bundle(BundleOptions bundleOptions) throws IOException {
+        final Path workDir = installIfNeeded(bundleOptions);
+        final Path dist = workDir.resolve(DIST);
+        final EsBuildConfig esBuildConfig = createBundle(bundleOptions, workDir, dist);
 
-        esBuild(esBuildConfig, null);
+        final ExecuteResult executeResult = esBuild(esBuildConfig);
 
-        return dist;
+        if(!Files.isDirectory(dist)) {
+            throw new BundleException("Unexpected Error during bundling", executeResult.output());
+        }
+
+        return new BundleResult(dist, executeResult);
     }
 
-    private static EsBuildConfig createBundle(BundleOptions bundleOptions, Path location, Path dist) throws IOException {
+    private static EsBuildConfig createBundle(BundleOptions bundleOptions, Path workDir, Path dist) throws IOException {
         final EsBuildConfig esBuildConfig = bundleOptions.getEsBuildConfig();
         // Clean the dist directory from a previous bundling
         deleteRecursive(dist);
         Files.createDirectories(dist);
         esBuildConfig.setOutdir(dist.toString());
-
-        final Path path = bundleOptions.getWorkFolder() != null ? bundleOptions.getWorkFolder() : location;
-        final List<String> paths = bundleOptions.getEntries().stream().map(entry -> entry.process(path).toString()).toList();
+        final List<String> paths = bundleOptions.getEntries().stream().map(entry -> entry.process(workDir).toString()).toList();
         esBuildConfig.setEntryPoint(paths.toArray(new String[0]));
         return esBuildConfig;
     }
 
     public static Watch watch(BundleOptions bundleOptions, BuildEventListener eventListener) throws IOException {
-        final Path location = installIfNeeded(bundleOptions);
-        final Path dist = location.resolve(DIST);
-        final EsBuildConfig esBuildConfig = createBundle(bundleOptions, location, dist);
+        final Path workDir = installIfNeeded(bundleOptions);
+        final Path dist = workDir.resolve(DIST);
+        final EsBuildConfig esBuildConfig = createBundle(bundleOptions, workDir, dist);
 
         bundleOptions.getEsBuildConfig().setWatch(true);
         final Process process = esBuild(esBuildConfig, eventListener);
-        return new Watch(process);
+        return new Watch(process, workDir);
     }
 
     public static Path installIfNeeded(BundleOptions bundleOptions) throws IOException {
-        if(bundleOptions.getWorkFolder() != null && Files.isDirectory(bundleOptions.getWorkFolder().resolve(NODE_MODULES))) {
-            return bundleOptions.getWorkFolder();
+        if(bundleOptions.getWorkDir() != null && Files.isDirectory(bundleOptions.getWorkDir().resolve(NODE_MODULES))) {
+            return bundleOptions.getWorkDir();
         }
         return install(bundleOptions);
     }
 
     public static Path install(BundleOptions bundleOptions) throws IOException {
-        final Path workingDir = bundleOptions.getWorkFolder() != null ? bundleOptions.getWorkFolder() : Files.createTempDirectory("bundle");
+        final Path workingDir = bundleOptions.getWorkDir() != null ? bundleOptions.getWorkDir() : Files.createTempDirectory("bundle");
         return extract(workingDir, bundleOptions.getDependencies(), bundleOptions.getType());
     }
 
@@ -146,14 +151,14 @@ public class Bundler {
     protected static Process esBuild(EsBuildConfig esBuildConfig, BuildEventListener listener) throws IOException {
         final Path esBuildExec = new ExecutableResolver().resolve(Bundler.getDefaultVersion());
         final Execute execute = new Execute(esBuildExec.toFile(), esBuildConfig);
-        if (listener != null) {
-            return execute.execute(listener);
-        } else {
-            execute.executeAndWait();
-        }
-        return null;
+        return execute.execute(listener);
     }
 
+    protected static ExecuteResult esBuild(EsBuildConfig esBuildConfig) throws IOException {
+        final Path esBuildExec = new ExecutableResolver().resolve(Bundler.getDefaultVersion());
+        final Execute execute = new Execute(esBuildExec.toFile(), esBuildConfig);
+        return execute.executeAndWait();
+    }
 
 }
 

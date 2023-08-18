@@ -1,4 +1,4 @@
-package ch.nerdin.esbuild.modal;
+package ch.nerdin.esbuild.model;
 
 import ch.nerdin.esbuild.Bundler;
 
@@ -8,7 +8,7 @@ import java.util.List;
 
 public class BundleOptions {
 
-    private List<Entry> entries;
+    private List<EntryPoint> entries;
 
     private List<Path> dependencies = new ArrayList<>();
 
@@ -16,13 +16,13 @@ public class BundleOptions {
 
     private EsBuildConfig esBuildConfig;
 
-    private Path workFolder;
+    private Path workDir;
 
-    public List<Entry> getEntries() {
+    public List<EntryPoint> getEntries() {
         return entries;
     }
 
-    public void setEntries(List<Entry> entries) {
+    public void setEntries(List<EntryPoint> entries) {
         this.entries = entries;
     }
 
@@ -50,11 +50,15 @@ public class BundleOptions {
         this.esBuildConfig = esBuildConfig;
     }
 
-    public Path getWorkFolder() {
-        return workFolder;
+    public Path getWorkDir() {
+        return workDir;
     }
 
-    public void setWorkFolder(Path workFolder) {
-        this.workFolder = workFolder;
+    public boolean hasWorkDir() {
+        return workDir == null;
+    }
+
+    public void setWorkDir(Path workDir) {
+        this.workDir = workDir;
     }
 }

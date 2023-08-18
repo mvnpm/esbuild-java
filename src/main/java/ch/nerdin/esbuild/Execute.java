@@ -1,6 +1,7 @@
 package ch.nerdin.esbuild;
 
-import ch.nerdin.esbuild.modal.EsBuildConfig;
+import ch.nerdin.esbuild.model.EsBuildConfig;
+import ch.nerdin.esbuild.model.ExecuteResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,14 +14,24 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 public class Execute {
+
+    private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor(r -> {
+        final Thread t = new Thread(r, "Process stdout streamer");
+        t.setDaemon(true);
+        return t;
+    });
     private static final Logger logger = LoggerFactory.getLogger(Execute.class);
 
     private final File esBuildExec;
     private EsBuildConfig esBuildConfig;
     private String[] args;
-    private Process process;
 
     public Execute(File esBuildExec, EsBuildConfig esBuildConfig) {
         this.esBuildExec = esBuildExec;
@@ -32,20 +43,24 @@ public class Execute {
         this.args = args;
     }
 
-    public void executeAndWait() throws IOException {
-        watchOutput(getCommand(), () -> {
-
-        });
+    public ExecuteResult executeAndWait() throws IOException {
+        final Process process = createProcess(getCommand(), Optional.empty());
         try {
-            process.waitFor();
+            final int exitCode = process.waitFor();
+            final String content = readStream(process.getInputStream());
+            final String errors = readStream(process.getErrorStream());
+            if (exitCode != 0) {
+                throw new BundleException(errors.isEmpty() ? "Unexpected Error during bundling" : errors, content);
+            }
+            return new ExecuteResult(content);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }
 
     public Process execute(BuildEventListener listener) throws IOException {
-        watchOutput(getCommand(), listener);
-        return process;
+        return createProcess(getCommand(), Optional.of(listener));
     }
 
     private String[] getCommand() {
@@ -69,39 +84,52 @@ public class Execute {
         return argList.toArray(new String[0]);
     }
 
-    public void watchOutput(final String[] command, final BuildEventListener listener) throws IOException {
-        process = new ProcessBuilder().command(command).start();
-        final InputStream errorStream = process.getErrorStream();
-        final Thread t = new Thread(new Streamer(errorStream, listener));
-        t.setName("Process stdout streamer");
-        t.setDaemon(true);
-        t.start();
+    public Process createProcess(final String[] command, final Optional<BuildEventListener> listener) throws IOException {
+        Process process = new ProcessBuilder().command(command).start();
+        final InputStream s = process.getErrorStream();
+        if(listener.isPresent()) {
+            EXECUTOR.execute(new Streamer(process::isAlive, s, listener.get()));
+        }
+        return process;
     }
 
-    private record Streamer(InputStream processStream, BuildEventListener listener) implements Runnable {
+
+    private record Streamer(BooleanSupplier isAlive, InputStream processStream, BuildEventListener listener) implements Runnable {
 
         @Override
         public void run() {
-            StringBuilder error = new StringBuilder();
-            try (final BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(processStream, StandardCharsets.UTF_8))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    logger.debug(line);
-                    if (line.contains("✘ [ERROR]") || !error.isEmpty()) {
-                        error.append("\n").append(line);
-                    } else if (line.contains("build finished")) {
-                        logger.info("Build finished!");
-                        listener.onChange();
-                    }
+            final StringBuilder errorBuilder = new StringBuilder();
+            consumeStream(isAlive, processStream, l -> {
+                logger.debug(l);
+                if (l.contains("[ERROR]") || !errorBuilder.isEmpty()) {
+                    errorBuilder.append("\n").append(l);
+                } else if (l.contains("build finished")) {
+                    logger.info("Build finished!");
+                    listener.onChange();
                 }
-            } catch (IOException e) {
-                // ignore
-            }
-            if (!error.isEmpty()) {
-                throw new BundleException(error.toString());
-            }
+            });
         }
     }
+
+    private static String readStream(InputStream stream) {
+        final StringBuilder s = new StringBuilder();
+        consumeStream(() -> true, stream, l -> s.append(l).append("\n"));
+        return s.toString();
+    }
+
+    private static void consumeStream(BooleanSupplier shouldStop, InputStream stream, Consumer<String> newLineConsumer) {
+        try (
+            final InputStreamReader in = new InputStreamReader(stream, StandardCharsets.UTF_8);
+            final BufferedReader reader = new BufferedReader(in)
+        ) {
+            String line;
+            while ((line = reader.readLine()) != null && shouldStop.getAsBoolean()) {
+                newLineConsumer.accept(line);
+            }
+        } catch (IOException e) {
+            // ignore
+        }
+    }
+
 }
 

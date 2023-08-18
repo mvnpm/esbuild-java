@@ -9,16 +9,18 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static java.util.Objects.requireNonNull;
+
 public abstract class BaseResolver {
     public static final String EXECUTABLE_PATH = "package/bin/esbuild";
 
     protected Resolver resolver;
 
     public BaseResolver(Resolver resolver) {
-        this.resolver = resolver;
+        this.resolver = requireNonNull(resolver, "resolver is required");
     }
 
-    String determineClassifier() {
+    static String determineClassifier() {
         final String osName = System.getProperty("os.name").toLowerCase();
         final String osArch = System.getProperty("os.arch").toLowerCase();
         String classifier;
@@ -45,22 +47,22 @@ public abstract class BaseResolver {
         return classifier;
     }
 
-    Path extract(InputStream archive, String version) throws IOException {
+    static Path extract(InputStream archive, String version) throws IOException {
         final File destination = createDestination(version).toFile();
         return extract(archive, destination);
     }
 
-    Path extract(InputStream archive, File destination) throws IOException {
+    static Path extract(InputStream archive, File destination) throws IOException {
         Archiver archiver = ArchiverFactory.createArchiver("tar", "gz");
         archiver.extract(archive, destination);
         return destination.toPath().resolve(EXECUTABLE_PATH);
     }
 
-    Path createDestination(String version) throws IOException {
-        return Files.createDirectory(getLocation(version));
+    static Path createDestination(String version) throws IOException {
+        return Files.createDirectories(getLocation(version));
     }
 
-    Path getLocation(String version) {
+    static Path getLocation(String version) {
         return Path.of(System.getProperty("java.io.tmpdir")).resolve("esbuild-" + version);
     }
 }

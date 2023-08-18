@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import static ch.nerdin.esbuild.resolve.BundleResolverTest.THROWING_RESOLVER;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DownloadResolverTest extends BundleTester {
@@ -19,7 +20,7 @@ public class DownloadResolverTest extends BundleTester {
     @Test
     public void download() throws IOException {
         // when
-        final Path path = new DownloadResolver(null).resolve(Bundler.getDefaultVersion());
+        final Path path = new DownloadResolver(THROWING_RESOLVER).resolve(Bundler.getDefaultVersion());
 
         // then
         assertTrue(path.toFile().exists());

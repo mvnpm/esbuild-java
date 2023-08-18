@@ -11,6 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BundleResolverTest extends BundleTester {
 
+    public static final Resolver THROWING_RESOLVER = version -> { throw new RuntimeException("Should not call this"); };
+
     @BeforeAll
     public static void cleanUp() throws IOException {
         cleanUpDefault();
@@ -19,7 +21,7 @@ public class BundleResolverTest extends BundleTester {
     @Test
     public void resolve() throws IOException {
         // when
-        final Path resolve = new BundledResolver(null).resolve(Bundler.getDefaultVersion());
+        final Path resolve = new BundledResolver(THROWING_RESOLVER).resolve(Bundler.getDefaultVersion());
 
         // then
         assertTrue(resolve.toFile().exists());

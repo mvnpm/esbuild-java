@@ -1,16 +1,16 @@
-package ch.nerdin.esbuild.modal;
+package ch.nerdin.esbuild.model;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ch.nerdin.esbuild.modal.EsBuildConfig.Loader.CSS;
-import static ch.nerdin.esbuild.modal.EsBuildConfig.Loader.FILE;
-import static ch.nerdin.esbuild.modal.EsBuildConfig.Loader.JS;
-import static ch.nerdin.esbuild.modal.EsBuildConfig.Loader.JSON;
-import static ch.nerdin.esbuild.modal.EsBuildConfig.Loader.JSX;
-import static ch.nerdin.esbuild.modal.EsBuildConfig.Loader.TS;
-import static ch.nerdin.esbuild.modal.EsBuildConfig.Loader.TSX;
+import static ch.nerdin.esbuild.model.EsBuildConfig.Loader.CSS;
+import static ch.nerdin.esbuild.model.EsBuildConfig.Loader.FILE;
+import static ch.nerdin.esbuild.model.EsBuildConfig.Loader.JS;
+import static ch.nerdin.esbuild.model.EsBuildConfig.Loader.JSON;
+import static ch.nerdin.esbuild.model.EsBuildConfig.Loader.JSX;
+import static ch.nerdin.esbuild.model.EsBuildConfig.Loader.TS;
+import static ch.nerdin.esbuild.model.EsBuildConfig.Loader.TSX;
 
 public class EsBuildConfigBuilder {
     private final EsBuildConfig esBuildConfig;
