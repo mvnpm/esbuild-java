@@ -4,18 +4,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>ch.nerdin</groupId>
+  <groupId>io.mvnpm</groupId>
   <artifactId>esbuild-java</artifactId>
   <name>esbuild wrapper for java</name>
-  <version>1.0.0-alpha15</version>
+  <version>1.0.0-alpha16</version>
   <packaging>jar</packaging>
   <description>Small wrapper around esbuild to be able to use it in java</description>
 
-  <url>https://github.com/edewit/esbuild-java/</url>
+  <url>https://github.com/mvnpm/esbuild-java/</url>
   <scm>
-    <connection>scm:git:git://github.com/edewit/esbuild-java.git</connection>
-    <developerConnection>scm:git:ssh://github.com:edewit/esbuild-java.git</developerConnection>
-    <url>http://github.com/edewit/esbuild-java/tree/master</url>
+    <connection>scm:git:git://github.com/mvnpm/esbuild-java.git</connection>
+    <developerConnection>scm:git:ssh://github.com:mvnpm/esbuild-java.git</developerConnection>
+    <url>http://github.com/mvnpm/esbuild-java/tree/main</url>
   </scm>
   <licenses>
     <license>
@@ -88,10 +88,14 @@
   <distributionManagement>
     <snapshotRepository>
       <id>ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
   </distributionManagement>
-
+  
   <build>
     <plugins>
       <plugin>
@@ -161,7 +165,7 @@
               <archive>
                 <manifest>
                   <mainClass>
-                    ch.nerdin.esbuild.Main
+                    io.mvnpm.esbuild.Main
                   </mainClass>
                 </manifest>
               </archive>
@@ -187,7 +191,7 @@
             <extensions>true</extensions>
             <configuration>
               <serverId>ossrh</serverId>
-              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+              <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
               <autoReleaseAfterClose>true</autoReleaseAfterClose>
             </configuration>
           </plugin>
