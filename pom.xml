@@ -37,37 +37,45 @@
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <esbuild.version>0.19.2</esbuild.version>
+    <quarkus.version>3.2.4.Final</quarkus.version>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-bom</artifactId>
+        <version>${quarkus.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-text</artifactId>
-      <version>1.10.0</version>
     </dependency>
 
     <dependency>
-      <groupId>org.json</groupId>
-      <artifactId>json</artifactId>
-      <version>20230227</version>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>org.rauschig</groupId>
-      <artifactId>jarchivelib</artifactId>
-      <version>1.2.0</version>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-compress</artifactId>
     </dependency>
 
     <dependency>
       <groupId>io.quarkus.qute</groupId>
       <artifactId>qute-core</artifactId>
-      <version>3.2.4.Final</version>
     </dependency>
 
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
-      <version>5.9.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

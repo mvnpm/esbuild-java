@@ -1,15 +1,22 @@
 package io.mvnpm.esbuild.resolve;
 
-import org.rauschig.jarchivelib.Archiver;
-import org.rauschig.jarchivelib.ArchiverFactory;
-
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.Arrays;
+import java.util.HashSet;
 
 import static java.util.Objects.requireNonNull;
+import java.util.Set;
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 
 public abstract class BaseResolver {
     public static final String EXECUTABLE_PATH = "package/bin/esbuild";
@@ -53,8 +60,46 @@ public abstract class BaseResolver {
     }
 
     static Path extract(InputStream archive, File destination) throws IOException {
-        Archiver archiver = ArchiverFactory.createArchiver("tar", "gz");
-        archiver.extract(archive, destination);
+        if (!destination.exists()) {
+            destination.mkdirs();
+        }
+        
+        try (GzipCompressorInputStream gzipIn = new GzipCompressorInputStream(archive);
+                TarArchiveInputStream tarIn = new TarArchiveInputStream(gzipIn)) {
+
+            ArchiveEntry entry;
+            while ((entry = tarIn.getNextEntry()) != null) {
+                if (!tarIn.canReadEntryData(entry)) {
+                    // Entry is a directory or symbolic link, skip it
+                    continue;
+                }
+
+                // Create a file for this entry in the output directory
+                File outputFile = new File(destination, entry.getName());
+                // Ensure that the parent directory exists
+                File parentDir = outputFile.getParentFile();
+                if (!parentDir.exists()) {
+                    parentDir.mkdirs();
+                }
+
+                // Create the output file with its original permissions
+                Files.createFile(outputFile.toPath());
+                
+                // Get the POSIX file permissions from the TarArchiveEntry
+                int mode = ((TarArchiveEntry) entry).getMode();
+                Set<PosixFilePermission> permissions = convertModeToPosixFilePermissions(mode);
+                Files.setPosixFilePermissions(outputFile.toPath(), permissions);
+                
+                try (OutputStream outputStream = new FileOutputStream(outputFile)) {
+                    byte[] buffer = new byte[4096];
+                    int bytesRead;
+                    while ((bytesRead = tarIn.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, bytesRead);
+                    }
+                }
+            }
+        }
+        
         return destination.toPath().resolve(EXECUTABLE_PATH);
     }
 
@@ -64,5 +109,45 @@ public abstract class BaseResolver {
 
     static Path getLocation(String version) {
         return Path.of(System.getProperty("java.io.tmpdir")).resolve("esbuild-" + version);
+    }
+    
+    // Helper method to convert Tar mode to PosixFilePermission
+    private static Set<PosixFilePermission> convertModeToPosixFilePermissions(int mode) {
+        Set<PosixFilePermission> permissions = new HashSet<>(Arrays.asList(PosixFilePermission.values()));
+
+        for (int i = 0; i < 9; i++) {
+            int mask = 1 << (8 - i);
+            if ((mode & mask) == 0) {
+                // Bit is not set, remove the permission
+                permissions.remove(getPermissionForIndex(i));
+            }
+        }
+
+        return permissions;
+    }
+    
+    private static PosixFilePermission getPermissionForIndex(int index) {
+        switch (index) {
+            case 0:
+                return PosixFilePermission.OWNER_READ;
+            case 1:
+                return PosixFilePermission.OWNER_WRITE;
+            case 2:
+                return PosixFilePermission.OWNER_EXECUTE;
+            case 3:
+                return PosixFilePermission.GROUP_READ;
+            case 4:
+                return PosixFilePermission.GROUP_WRITE;
+            case 5:
+                return PosixFilePermission.GROUP_EXECUTE;
+            case 6:
+                return PosixFilePermission.OTHERS_READ;
+            case 7:
+                return PosixFilePermission.OTHERS_WRITE;
+            case 8:
+                return PosixFilePermission.OTHERS_EXECUTE;
+            default:
+                throw new IllegalArgumentException("Invalid index: " + index);
+        }
     }
 }

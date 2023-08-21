@@ -1,10 +1,8 @@
 package io.mvnpm.esbuild.util;
 
-import org.json.JSONObject;
-import org.json.JSONTokener;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
@@ -17,6 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class PackageJson {
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final Logger logger = Logger.getLogger(PackageJson.class.getName());
     public static final String PACKAGE_JSON = "package.json";
 
@@ -46,12 +45,11 @@ public class PackageJson {
     }
 
     public static String readPackageName(Path packageJson) {
-        try (final InputStream packageStream = Files.newInputStream(packageJson)) {
-            final JSONTokener jsonTokener = new JSONTokener(packageStream);
-            final JSONObject object = new JSONObject(jsonTokener);
-            return object.getString("name");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        try {
+            JsonNode object = objectMapper.readTree(packageJson.toFile());
+            return object.get("name").asText();
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
     }
 }
