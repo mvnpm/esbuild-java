@@ -7,8 +7,6 @@ import io.mvnpm.esbuild.model.ExecuteResult;
 import io.mvnpm.esbuild.resolve.ExecutableResolver;
 import io.mvnpm.esbuild.util.PackageJson;
 import io.mvnpm.esbuild.util.UnZip;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,10 +18,11 @@ import java.util.Optional;
 import java.util.Properties;
 
 import static io.mvnpm.esbuild.util.Copy.deleteRecursive;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Bundler {
-    private static final Logger logger = LoggerFactory.getLogger(Bundler.class);
-
+    private static final Logger logger = Logger.getLogger(Bundler.class.getName());
     private static final String WEBJAR_PACKAGE_PREFIX = "META-INF/resources/webjars";
     private static final String MVNPM_PACKAGE_PREFIX = "META-INF/resources/_static";
     private static final String NODE_MODULES = "node_modules";
@@ -80,7 +79,7 @@ public class Bundler {
         Files.createDirectories(dist);
         esBuildConfig.setOutdir(dist.toString());
         final List<String> paths = bundleOptions.getEntries().stream().map(entry -> entry.process(workDir).toString()).toList();
-        esBuildConfig.setEntryPoint(paths.toArray(new String[0]));
+        esBuildConfig.setEntryPoint(paths.toArray(String[]::new));
         return esBuildConfig;
     }
 
@@ -138,10 +137,10 @@ public class Bundler {
                         Files.createDirectories(target.getParent());
                         Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
                     } else {
-                        logger.info("skipping package as it already exists '{}'", target);
+                        logger.log(Level.INFO, "skipping package as it already exists '{0}'", target);
                     }
                 } else {
-                    logger.info("package.json not found in package '{}'", fileName);
+                    logger.log(Level.INFO,"package.json not found in package '{0}'", fileName);
                 }
             }
         }

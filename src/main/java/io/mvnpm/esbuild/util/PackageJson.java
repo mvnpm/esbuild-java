@@ -1,12 +1,8 @@
 package io.mvnpm.esbuild.util;
 
-import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
@@ -15,10 +11,12 @@ import java.util.Queue;
 import java.util.stream.Stream;
 
 import static java.util.function.Predicate.not;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PackageJson {
-
-    private static final Logger logger = LoggerFactory.getLogger(PackageJson.class);
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final Logger logger = Logger.getLogger(PackageJson.class.getName());
     public static final String PACKAGE_JSON = "package.json";
 
     public static Optional<Path> findPackageJson(Path dir) {
@@ -34,7 +32,7 @@ public class PackageJson {
         while (!queue.isEmpty()) {
             Path current = queue.poll();
             if (Files.isRegularFile(current.resolve(PACKAGE_JSON))) {
-                logger.debug("package.json found in {}", current);
+                logger.log(Level.FINEST, "package.json found in {0}", current);
                 return Optional.of(current.resolve(PACKAGE_JSON));
             }
             try (final Stream<Path> list = Files.list(current)) {
@@ -47,12 +45,11 @@ public class PackageJson {
     }
 
     public static String readPackageName(Path packageJson) {
-        try (final InputStream packageStream = Files.newInputStream(packageJson)) {
-            final JSONTokener jsonTokener = new JSONTokener(packageStream);
-            final JSONObject object = new JSONObject(jsonTokener);
-            return object.getString("name");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        try {
+            JsonNode object = objectMapper.readTree(packageJson.toFile());
+            return object.get("name").asText();
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
     }
 }

@@ -2,8 +2,6 @@ package io.mvnpm.esbuild;
 
 import io.mvnpm.esbuild.model.EsBuildConfig;
 import io.mvnpm.esbuild.model.ExecuteResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -19,6 +17,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Execute {
 
@@ -27,7 +27,7 @@ public class Execute {
         t.setDaemon(true);
         return t;
     });
-    private static final Logger logger = LoggerFactory.getLogger(Execute.class);
+    private static final Logger logger = Logger.getLogger(Execute.class.getName());
 
     private final File esBuildExec;
     private EsBuildConfig esBuildConfig;
@@ -65,8 +65,8 @@ public class Execute {
 
     private String[] getCommand() {
         String[] command = args != null ? getCommand(args) : getCommand(esBuildConfig);
-        if (logger.isDebugEnabled()) {
-            logger.debug("running esbuild with flags: `{}`.", String.join(" ", command));
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, "running esbuild with flags: `{0}`.", String.join(" ", command));
         }
         return command;
     }
@@ -81,7 +81,7 @@ public class Execute {
         argList.add(esBuildExec.toString());
         argList.addAll(Arrays.asList(args));
 
-        return argList.toArray(new String[0]);
+        return argList.toArray(String[]::new);
     }
 
     public Process createProcess(final String[] command, final Optional<BuildEventListener> listener) throws IOException {
@@ -100,7 +100,7 @@ public class Execute {
         public void run() {
             final StringBuilder errorBuilder = new StringBuilder();
             consumeStream(isAlive, processStream, l -> {
-                logger.debug(l);
+                logger.finest(l);
                 if (l.contains("[ERROR]") || !errorBuilder.isEmpty()) {
                     errorBuilder.append("\n").append(l);
                 } else if (l.contains("build finished")) {
