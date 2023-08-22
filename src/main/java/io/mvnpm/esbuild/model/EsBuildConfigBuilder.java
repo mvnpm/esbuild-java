@@ -134,6 +134,11 @@ public class EsBuildConfigBuilder {
         return this;
     }
 
+    public EsBuildConfigBuilder addExternal(String name) {
+        esBuildConfig.addExternal(name);
+        return this;
+    }
+
     public EsBuildConfigBuilder target(EsBuildConfig.Target target) {
         esBuildConfig.setTarget(target);
         return this;
