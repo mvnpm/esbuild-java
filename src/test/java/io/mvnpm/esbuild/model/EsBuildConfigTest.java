@@ -2,6 +2,7 @@ package io.mvnpm.esbuild.model;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -50,6 +51,20 @@ public class EsBuildConfigTest {
                 "--loader:.ts=ts", "--loader:.png=file", "--loader:.ttf=file", "--loader:.woff2=file", "--loader:.jsx=jsx",
                 "--loader:.js=js", "--loader:.woff=file", "--loader:.tsx=tsx", "--outdir=/tmp", "--sourcemap",
                 "--splitting", "--entry-names=[name]-[hash]"}, params);
+    }
+
+    @Test
+    public void shouldExternal() {
+        // given
+        final EsBuildConfig esBuildConfig = new EsBuildConfig();
+        esBuildConfig.addExternal("*.png");
+        esBuildConfig.addExternal("/images/*");
+
+        // when
+        final String[] params = esBuildConfig.toParams();
+
+        // then
+        assertArrayEquals(new String[] {"--external:*.png", "--external:/images/*"}, params);
     }
 
     @Test

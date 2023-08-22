@@ -62,6 +62,7 @@ public class EsBuildConfig {
 
     private String entryNames;
 
+    private final List<String> external = new ArrayList<>();
 
     public boolean isBundle() {
         return bundle;
@@ -207,6 +208,14 @@ public class EsBuildConfig {
         this.entryNames = entryNames;
     }
 
+    public List<String> getExternal() {
+        return external;
+    }
+
+    public void addExternal(String name) {
+        external.add(name);
+    }
+
     public String[] toParams() {
         final Field[] fields = EsBuildConfig.class.getDeclaredFields();
         List<String> result = new ArrayList<>(fields.length);
@@ -218,6 +227,8 @@ public class EsBuildConfig {
                     final String fieldName = field.getName();
                     if (value == Boolean.TRUE) {
                         result.add("--" + fieldName.toLowerCase());
+                    } else if (value instanceof List) {
+                        ((List<?>) value).forEach(e -> result.add("--%s:%s".formatted(convertField(fieldName), e.toString())));
                     } else if (value instanceof Map) {
                         result.addAll(mapToString(fieldName, (Map<?, ?>) value));
                     } else if ("entryPoint".equals(field.getName())) {
