@@ -29,7 +29,7 @@ public class EsBuildConfig {
     private Format format;
 
     public enum Loader {
-        BASE64, BINARY, COPY, CSS, DATAURL,
+        BASE64, BINARY, COPY, CSS, DATAURL, LOCAL_CSS,
         EMPTY, FILE, JS, JSON, JSX, TEXT, TS, TSX
     }
 
@@ -78,6 +78,7 @@ public class EsBuildConfig {
     public void setEntryPoint(String[] entryPoint) {
         this.entryPoint = entryPoint;
     }
+
     public boolean isMinify() {
         return minify;
     }
@@ -189,6 +190,7 @@ public class EsBuildConfig {
     public void setWatch(boolean watch) {
         this.watch = watch ? "forever" : null;
     }
+
     public String getChunkNames() {
         return chunkNames;
     }
@@ -221,13 +223,7 @@ public class EsBuildConfig {
                     } else if ("entryPoint".equals(field.getName())) {
                         result.addAll(List.of((String[]) value));
                     } else if (!(value instanceof Boolean)) {
-                        String fn = convertField(fieldName);
-                        String v = value.toString();
-                        if(!fn.equals("outdir")){ 
-                            v = v.toLowerCase();
-                        }
-                        result.add("--%s=%s".formatted(fn, v));
-                        
+                        result.add("--%s=%s".formatted(convertField(fieldName), value));
                     }
                 }
             } catch (IllegalAccessException e) {
@@ -246,7 +242,7 @@ public class EsBuildConfig {
     private static List<String> mapToString(String fieldName, Map<?, ?> map) {
         List<String> result = new ArrayList<>(map.size());
         for (Map.Entry<?, ?> entry : map.entrySet()) {
-            result.add("--%s:%s=%s".formatted(fieldName, entry.getKey(), entry.getValue().toString().toLowerCase()));
+            result.add("--%s:%s=%s".formatted(fieldName, entry.getKey(), entry.getValue().toString().toLowerCase().replaceAll("_", "-")));
         }
 
         return result;
