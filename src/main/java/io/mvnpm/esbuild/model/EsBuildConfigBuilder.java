@@ -26,6 +26,7 @@ public class EsBuildConfigBuilder {
                 .sourceMap()
                 .splitting()
                 .entryNames("[name]-[hash]")
+                .assetNames("assets/[name]-[hash]")
                 .format(EsBuildConfig.Format.ESM)
                 .loader(getDefaultLoadersMap());
     }
@@ -156,6 +157,11 @@ public class EsBuildConfigBuilder {
 
     public EsBuildConfigBuilder entryNames(String template) {
         esBuildConfig.setEntryNames(template);
+        return this;
+    }
+
+    public EsBuildConfigBuilder assetNames(String assetNames) {
+        esBuildConfig.setAssetNames(assetNames);
         return this;
     }
 

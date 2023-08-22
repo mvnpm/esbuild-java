@@ -62,6 +62,8 @@ public class EsBuildConfig {
 
     private String entryNames;
 
+    private String assetNames;
+
     private final List<String> external = new ArrayList<>();
 
     public boolean isBundle() {
@@ -206,6 +208,14 @@ public class EsBuildConfig {
 
     public void setEntryNames(String entryNames) {
         this.entryNames = entryNames;
+    }
+
+    public String getAssetNames() {
+        return assetNames;
+    }
+
+    public void setAssetNames(String assetNames) {
+        this.assetNames = assetNames;
     }
 
     public List<String> getExternal() {
