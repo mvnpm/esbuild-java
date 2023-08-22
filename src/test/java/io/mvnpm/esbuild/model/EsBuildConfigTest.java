@@ -27,13 +27,13 @@ public class EsBuildConfigTest {
     public void shouldOutputLoaderFlags() {
         // given
         final EsBuildConfig esBuildConfig = new EsBuildConfig();
-        esBuildConfig.setLoader(Map.of(".js", EsBuildConfig.Loader.JSX));
+        esBuildConfig.setLoader(Map.of(".js", EsBuildConfig.Loader.JSX, ".css", EsBuildConfig.Loader.LOCAL_CSS));
 
         // when
         final String[] params = esBuildConfig.toParams();
 
         // then
-        assertArrayEquals(new String[]{"--loader:.js=jsx"}, params);
+        assertArrayEquals(new String[]{"--loader:.js=jsx", "--loader:.css=local-css"}, params);
     }
 
     @Test
