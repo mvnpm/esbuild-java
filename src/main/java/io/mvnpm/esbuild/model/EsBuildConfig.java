@@ -29,7 +29,7 @@ public class EsBuildConfig {
     private Format format;
 
     public enum Loader {
-        BASE64, BINARY, COPY, CSS, DATAURL, LOCAL_CSS,
+        BASE64, BINARY, COPY, CSS, DATAURL, LOCAL_CSS, GLOBAL_CSS,
         EMPTY, FILE, JS, JSON, JSX, TEXT, TS, TSX
     }
 
