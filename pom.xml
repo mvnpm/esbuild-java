@@ -7,8 +7,8 @@
   <groupId>io.mvnpm</groupId>
   <artifactId>esbuild-java</artifactId>
   <name>esbuild wrapper for java</name>
-  <version>1.0.1-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <version>1.0.1</version>
+  
   <description>Small wrapper around esbuild to be able to use it in java</description>
 
   <url>https://github.com/mvnpm/esbuild-java/</url>
@@ -95,7 +95,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.0</version>
+        <version>3.1.2</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -127,7 +127,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>properties-maven-plugin</artifactId>
-        <version>1.0.0</version>
+        <version>1.2.0</version>
         <executions>
           <execution>
             <phase>generate-resources</phase>
@@ -186,7 +186,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
-            <version>2.2.1</version>
+            <version>3.3.0</version>
             <executions>
               <execution>
                 <id>attach-sources</id>
@@ -199,7 +199,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.1.1</version>
+            <version>3.5.0</version>
             <executions>
               <execution>
                 <id>attach-javadocs</id>
@@ -212,7 +212,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.0.1</version>
+            <version>3.1.0</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>

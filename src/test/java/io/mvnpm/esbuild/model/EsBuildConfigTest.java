@@ -50,7 +50,7 @@ public class EsBuildConfigTest {
                 "--loader:.gif=file", "--loader:.css=css", "--loader:.jpg=file", "--loader:.eot=file", "--loader:.json=json",
                 "--loader:.ts=ts", "--loader:.png=file", "--loader:.ttf=file", "--loader:.woff2=file", "--loader:.jsx=jsx",
                 "--loader:.js=js", "--loader:.woff=file", "--loader:.tsx=tsx", "--outdir=/tmp", "--sourcemap",
-                "--splitting", "--entry-names=[name]-[hash]"}, params);
+                "--splitting", "--entry-names=[name]-[hash]", "--asset-names=assets/[name]-[hash]"}, params);
     }
 
     @Test
