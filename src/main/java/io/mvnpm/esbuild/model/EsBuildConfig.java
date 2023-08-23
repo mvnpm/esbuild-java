@@ -244,7 +244,12 @@ public class EsBuildConfig {
                     } else if ("entryPoint".equals(field.getName())) {
                         result.addAll(List.of((String[]) value));
                     } else if (!(value instanceof Boolean)) {
-                        result.add("--%s=%s".formatted(convertField(fieldName), value));
+                        String fn = convertField(fieldName);
+                        String v = value.toString();
+                        if(!fn.equals("outdir")){ 
+                            v = v.toLowerCase();
+                        }
+                        result.add("--%s=%s".formatted(fn, v));
                     }
                 }
             } catch (IllegalAccessException e) {
