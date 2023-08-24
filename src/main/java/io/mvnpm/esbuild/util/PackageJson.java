@@ -32,7 +32,7 @@ public class PackageJson {
         while (!queue.isEmpty()) {
             Path current = queue.poll();
             if (Files.isRegularFile(current.resolve(PACKAGE_JSON))) {
-                logger.log(Level.FINEST, "package.json found in {0}", current);
+                logger.log(Level.FINE, "package.json found in ''{0}''", current);
                 return Optional.of(current.resolve(PACKAGE_JSON));
             }
             try (final Stream<Path> list = Files.list(current)) {

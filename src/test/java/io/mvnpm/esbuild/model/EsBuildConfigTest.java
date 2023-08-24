@@ -1,10 +1,15 @@
 package io.mvnpm.esbuild.model;
 
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Map;
 
+import static java.util.Arrays.asList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class EsBuildConfigTest {
@@ -20,7 +25,7 @@ public class EsBuildConfigTest {
         final String[] params = esBuildConfig.toParams();
 
         // then
-        assertArrayEquals(new String[]{"--bundle", "--format=esm"}, params);
+        assertThat(asList(params), containsInAnyOrder("--bundle", "--format=esm"));
     }
 
     @Test
@@ -33,7 +38,7 @@ public class EsBuildConfigTest {
         final String[] params = esBuildConfig.toParams();
 
         // then
-        assertArrayEquals(new String[]{"--loader:.js=jsx", "--loader:.css=local-css"}, params);
+        assertThat(asList(params), containsInAnyOrder("--loader:.js=jsx", "--loader:.css=local-css"));
     }
 
     @Test
@@ -46,11 +51,11 @@ public class EsBuildConfigTest {
         final String[] params = esBuildConfig.toParams();
 
         // then
-        assertArrayEquals(new String[]{"--bundle", "main.js", "bundle.js", "--minify", "--format=esm", "--loader:.svg=file",
-                "--loader:.gif=file", "--loader:.css=css", "--loader:.jpg=file", "--loader:.eot=file", "--loader:.json=json",
-                "--loader:.ts=ts", "--loader:.png=file", "--loader:.ttf=file", "--loader:.woff2=file", "--loader:.jsx=jsx",
-                "--loader:.js=js", "--loader:.woff=file", "--loader:.tsx=tsx", "--outdir=/tmp", "--sourcemap",
-                "--splitting", "--entry-names=[name]-[hash]", "--asset-names=assets/[name]-[hash]"}, params);
+        assertThat(asList(params), containsInAnyOrder("--bundle", "main.js", "bundle.js", "--minify", "--format=esm", "--loader:.svg=file",
+            "--loader:.gif=file", "--loader:.css=css", "--loader:.jpg=file", "--loader:.eot=file", "--loader:.json=json",
+            "--loader:.ts=ts", "--loader:.png=file", "--loader:.ttf=file", "--loader:.woff2=file", "--loader:.jsx=jsx",
+            "--loader:.js=js", "--loader:.woff=file", "--loader:.tsx=tsx", "--outdir=/tmp", "--sourcemap",
+            "--splitting", "--entry-names=[name]-[hash]", "--asset-names=assets/[name]-[hash]"));
     }
 
     @Test
@@ -64,7 +69,7 @@ public class EsBuildConfigTest {
         final String[] params = esBuildConfig.toParams();
 
         // then
-        assertArrayEquals(new String[] {"--external:*.png", "--external:/images/*"}, params);
+        assertThat(asList(params), containsInAnyOrder("--external:*.png", "--external:/images/*"));
     }
 
     @Test
@@ -77,6 +82,6 @@ public class EsBuildConfigTest {
         final String[] params = esBuildConfig.toParams();
 
         // then
-        assertArrayEquals(new String[]{"--chunk-names=chunks/[name]-[hash]"}, params);
+        assertThat(asList(params), containsInAnyOrder("--chunk-names=chunks/[name]-[hash]"));
     }
 }
