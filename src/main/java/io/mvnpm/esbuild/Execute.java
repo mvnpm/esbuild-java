@@ -65,8 +65,8 @@ public class Execute {
 
     private String[] getCommand() {
         String[] command = args != null ? getCommand(args) : getCommand(esBuildConfig);
-        if (logger.isLoggable(Level.FINEST)) {
-            logger.log(Level.FINEST, "running esbuild with flags: `{0}`.", String.join(" ", command));
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, "running esbuild with flags: \n > `{0}`", String.join(" ", command));
         }
         return command;
     }
@@ -100,7 +100,7 @@ public class Execute {
         public void run() {
             final StringBuilder errorBuilder = new StringBuilder();
             consumeStream(isAlive, processStream, l -> {
-                logger.finest(l);
+                logger.fine(l);
                 if (l.contains("[ERROR]") || !errorBuilder.isEmpty()) {
                     errorBuilder.append("\n").append(l);
                 } else if (l.contains("build finished")) {

@@ -137,10 +137,10 @@ public class Bundler {
                         Files.createDirectories(target.getParent());
                         Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
                     } else {
-                        logger.log(Level.INFO, "skipping package as it already exists '{0}'", target);
+                        logger.log(Level.INFO, "skipping package as it already exists ''{0}''", target);
                     }
                 } else {
-                    logger.log(Level.INFO,"package.json not found in package '{0}'", fileName);
+                    logger.log(Level.INFO,"package.json not found in package: ''{0}''", fileName);
                 }
             }
         }
