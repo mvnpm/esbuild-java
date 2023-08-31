@@ -5,7 +5,7 @@ import io.mvnpm.esbuild.model.BundleResult;
 import io.mvnpm.esbuild.model.EsBuildConfig;
 import io.mvnpm.esbuild.model.ExecuteResult;
 import io.mvnpm.esbuild.resolve.ExecutableResolver;
-import io.mvnpm.esbuild.util.PackageJson;
+import io.mvnpm.esbuild.util.JarInspector;
 import io.mvnpm.esbuild.util.UnZip;
 
 import java.io.IOException;
@@ -14,10 +14,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.Optional;
 import java.util.Properties;
 
 import static io.mvnpm.esbuild.util.Copy.deleteRecursive;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,8 +25,10 @@ public class Bundler {
     private static final Logger logger = Logger.getLogger(Bundler.class.getName());
     private static final String WEBJAR_PACKAGE_PREFIX = "META-INF/resources/webjars";
     private static final String MVNPM_PACKAGE_PREFIX = "META-INF/resources/_static";
+    private static final String MAVEN_ROOT = "META-INF/maven";
     private static final String NODE_MODULES = "node_modules";
     private static final String DIST = "dist";
+    private static final List<String> MULTIPLE_GROUP_IDS = List.of("org.mvnpm.at.mvnpm"); // Group Ids that can contain multiple package.jsons TODO: Allow this to be configured
     private static String VERSION;
 
     public enum BundleType {
@@ -125,19 +127,21 @@ public class Bundler {
             // Only extract new dependencies
             if (!Files.isDirectory(extractDir)) {
                 UnZip.unzip(path, extractDir);
-                final Optional<Path> packageJson = switch (type) {
-                    case MVNPM -> PackageJson.findPackageJson(extractDir.resolve(MVNPM_PACKAGE_PREFIX));
-                    case WEBJARS -> PackageJson.findPackageJson(extractDir.resolve(WEBJAR_PACKAGE_PREFIX));
+                final List<Path> packageJsons = switch (type) {
+                    case MVNPM -> JarInspector.findPackageJsons(extractDir.resolve(MVNPM_PACKAGE_PREFIX), isComposite(extractDir));
+                    case WEBJARS -> JarInspector.findPackageJsons(extractDir.resolve(WEBJAR_PACKAGE_PREFIX), false);
                 };
-                if(packageJson.isPresent()) {
-                    final String packageName = PackageJson.readPackageName(packageJson.get());
-                    final Path source = packageJson.get().getParent();
-                    final Path target = nodeModules.resolve(packageName);
-                    if (!Files.isDirectory(target)) {
-                        Files.createDirectories(target.getParent());
-                        Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
-                    } else {
-                        logger.log(Level.INFO, "skipping package as it already exists ''{0}''", target);
+                if(!packageJsons.isEmpty()) {
+                    for(Path packageJson: packageJsons){
+                        final String packageName = JarInspector.readPackageName(packageJson);
+                        final Path source = packageJson.getParent();
+                        final Path target = nodeModules.resolve(packageName);
+                        if (!Files.isDirectory(target)) {
+                            Files.createDirectories(target.getParent());
+                            Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+                        } else {
+                            logger.log(Level.INFO, "skipping package as it already exists ''{0}''", target);
+                        }
                     }
                 } else {
                     logger.log(Level.INFO,"package.json not found in package: ''{0}''", fileName);
@@ -159,6 +163,29 @@ public class Bundler {
         return execute.executeAndWait();
     }
 
+    private static boolean isComposite(Path extractDir){
+        return MULTIPLE_GROUP_IDS.contains(getGroupId(extractDir));
+    }
+    
+    private static String getGroupId(Path extractDir){
+        Properties p = getPomProperties(extractDir);
+        return p.getProperty("groupId", "");
+    }
+    
+    private static Properties getPomProperties(Path extractDir){
+        Properties p  = new Properties();
+        Optional<Path> maybePomProperties = JarInspector.findPomProperties(extractDir.resolve(MAVEN_ROOT));
+        if(maybePomProperties.isPresent()){
+            Path pomProperties = maybePomProperties.get();
+            try {
+                p.load(Files.newInputStream(pomProperties));
+            } catch (IOException ex) {
+                logger.log(Level.WARNING, "could not read properties ''{0}''", pomProperties);
+            }
+        }
+        return p;
+    }
+    
 }
 
 
