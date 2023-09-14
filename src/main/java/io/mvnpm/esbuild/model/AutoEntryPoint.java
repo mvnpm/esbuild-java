@@ -13,7 +13,7 @@ import java.io.StringWriter;
 import java.io.UncheckedIOException;
 
 public class AutoEntryPoint implements EntryPoint {
-    private static final Set<String> SCRIPTS = Set.of("js", "ts", "jsx", "tsx");
+    private static final Set<String> SCRIPTS = Set.of("js", "ts", "jsx", "tsx", "mjs", "mts", "cjs", "cts");
     private final String name;
     private final Path rootDir;
     private final List<String> scripts;
