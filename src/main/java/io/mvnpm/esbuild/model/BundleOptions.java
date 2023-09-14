@@ -1,7 +1,5 @@
 package io.mvnpm.esbuild.model;
 
-import io.mvnpm.esbuild.Bundler;
-
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +10,7 @@ public class BundleOptions {
 
     private List<Path> dependencies = new ArrayList<>();
 
-    private Bundler.BundleType type;
+    private BundleType type;
 
     private EsBuildConfig esBuildConfig;
 
@@ -34,11 +32,11 @@ public class BundleOptions {
         this.dependencies = dependencies;
     }
 
-    public Bundler.BundleType getType() {
+    public BundleType getType() {
         return type;
     }
 
-    public void setType(Bundler.BundleType type) {
+    public void setType(BundleType type) {
         this.type = type;
     }
 

@@ -32,8 +32,7 @@ public class AutoEntryPointTest {
         assertEquals("""
                 import * as script1 from "./script1";
                 import * as script2test from "./script2-test";
-                import * as sub from "./sub/sub";
-                """, entryContents);
+                import * as sub from "./sub/sub";""", entryContents);
     }
 
     @Test
@@ -47,7 +46,7 @@ public class AutoEntryPointTest {
         String entryContents = readEntry(entry, tempDirectory);
 
         // then
-        assertEquals("import \"./style.css\";\n", entryContents);
+        assertEquals("import \"./style.css\";", entryContents);
     }
 
     private Path getRootScriptsDir() throws URISyntaxException {

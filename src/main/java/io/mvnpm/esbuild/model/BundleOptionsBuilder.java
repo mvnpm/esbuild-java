@@ -1,7 +1,5 @@
 package io.mvnpm.esbuild.model;
 
-import io.mvnpm.esbuild.Bundler;
-
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +43,7 @@ public class BundleOptionsBuilder {
         return this;
     }
 
-    public BundleOptionsBuilder withType(Bundler.BundleType type) {
+    public BundleOptionsBuilder withType(BundleType type) {
         this.options.setType(type);
         return this;
     }
