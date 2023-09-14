@@ -73,13 +73,7 @@
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-compress</artifactId>
     </dependency>
-    
-    <!-- TODO: We can problaby drop this dependency -->
-    <dependency>
-      <groupId>io.quarkus.qute</groupId>
-      <artifactId>qute-core</artifactId>
-    </dependency>
-
+   
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
