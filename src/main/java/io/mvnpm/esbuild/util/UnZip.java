@@ -17,7 +17,7 @@ public class UnZip {
             ZipEntry zipEntry = zis.getNextEntry();
 
             while (zipEntry != null) {
-                boolean isDirectory = zipEntry.getName().endsWith(File.separator);
+                boolean isDirectory = zipEntry.isDirectory();
 
                 Path newPath = zipSlipProtect(zipEntry, target);
 

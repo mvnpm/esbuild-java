@@ -12,8 +12,9 @@ public class CacheResolver extends BaseResolver implements Resolver {
     @Override
     public Path resolve(String version) throws IOException {
         final Path path = getLocation(version);
-        if (Files.isRegularFile(path.resolve(EXECUTABLE_PATH))) {
-            return path.resolve(EXECUTABLE_PATH);
+        final Path executable = path.resolve(executablePath());
+        if (Files.isExecutable(executable)) {
+            return executable;
         }
         return resolver.resolve(version);
     }
