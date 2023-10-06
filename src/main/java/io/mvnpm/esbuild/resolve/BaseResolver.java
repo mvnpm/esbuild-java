@@ -19,12 +19,21 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 
 public abstract class BaseResolver {
-    public static final String EXECUTABLE_PATH = "package/bin/esbuild";
+    private static final String EXECUTABLE_PATH = "package/bin/esbuild";
+    private static final String WINDOWS_EXE_PATH = "package/esbuild.exe";
 
     protected Resolver resolver;
 
     public BaseResolver(Resolver resolver) {
         this.resolver = requireNonNull(resolver, "resolver is required");
+    }
+
+    public static String executablePath() {
+        final String osName = System.getProperty("os.name").toLowerCase();
+        if (osName.contains("win")) {
+            return WINDOWS_EXE_PATH;
+        }
+        return EXECUTABLE_PATH;
     }
 
     static String determineClassifier() {
@@ -88,7 +97,11 @@ public abstract class BaseResolver {
                 // Get the POSIX file permissions from the TarArchiveEntry
                 int mode = ((TarArchiveEntry) entry).getMode();
                 Set<PosixFilePermission> permissions = convertModeToPosixFilePermissions(mode);
-                Files.setPosixFilePermissions(outputFile.toPath(), permissions);
+                try {
+                    Files.setPosixFilePermissions(outputFile.toPath(), permissions);
+                } catch(UnsupportedOperationException e) { 
+                    // ignore we are on a platform that doesn't support this
+                }
                 
                 try (OutputStream outputStream = new FileOutputStream(outputFile)) {
                     byte[] buffer = new byte[4096];
@@ -100,7 +113,7 @@ public abstract class BaseResolver {
             }
         }
         
-        return destination.toPath().resolve(EXECUTABLE_PATH);
+        return destination.toPath().resolve(executablePath());
     }
 
     static Path createDestination(String version) throws IOException {

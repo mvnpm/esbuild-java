@@ -6,14 +6,17 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Set;
 
-import static io.mvnpm.esbuild.resolve.BaseResolver.EXECUTABLE_PATH;
+import static io.mvnpm.esbuild.resolve.BaseResolver.executablePath;
 import static io.mvnpm.esbuild.resolve.BundleResolverTest.THROWING_RESOLVER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CacheResolverTest extends BundleTester {
-
 
 
     @AfterAll
@@ -54,9 +57,10 @@ public class CacheResolverTest extends BundleTester {
 
     private Path createEsBuildBinary(String version) throws IOException {
         final Path destination = BaseResolver.createDestination(version);
-        final Path exec = destination.resolve(EXECUTABLE_PATH);
+        final Path exec = destination.resolve(executablePath());
         Files.createDirectories(exec.getParent());
         Files.writeString(exec, "hello");
+        exec.toFile().setExecutable(true, true);
         return exec;
     }
 }

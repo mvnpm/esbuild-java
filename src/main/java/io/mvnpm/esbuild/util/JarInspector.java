@@ -9,6 +9,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -25,73 +26,76 @@ public class JarInspector {
     private static final Logger logger = Logger.getLogger(JarInspector.class.getName());
     public static final String PACKAGE_JSON = "package.json";
     public static final String IMPORTMAP_JSON = "importmap.json";
-    
+
     public static final String POM_PROPERTIES = "pom.properties";
     private static final String MAVEN_ROOT = "META-INF/maven";
     private static final String WEBJAR_PACKAGE_PREFIX = "META-INF/resources/webjars";
     private static final String MVNPM_PACKAGE_PREFIX = "META-INF/resources/_static";
-    private static final List<String> MULTIPLE_GROUP_IDS = List.of("org.mvnpm.at.mvnpm"); // Group Ids that can contain multiple package.jsons TODO: Allow this to be configured
-    
+    private static final List<String> MULTIPLE_GROUP_IDS = List.of("org.mvnpm.at.mvnpm"); // Group Ids that can contain
+                                                                                          // multiple package.jsons
+                                                                                          // TODO: Allow this to be
+                                                                                          // configured
+
     public static Map<String, Path> findPackageNameAndRoot(Path extractDir, BundleType type) {
-        
+
         Path dir = getBundleTypeRootPath(extractDir, type);
-        
+
         if (!Files.isDirectory(dir)) {
             return Map.of();
         }
-        
-        Properties properties  = getProperties(extractDir, type);
+
+        Properties properties = getProperties(extractDir, type);
         String groupId = properties.getProperty("groupId", "");
         boolean shouldDoMultiple = MULTIPLE_GROUP_IDS.contains(groupId);
-        
+
         // First try package.json
         Map<String, Path> found = findPackageNameAndRootWithPackage(dir, shouldDoMultiple);
-        
+
         // If this is mvnpm and we could not find package.json we can try another way
-        if(found.isEmpty() && type.equals(BundleType.MVNPM)){
+        if (found.isEmpty() && type.equals(BundleType.MVNPM)) {
             found = findPackageNameAndRootWithImportMap(extractDir, properties);
         }
-        
+
         return found;
     }
 
-    private static Path getBundleTypeRootPath(Path extractDir, BundleType type){
-        if(type.equals(BundleType.MVNPM)) {
+    private static Path getBundleTypeRootPath(Path extractDir, BundleType type) {
+        if (type.equals(BundleType.MVNPM)) {
             return extractDir.resolve(MVNPM_PACKAGE_PREFIX);
-        }else if(type.equals(BundleType.WEBJARS)) {
+        } else if (type.equals(BundleType.WEBJARS)) {
             return extractDir.resolve(WEBJAR_PACKAGE_PREFIX);
         }
         throw new RuntimeException("Unknown Bundle Type " + type);
     }
-    
-    private static Properties getProperties(Path extractDir, BundleType type){
-        Properties properties  = new Properties();
-        
-        if(type.equals(BundleType.MVNPM)) { // Only mvnpm support composite
+
+    private static Properties getProperties(Path extractDir, BundleType type) {
+        Properties properties = new Properties();
+
+        if (type.equals(BundleType.MVNPM)) { // Only mvnpm support composite
             properties = getPomProperties(extractDir);
         }
-        
+
         return properties;
     }
-    
+
     private static Map<String, Path> findPackageNameAndRootWithPackage(Path root, boolean shouldDoMultiple) {
         Map<String, Path> paths = new HashMap<>();
-        
+
         List<Path> foundFiles = searchFiles(root, PACKAGE_JSON, shouldDoMultiple);
-        for(Path path:foundFiles){
+        for (Path path : foundFiles) {
             String packageName = readPackageName(path);
             paths.putIfAbsent(packageName, path.getParent());
         }
-        
+
         return paths;
     }
 
     private static Map<String, Path> findPackageNameAndRootWithImportMap(Path root, Properties properties) {
         Optional<Path> importMapJson = searchFile(root, IMPORTMAP_JSON);
-        if(importMapJson.isPresent()){
+        if (importMapJson.isPresent()) {
             try {
                 Path importMap = importMapJson.get();
-                String json = new String (Files.readAllBytes(importMap));
+                String json = new String(Files.readAllBytes(importMap));
                 Map<String, String> imports = ImportsDataBinding.toImports(json).getImports();
                 // Find the first directory one
                 String packageName = readPackageName(properties);
@@ -99,53 +103,54 @@ public class JarInspector {
                 String version = properties.getProperty("version");
                 Path fullExtractedRoot = null;
                 String fullExtractedMain = null;
-                for(Map.Entry<String, String> ie: imports.entrySet()){
-                    if(ie.getKey().endsWith("/") && fullExtractedRoot==null){
+                for (Map.Entry<String, String> ie : imports.entrySet()) {
+                    if (ie.getKey().endsWith("/") && fullExtractedRoot == null) {
                         Path resources = importMap.getParent().resolve("resources");
                         Path packageRoot = Path.of(resources.toString(), toRelativeDir(ie.getValue(), artifactId));
                         fullExtractedRoot = root.resolve(packageRoot);
-                    }else if(fullExtractedMain==null){
+                    } else if (fullExtractedMain == null) {
                         fullExtractedMain = ie.getValue();
                     }
                 }
-                
-                String main = toRelativeMain(fullExtractedRoot.toString(),fullExtractedMain);
+
+                String main = toRelativeMain(fullExtractedRoot.toString(), fullExtractedMain);
                 PackageJsonCreator.createPackageJson(fullExtractedRoot, packageName, version, main);
                 return Map.of(packageName, fullExtractedRoot);
             } catch (IOException ex) {
                 throw new UncheckedIOException(ex);
             }
         }
-        
+
         return Map.of();
     }
-    
-    private static String toRelativeDir(String path, String artifactId){
-        if(!path.endsWith(artifactId +"/")){ // Could be in a sub folder
-            path = path.substring(0, path.indexOf(artifactId) + artifactId.length()+1);
+
+    private static String toRelativeDir(String path, String artifactId) {
+        if (!path.endsWith(artifactId + "/")) { // Could be in a sub folder
+            path = path.substring(0, path.indexOf(artifactId) + artifactId.length() + 1);
         }
         return path;
     }
-    
-    private static String toRelativeMain(String root, String main){
+
+    private static String toRelativeMain(String root, String main) {
         root = root.substring(root.indexOf("_static"));
-        main = main.split(root)[1];
-        if(main.startsWith("/"))main = main.substring(1);
-        return main;
+        Path rootPath = Paths.get(root);
+        if (main.startsWith("/"))
+            main = main.substring(1);
+        return rootPath.relativize(Paths.get(main)).toString();
     }
-    
-    private static String readPackageName(Properties properties){
+
+    private static String readPackageName(Properties properties) {
         String groupId = properties.getProperty("groupId");
-        if(groupId.equals("org.mvnpm")){
+        if (groupId.equals("org.mvnpm")) {
             groupId = "";
-        }else {
+        } else {
             groupId = groupId.substring(10); // Cut out org.mvnpm
             groupId = groupId.replaceFirst("at.", "@");
             groupId = groupId + "/";
         }
         return groupId + properties.getProperty("artifactId");
     }
-    
+
     private static String readPackageName(Path path) {
         try {
             JsonNode object = objectMapper.readTree(path.toFile());
@@ -154,15 +159,14 @@ public class JarInspector {
             throw new UncheckedIOException(ex);
         }
     }
-    
-    
-    private static Properties getPomProperties(Path extractDir){
-        Properties properties  = new Properties();
-        
+
+    private static Properties getPomProperties(Path extractDir) {
+        Properties properties = new Properties();
+
         Path metaInfMavenDir = extractDir.resolve(MAVEN_ROOT);
-        
+
         Optional<Path> maybePomProperties = searchFile(extractDir.resolve(MAVEN_ROOT), POM_PROPERTIES);
-        if(maybePomProperties.isPresent()){
+        if (maybePomProperties.isPresent()) {
             Path pomProperties = maybePomProperties.get();
             try {
                 properties.load(Files.newInputStream(pomProperties));
@@ -172,21 +176,22 @@ public class JarInspector {
         }
         return properties;
     }
-    
+
     /**
      * Find the first match recursively
-     * @param rootPath starting
+     * 
+     * @param rootPath       starting
      * @param targetFileName file we are looking for
      * @return the Path to the found file
      */
     private static Optional<Path> searchFile(Path rootPath, final String targetFileName) {
         List<Path> found = searchFiles(rootPath, targetFileName, false);
-        if(!found.isEmpty()){
+        if (!found.isEmpty()) {
             return Optional.of(found.get(0));
         }
         return Optional.empty();
     }
-    
+
     private static List<Path> searchFiles(Path rootPath, final String targetFileName, boolean multiple) {
         List<Path> found = new ArrayList<>();
         Queue<Path> queue = new LinkedList<>();
@@ -201,7 +206,8 @@ public class JarInspector {
                         queue.add(entry);
                     } else if (entry.getFileName().toString().equals(targetFileName)) {
                         found.add(entry);
-                        if(!multiple)return found;
+                        if (!multiple)
+                            return found;
                     }
                 }
             } catch (IOException e) {
