@@ -1,13 +1,13 @@
 package io.mvnpm.esbuild.model;
 
+import static io.mvnpm.esbuild.util.Copy.copyEntries;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
-
-import static io.mvnpm.esbuild.util.Copy.copyEntries;
 
 public class FileEntryPoint implements EntryPoint {
 
@@ -26,7 +26,7 @@ public class FileEntryPoint implements EntryPoint {
             return workDir.resolve(script);
         }
         final Path scriptPath = rootDir.resolve(script);
-        if(!Files.exists(scriptPath)) {
+        if (!Files.exists(scriptPath)) {
             throw new UncheckedIOException(new IOException("Entry file not found: " + scriptPath));
         }
         return scriptPath;

@@ -1,16 +1,12 @@
 package io.mvnpm.esbuild.model;
 
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
-import java.util.Map;
-
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
 
 public class EsBuildConfigTest {
 
@@ -45,17 +41,18 @@ public class EsBuildConfigTest {
     public void shouldOutputStandardFlags() {
         // given
         final EsBuildConfig esBuildConfig = new EsBuildConfigBuilder().bundle()
-                .entryPoint(new String[]{"main.js", "bundle.js"}).outDir("/tmp").minify().build();
+                .entryPoint(new String[] { "main.js", "bundle.js" }).outDir("/tmp").minify().build();
 
         // when
         final String[] params = esBuildConfig.toParams();
 
         // then
-        assertThat(asList(params), containsInAnyOrder("--bundle", "main.js", "bundle.js", "--minify", "--format=esm", "--loader:.svg=file",
-            "--loader:.gif=file", "--loader:.css=css", "--loader:.jpg=file", "--loader:.eot=file", "--loader:.json=json",
-            "--loader:.ts=ts", "--loader:.png=file", "--loader:.ttf=file", "--loader:.woff2=file", "--loader:.jsx=jsx",
-            "--loader:.js=js", "--loader:.woff=file", "--loader:.tsx=tsx", "--outdir=/tmp", "--sourcemap",
-            "--splitting", "--entry-names=[name]-[hash]", "--asset-names=assets/[name]-[hash]"));
+        assertThat(asList(params), containsInAnyOrder("--bundle", "main.js", "bundle.js", "--minify", "--format=esm",
+                "--loader:.svg=file",
+                "--loader:.gif=file", "--loader:.css=css", "--loader:.jpg=file", "--loader:.eot=file", "--loader:.json=json",
+                "--loader:.ts=ts", "--loader:.png=file", "--loader:.ttf=file", "--loader:.woff2=file", "--loader:.jsx=jsx",
+                "--loader:.js=js", "--loader:.woff=file", "--loader:.tsx=tsx", "--outdir=/tmp", "--sourcemap",
+                "--splitting", "--entry-names=[name]-[hash]", "--asset-names=assets/[name]-[hash]"));
     }
 
     @Test

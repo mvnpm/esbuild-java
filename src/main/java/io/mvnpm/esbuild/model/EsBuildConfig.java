@@ -1,6 +1,5 @@
 package io.mvnpm.esbuild.model;
 
-
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,8 +28,21 @@ public class EsBuildConfig {
     private Format format;
 
     public enum Loader {
-        BASE64, BINARY, COPY, CSS, DATAURL, LOCAL_CSS, GLOBAL_CSS,
-        EMPTY, FILE, JS, JSON, JSX, TEXT, TS, TSX
+        BASE64,
+        BINARY,
+        COPY,
+        CSS,
+        DATAURL,
+        LOCAL_CSS,
+        GLOBAL_CSS,
+        EMPTY,
+        FILE,
+        JS,
+        JSON,
+        JSX,
+        TEXT,
+        TS,
+        TSX
     }
 
     private Map<String, Loader> loader;
@@ -39,7 +51,9 @@ public class EsBuildConfig {
     private String packages;
 
     enum Platform {
-        BROWSER, NODE, NEUTRAL
+        BROWSER,
+        NODE,
+        NEUTRAL
     }
 
     private Platform platform;
@@ -50,8 +64,14 @@ public class EsBuildConfig {
     private boolean splitting;
 
     enum Target {
-        ES2017, CHROME58, FIREFOX57,
-        SAFARI11, EDGE16, NODE10, IE9, OPERA45
+        ES2017,
+        CHROME58,
+        FIREFOX57,
+        SAFARI11,
+        EDGE16,
+        NODE10,
+        IE9,
+        OPERA45
     }
 
     private Target target;
@@ -246,7 +266,7 @@ public class EsBuildConfig {
                     } else if (!(value instanceof Boolean)) {
                         String fn = convertField(fieldName);
                         String v = value.toString();
-                        if(!fn.equals("outdir")){ 
+                        if (!fn.equals("outdir")) {
                             v = v.toLowerCase();
                         }
                         result.add("--%s=%s".formatted(fn, v));
@@ -268,7 +288,8 @@ public class EsBuildConfig {
     private static List<String> mapToString(String fieldName, Map<?, ?> map) {
         List<String> result = new ArrayList<>(map.size());
         for (Map.Entry<?, ?> entry : map.entrySet()) {
-            result.add("--%s:%s=%s".formatted(fieldName, entry.getKey(), entry.getValue().toString().toLowerCase().replaceAll("_", "-")));
+            result.add("--%s:%s=%s".formatted(fieldName, entry.getKey(),
+                    entry.getValue().toString().toLowerCase().replaceAll("_", "-")));
         }
 
         return result;

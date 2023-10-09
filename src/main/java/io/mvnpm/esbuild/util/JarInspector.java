@@ -1,9 +1,5 @@
 package io.mvnpm.esbuild.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.mvnpm.esbuild.model.BundleType;
-import io.mvnpm.importmap.ImportsDataBinding;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.DirectoryStream;
@@ -20,6 +16,12 @@ import java.util.Properties;
 import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.mvnpm.esbuild.model.BundleType;
+import io.mvnpm.importmap.ImportsDataBinding;
 
 public class JarInspector {
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -179,8 +181,8 @@ public class JarInspector {
 
     /**
      * Find the first match recursively
-     * 
-     * @param rootPath       starting
+     *
+     * @param rootPath starting
      * @param targetFileName file we are looking for
      * @return the Path to the found file
      */
