@@ -7,7 +7,7 @@
   <groupId>io.mvnpm</groupId>
   <artifactId>esbuild-java</artifactId>
   <name>esbuild wrapper for Java</name>
-  <version>1.0.5</version>
+  <version>1.0.6-SNAPSHOT</version>
 
   <description>Small wrapper around esbuild to be able to use it in Java</description>
 
