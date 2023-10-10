@@ -1,9 +1,9 @@
 package io.mvnpm.esbuild;
 
+import static io.mvnpm.esbuild.util.Copy.copyEntries;
+
 import java.nio.file.Path;
 import java.util.List;
-
-import static io.mvnpm.esbuild.util.Copy.copyEntries;
 
 public class Watch {
 

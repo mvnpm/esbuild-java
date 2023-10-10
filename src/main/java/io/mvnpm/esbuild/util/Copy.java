@@ -1,5 +1,7 @@
 package io.mvnpm.esbuild.util;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -7,8 +9,6 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
-
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class Copy {
 
@@ -39,7 +39,7 @@ public class Copy {
     }
 
     public static void deleteRecursive(Path source) throws IOException {
-        if (!Files.exists(source)){
+        if (!Files.exists(source)) {
             return;
         }
         try (final Stream<Path> paths = Files.walk(source)) {

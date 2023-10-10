@@ -1,20 +1,22 @@
 package io.mvnpm.esbuild.util;
 
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 public class PackageJsonCreator {
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final ObjectNode browser = mapper.createObjectNode();
-    
-    private PackageJsonCreator(){}
-    
+
+    private PackageJsonCreator() {
+    }
+
     public static void createPackageJson(Path root, String name, String version, String main) {
         try {
             ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
@@ -25,18 +27,18 @@ public class PackageJsonCreator {
             throw new UncheckedIOException(ex);
         }
     }
-    
-    private static ObjectNode createNode(String name, String version, String main){
+
+    private static ObjectNode createNode(String name, String version, String main) {
         ObjectNode node = mapper.createObjectNode();
-        
+
         node.put("name", name);
         node.put("version", version);
         node.put("main", main);
         node.set("browser", browser);
-        
+
         return node;
     }
-    
+
     static {
         browser.put("fs", false);
         browser.put("path", false);

@@ -4,7 +4,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class BundleOptionsBuilder {
     private final BundleOptions options = new BundleOptions();
 

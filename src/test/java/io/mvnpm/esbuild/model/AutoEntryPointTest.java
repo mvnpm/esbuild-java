@@ -1,6 +1,6 @@
 package io.mvnpm.esbuild.model;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,7 +15,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 public class AutoEntryPointTest {
 
@@ -25,7 +25,8 @@ public class AutoEntryPointTest {
         final Path workDir = Files.createTempDirectory("test");
         final Path rootDir = getRootScriptsDir();
         // when
-        final AutoEntryPoint entry = new AutoEntryPoint(rootDir, "bundle", List.of("script1.js", "script2-test.js", "sub/sub.js"));
+        final AutoEntryPoint entry = new AutoEntryPoint(rootDir, "bundle",
+                List.of("script1.js", "script2-test.js", "sub/sub.js"));
         String entryContents = readEntry(entry, workDir);
 
         // then

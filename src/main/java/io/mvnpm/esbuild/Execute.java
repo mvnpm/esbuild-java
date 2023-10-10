@@ -1,8 +1,5 @@
 package io.mvnpm.esbuild;
 
-import io.mvnpm.esbuild.model.EsBuildConfig;
-import io.mvnpm.esbuild.model.ExecuteResult;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +16,9 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import io.mvnpm.esbuild.model.EsBuildConfig;
+import io.mvnpm.esbuild.model.ExecuteResult;
 
 public class Execute {
 
@@ -87,14 +87,14 @@ public class Execute {
     public Process createProcess(final String[] command, final Optional<BuildEventListener> listener) throws IOException {
         Process process = new ProcessBuilder().command(command).start();
         final InputStream s = process.getErrorStream();
-        if(listener.isPresent()) {
+        if (listener.isPresent()) {
             EXECUTOR.execute(new Streamer(process::isAlive, s, listener.get()));
         }
         return process;
     }
 
-
-    private record Streamer(BooleanSupplier isAlive, InputStream processStream, BuildEventListener listener) implements Runnable {
+    private record Streamer(BooleanSupplier isAlive, InputStream processStream,
+            BuildEventListener listener) implements Runnable {
 
         @Override
         public void run() {
@@ -119,9 +119,8 @@ public class Execute {
 
     private static void consumeStream(BooleanSupplier shouldStop, InputStream stream, Consumer<String> newLineConsumer) {
         try (
-            final InputStreamReader in = new InputStreamReader(stream, StandardCharsets.UTF_8);
-            final BufferedReader reader = new BufferedReader(in)
-        ) {
+                final InputStreamReader in = new InputStreamReader(stream, StandardCharsets.UTF_8);
+                final BufferedReader reader = new BufferedReader(in)) {
             String line;
             while ((line = reader.readLine()) != null && shouldStop.getAsBoolean()) {
                 newLineConsumer.accept(line);
@@ -132,4 +131,3 @@ public class Execute {
     }
 
 }
-

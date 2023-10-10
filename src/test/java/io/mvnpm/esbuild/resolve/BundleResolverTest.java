@@ -1,17 +1,20 @@
 package io.mvnpm.esbuild.resolve;
 
-import io.mvnpm.esbuild.Bundler;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import io.mvnpm.esbuild.Bundler;
 
 public class BundleResolverTest extends BundleTester {
 
-    public static final Resolver THROWING_RESOLVER = version -> { throw new RuntimeException("Should not call this"); };
+    public static final Resolver THROWING_RESOLVER = version -> {
+        throw new RuntimeException("Should not call this");
+    };
 
     @BeforeAll
     public static void cleanUp() throws IOException {
@@ -21,7 +24,7 @@ public class BundleResolverTest extends BundleTester {
     @Test
     public void resolve() throws IOException {
         // when
-        final Path resolve = new BundledResolver(THROWING_RESOLVER).resolve(Bundler.getDefaultVersion());
+        final Path resolve = new BundledResolver(THROWING_RESOLVER).resolve(Bundler.ESBUILD_EMBEDDED_VERSION);
 
         // then
         assertTrue(resolve.toFile().exists());

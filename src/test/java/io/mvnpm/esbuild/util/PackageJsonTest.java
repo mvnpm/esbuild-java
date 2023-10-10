@@ -1,7 +1,6 @@
 package io.mvnpm.esbuild.util;
 
-import io.mvnpm.esbuild.model.BundleType;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,7 +9,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+
+import io.mvnpm.esbuild.model.BundleType;
 
 class PackageJsonTest {
 
@@ -31,9 +32,9 @@ class PackageJsonTest {
         UnZip.unzip(new File(getClass().getResource("/mvnpm/vaadin-webcomponents-24.1.6.jar").toURI()).toPath(), temp);
         final Map<String, Path> packageNameAndRoot = JarInspector.findPackageNameAndRoot(temp, BundleType.MVNPM);
         assertFalse(packageNameAndRoot.isEmpty());
-        assertTrue(packageNameAndRoot.size()>1);
+        assertTrue(packageNameAndRoot.size() > 1);
     }
-    
+
     @Test
     void findPackageWebjarsTest() throws URISyntaxException, IOException {
         final Path temp = Files.createTempDirectory("findPackageWebjarsTest");
