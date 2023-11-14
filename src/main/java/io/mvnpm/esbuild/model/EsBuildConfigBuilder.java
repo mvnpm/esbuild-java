@@ -160,6 +160,11 @@ public class EsBuildConfigBuilder {
         return this;
     }
 
+    public EsBuildConfigBuilder publicPath(String publicPath) {
+        esBuildConfig.setPublicPath(publicPath);
+        return this;
+    }
+
     public EsBuildConfigBuilder assetNames(String assetNames) {
         esBuildConfig.setAssetNames(assetNames);
         return this;

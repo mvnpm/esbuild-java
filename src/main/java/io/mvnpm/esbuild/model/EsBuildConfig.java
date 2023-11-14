@@ -84,6 +84,8 @@ public class EsBuildConfig {
 
     private String assetNames;
 
+    private String publicPath;
+
     private final List<String> external = new ArrayList<>();
 
     public boolean isBundle() {
@@ -244,6 +246,14 @@ public class EsBuildConfig {
 
     public void addExternal(String name) {
         external.add(name);
+    }
+
+    public String getPublicPath() {
+        return publicPath;
+    }
+
+    public void setPublicPath(String publicPath) {
+        this.publicPath = publicPath;
     }
 
     public String[] toParams() {

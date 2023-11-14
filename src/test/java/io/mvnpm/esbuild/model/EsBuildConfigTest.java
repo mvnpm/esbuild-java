@@ -38,6 +38,19 @@ public class EsBuildConfigTest {
     }
 
     @Test
+    public void shouldOutputPublicPathFlag() {
+        // given
+        final EsBuildConfig esBuildConfig = new EsBuildConfig();
+        esBuildConfig.setPublicPath("https://www.example.com/v1");
+
+        // when
+        final String[] params = esBuildConfig.toParams();
+
+        // then
+        assertThat(asList(params), containsInAnyOrder("--public-path=https://www.example.com/v1"));
+    }
+
+    @Test
     public void shouldOutputStandardFlags() {
         // given
         final EsBuildConfig esBuildConfig = new EsBuildConfigBuilder().bundle()
