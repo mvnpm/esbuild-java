@@ -1,7 +1,7 @@
 esbuild-java
 ============
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/mvnpm/locker/maven.yml?label=Build&branch=main)](https://github.com/mvnpm/locker/actions/workflows/build.yml)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/mvnpm/esbuild-java/maven.yml?label=Build&branch=main)](https://github.com/mvnpm/esbuild-java/actions/workflows/maven.yml)
 [![usefulness 100%](https://img.shields.io/badge/usefulness-100%25-success.svg?label=Usefulness)](https://www.google.com/search?q=pasta+machine)
 [![Maven Central](https://img.shields.io/maven-central/v/io.mvnpm/esbuild-java.svg?label=Maven%20Central)](https://search.maven.org/artifact/io.mvnpm/esbuild-java)
 [![Apache License, Version 2.0, January 2004](https://img.shields.io/github/license/apache/maven.svg?label=License)](https://www.apache.org/licenses/LICENSE-2.0)
