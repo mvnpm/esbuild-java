@@ -1,11 +1,12 @@
 package io.mvnpm.esbuild.model;
 
-import org.junit.jupiter.api.Test;
+import static java.util.Arrays.asList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 
-import java.util.Arrays;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import org.junit.jupiter.api.Test;
 
 public class EsBuildConfigTest {
 
@@ -20,37 +21,51 @@ public class EsBuildConfigTest {
         final String[] params = esBuildConfig.toParams();
 
         // then
-        assertArrayEquals(new String[]{"--bundle", "--format=esm"}, params);
+        assertThat(asList(params), containsInAnyOrder("--bundle", "--format=esm"));
     }
 
     @Test
     public void shouldOutputLoaderFlags() {
         // given
         final EsBuildConfig esBuildConfig = new EsBuildConfig();
-        esBuildConfig.setLoader(Map.of(".js", EsBuildConfig.Loader.JSX));
+        esBuildConfig.setLoader(Map.of(".js", EsBuildConfig.Loader.JSX, ".css", EsBuildConfig.Loader.LOCAL_CSS));
 
         // when
         final String[] params = esBuildConfig.toParams();
 
         // then
-        assertArrayEquals(new String[]{"--loader:.js=jsx"}, params);
+        assertThat(asList(params), containsInAnyOrder("--loader:.js=jsx", "--loader:.css=local-css"));
+    }
+
+    @Test
+    public void shouldOutputPublicPathFlag() {
+        // given
+        final EsBuildConfig esBuildConfig = new EsBuildConfig();
+        esBuildConfig.setPublicPath("https://www.example.com/v1");
+
+        // when
+        final String[] params = esBuildConfig.toParams();
+
+        // then
+        assertThat(asList(params), containsInAnyOrder("--public-path=https://www.example.com/v1"));
     }
 
     @Test
     public void shouldOutputStandardFlags() {
         // given
         final EsBuildConfig esBuildConfig = new EsBuildConfigBuilder().bundle()
-                .entryPoint(new String[]{"main.js", "bundle.js"}).outDir("/tmp").minify().build();
+                .entryPoint(new String[] { "main.js", "bundle.js" }).outDir("/tmp").minify().build();
 
         // when
         final String[] params = esBuildConfig.toParams();
 
         // then
-        assertArrayEquals(new String[]{"--bundle", "main.js", "bundle.js", "--minify", "--format=esm", "--loader:.svg=file",
+        assertThat(asList(params), containsInAnyOrder("--bundle", "main.js", "bundle.js", "--minify", "--format=esm",
+                "--loader:.svg=file",
                 "--loader:.gif=file", "--loader:.css=css", "--loader:.jpg=file", "--loader:.eot=file", "--loader:.json=json",
                 "--loader:.ts=ts", "--loader:.png=file", "--loader:.ttf=file", "--loader:.woff2=file", "--loader:.jsx=jsx",
                 "--loader:.js=js", "--loader:.woff=file", "--loader:.tsx=tsx", "--outdir=/tmp", "--sourcemap",
-                "--splitting", "--entry-names=[name]-[hash]"}, params);
+                "--splitting", "--entry-names=[name]-[hash]", "--asset-names=assets/[name]-[hash]"));
     }
 
     @Test
@@ -64,7 +79,7 @@ public class EsBuildConfigTest {
         final String[] params = esBuildConfig.toParams();
 
         // then
-        assertArrayEquals(new String[] {"--external:*.png", "--external:/images/*"}, params);
+        assertThat(asList(params), containsInAnyOrder("--external:*.png", "--external:/images/*"));
     }
 
     @Test
@@ -77,6 +92,6 @@ public class EsBuildConfigTest {
         final String[] params = esBuildConfig.toParams();
 
         // then
-        assertArrayEquals(new String[]{"--chunk-names=chunks/[name]-[hash]"}, params);
+        assertThat(asList(params), containsInAnyOrder("--chunk-names=chunks/[name]-[hash]"));
     }
 }

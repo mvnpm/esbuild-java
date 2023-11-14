@@ -1,14 +1,15 @@
 package io.mvnpm.esbuild.resolve;
 
-import io.mvnpm.esbuild.Bundler;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import static io.mvnpm.esbuild.resolve.BundleResolverTest.THROWING_RESOLVER;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Path;
 
-import static io.mvnpm.esbuild.resolve.BundleResolverTest.THROWING_RESOLVER;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import io.mvnpm.esbuild.Bundler;
 
 public class DownloadResolverTest extends BundleTester {
 
@@ -20,7 +21,7 @@ public class DownloadResolverTest extends BundleTester {
     @Test
     public void download() throws IOException {
         // when
-        final Path path = new DownloadResolver(THROWING_RESOLVER).resolve(Bundler.getDefaultVersion());
+        final Path path = new DownloadResolver(THROWING_RESOLVER).resolve(Bundler.ESBUILD_EMBEDDED_VERSION);
 
         // then
         assertTrue(path.toFile().exists());

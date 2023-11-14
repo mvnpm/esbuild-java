@@ -1,6 +1,6 @@
 package io.mvnpm.esbuild.util;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,7 +8,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import org.junit.jupiter.api.Test;
 
 public class UnZipTest {
 
@@ -23,7 +23,7 @@ public class UnZipTest {
 
         // then
         final String[] list = junit.toFile().list();
-        assertArrayEquals(new String[]{"META-INF"}, list);
+        assertArrayEquals(new String[] { "META-INF" }, list);
 
     }
 }

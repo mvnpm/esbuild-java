@@ -1,21 +1,19 @@
 package io.mvnpm.esbuild.model;
 
-import io.mvnpm.esbuild.util.QuteTemplateRenderer;
+import static io.mvnpm.esbuild.util.Copy.copyEntries;
 
 import java.io.IOException;
+import java.io.StringWriter;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import static io.mvnpm.esbuild.util.Copy.copyEntries;
-
 public class AutoEntryPoint implements EntryPoint {
-    private static final Set<String> SCRIPTS = Set.of("js", "ts", "jsx", "tsx");
+    private static final Set<String> SCRIPTS = Set.of("js", "ts", "jsx", "tsx", "mjs", "mts", "cjs", "cts");
     private final String name;
     private final Path rootDir;
     private final List<String> scripts;
@@ -25,7 +23,6 @@ public class AutoEntryPoint implements EntryPoint {
         this.rootDir = rootDir;
         this.scripts = scripts;
     }
-
 
     @Override
     public Path process(Path workDir) {
@@ -47,16 +44,30 @@ public class AutoEntryPoint implements EntryPoint {
     }
 
     private String convert(Path workDir, List<String> scripts) {
-        return QuteTemplateRenderer.render("entrypoint-template.js", Map.of("imports", scripts.stream().map(path -> {
-            final String fileName = Path.of(path).getFileName().toString();
-            final int index = fileName.lastIndexOf(".");
-            final String name = fileName.substring(0, index);
-            final String ext = fileName.substring(index + 1);
-            final boolean isScript = SCRIPTS.contains(ext);
-            final Map<String, String> imports = new HashMap<>();
-            imports.put("from", isScript ? path.substring(0, path.lastIndexOf(".")) : path);
-            imports.put("as", isScript ? name.replaceAll("-", "") : null);
-            return imports;
-        })));
+        try (StringWriter sw = new StringWriter()) {
+            for (String script : scripts) {
+                final String fileName = Path.of(script).getFileName().toString();
+                final int index = fileName.lastIndexOf(".");
+                String name = fileName.substring(0, index);
+                final String ext = fileName.substring(index + 1);
+                final boolean isScript = SCRIPTS.contains(ext);
+                String line;
+                if (isScript) {
+                    script = script.substring(0, script.lastIndexOf("."));
+                    name = name.replaceAll("-", "");
+                    line = IMPORT_WITH_FROM.formatted(name, script);
+                } else {
+                    line = IMPORT_WITHOUT_FROM.formatted(script);
+                }
+                sw.write(line);
+                sw.write("\n");
+            }
+            return sw.toString();
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
+        }
     }
+
+    private static final String IMPORT_WITH_FROM = "import * as %s from \"./%s\";";
+    private static final String IMPORT_WITHOUT_FROM = "import \"./%s\";";
 }

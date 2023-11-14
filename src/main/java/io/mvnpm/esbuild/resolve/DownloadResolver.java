@@ -1,7 +1,5 @@
 package io.mvnpm.esbuild.resolve;
 
-import org.apache.commons.text.StringSubstitutor;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
@@ -10,6 +8,8 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+
+import org.apache.commons.text.StringSubstitutor;
 
 public class DownloadResolver extends BaseResolver implements Resolver {
     private static final String URL_TEMPLATE = "https://registry.npmjs.org/@esbuild/${classifier}/-/${classifier}-${version}.tgz";
@@ -22,9 +22,8 @@ public class DownloadResolver extends BaseResolver implements Resolver {
     @Override
     public Path resolve(String version) throws IOException {
         final String url = new StringSubstitutor(Map.of(
-                "classifier", determineClassifier(),
-                "version", version
-        )).replace(URL_TEMPLATE);
+                "classifier", CLASSIFIER,
+                "version", version)).replace(URL_TEMPLATE);
 
         final Path destination = createDestination(version);
         final Path tarFile = destination.resolve(FILE_NAME);

@@ -1,6 +1,5 @@
 package io.mvnpm.esbuild.util;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,7 +16,7 @@ public class UnZip {
             ZipEntry zipEntry = zis.getNextEntry();
 
             while (zipEntry != null) {
-                boolean isDirectory = zipEntry.getName().endsWith(File.separator);
+                boolean isDirectory = zipEntry.isDirectory();
 
                 Path newPath = zipSlipProtect(zipEntry, target);
 

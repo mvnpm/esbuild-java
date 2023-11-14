@@ -1,5 +1,7 @@
 package io.mvnpm.esbuild.resolve;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,16 +12,20 @@ import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Arrays;
 import java.util.HashSet;
-
-import static java.util.Objects.requireNonNull;
 import java.util.Set;
+
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 
 public abstract class BaseResolver {
-    public static final String EXECUTABLE_PATH = "package/bin/esbuild";
+    private static final String UNIX_PATH = "package/bin/esbuild";
+    private static final String WINDOWS_EXE_PATH = "package/esbuild.exe";
+
+    public static final String EXECUTABLE_PATH = resolveExecutablePath();
+
+    public static final String CLASSIFIER = determineClassifier();
 
     protected Resolver resolver;
 
@@ -27,7 +33,16 @@ public abstract class BaseResolver {
         this.resolver = requireNonNull(resolver, "resolver is required");
     }
 
-    static String determineClassifier() {
+    private static String resolveExecutablePath() {
+        return isWindows() ? WINDOWS_EXE_PATH : UNIX_PATH;
+    }
+
+    private static boolean isWindows() {
+        final String osName = System.getProperty("os.name").toLowerCase();
+        return osName.contains("win");
+    }
+
+    private static String determineClassifier() {
         final String osName = System.getProperty("os.name").toLowerCase();
         final String osArch = System.getProperty("os.arch").toLowerCase();
         String classifier;
@@ -63,7 +78,7 @@ public abstract class BaseResolver {
         if (!destination.exists()) {
             destination.mkdirs();
         }
-        
+
         try (GzipCompressorInputStream gzipIn = new GzipCompressorInputStream(archive);
                 TarArchiveInputStream tarIn = new TarArchiveInputStream(gzipIn)) {
 
@@ -84,12 +99,16 @@ public abstract class BaseResolver {
 
                 // Create the output file with its original permissions
                 Files.createFile(outputFile.toPath());
-                
+
                 // Get the POSIX file permissions from the TarArchiveEntry
                 int mode = ((TarArchiveEntry) entry).getMode();
                 Set<PosixFilePermission> permissions = convertModeToPosixFilePermissions(mode);
-                Files.setPosixFilePermissions(outputFile.toPath(), permissions);
-                
+                try {
+                    Files.setPosixFilePermissions(outputFile.toPath(), permissions);
+                } catch (UnsupportedOperationException e) {
+                    // ignore we are on a platform that doesn't support this
+                }
+
                 try (OutputStream outputStream = new FileOutputStream(outputFile)) {
                     byte[] buffer = new byte[4096];
                     int bytesRead;
@@ -99,8 +118,8 @@ public abstract class BaseResolver {
                 }
             }
         }
-        
-        return destination.toPath().resolve(EXECUTABLE_PATH);
+
+        return destination.toPath().resolve(resolveExecutablePath());
     }
 
     static Path createDestination(String version) throws IOException {
@@ -110,7 +129,7 @@ public abstract class BaseResolver {
     static Path getLocation(String version) {
         return Path.of(System.getProperty("java.io.tmpdir")).resolve("esbuild-" + version);
     }
-    
+
     // Helper method to convert Tar mode to PosixFilePermission
     private static Set<PosixFilePermission> convertModeToPosixFilePermissions(int mode) {
         Set<PosixFilePermission> permissions = new HashSet<>(Arrays.asList(PosixFilePermission.values()));
@@ -125,7 +144,7 @@ public abstract class BaseResolver {
 
         return permissions;
     }
-    
+
     private static PosixFilePermission getPermissionForIndex(int index) {
         switch (index) {
             case 0:

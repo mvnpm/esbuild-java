@@ -1,20 +1,18 @@
 package io.mvnpm.esbuild.resolve;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 import static io.mvnpm.esbuild.resolve.BaseResolver.EXECUTABLE_PATH;
 import static io.mvnpm.esbuild.resolve.BundleResolverTest.THROWING_RESOLVER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
+
 public class CacheResolverTest extends BundleTester {
-
-
 
     @AfterAll
     public static void cleanUp() throws IOException {
@@ -57,6 +55,7 @@ public class CacheResolverTest extends BundleTester {
         final Path exec = destination.resolve(EXECUTABLE_PATH);
         Files.createDirectories(exec.getParent());
         Files.writeString(exec, "hello");
+        exec.toFile().setExecutable(true, true);
         return exec;
     }
 }

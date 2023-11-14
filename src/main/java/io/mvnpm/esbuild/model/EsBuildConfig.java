@@ -1,6 +1,5 @@
 package io.mvnpm.esbuild.model;
 
-
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,8 +28,21 @@ public class EsBuildConfig {
     private Format format;
 
     public enum Loader {
-        BASE64, BINARY, COPY, CSS, DATAURL,
-        EMPTY, FILE, JS, JSON, JSX, TEXT, TS, TSX
+        BASE64,
+        BINARY,
+        COPY,
+        CSS,
+        DATAURL,
+        LOCAL_CSS,
+        GLOBAL_CSS,
+        EMPTY,
+        FILE,
+        JS,
+        JSON,
+        JSX,
+        TEXT,
+        TS,
+        TSX
     }
 
     private Map<String, Loader> loader;
@@ -39,7 +51,9 @@ public class EsBuildConfig {
     private String packages;
 
     enum Platform {
-        BROWSER, NODE, NEUTRAL
+        BROWSER,
+        NODE,
+        NEUTRAL
     }
 
     private Platform platform;
@@ -50,8 +64,14 @@ public class EsBuildConfig {
     private boolean splitting;
 
     enum Target {
-        ES2017, CHROME58, FIREFOX57,
-        SAFARI11, EDGE16, NODE10, IE9, OPERA45
+        ES2017,
+        CHROME58,
+        FIREFOX57,
+        SAFARI11,
+        EDGE16,
+        NODE10,
+        IE9,
+        OPERA45
     }
 
     private Target target;
@@ -63,6 +83,8 @@ public class EsBuildConfig {
     private String entryNames;
 
     private String assetNames;
+
+    private String publicPath;
 
     private final List<String> external = new ArrayList<>();
 
@@ -81,6 +103,7 @@ public class EsBuildConfig {
     public void setEntryPoint(String[] entryPoint) {
         this.entryPoint = entryPoint;
     }
+
     public boolean isMinify() {
         return minify;
     }
@@ -192,6 +215,7 @@ public class EsBuildConfig {
     public void setWatch(boolean watch) {
         this.watch = watch ? "forever" : null;
     }
+
     public String getChunkNames() {
         return chunkNames;
     }
@@ -224,6 +248,14 @@ public class EsBuildConfig {
         external.add(name);
     }
 
+    public String getPublicPath() {
+        return publicPath;
+    }
+
+    public void setPublicPath(String publicPath) {
+        this.publicPath = publicPath;
+    }
+
     public String[] toParams() {
         final Field[] fields = EsBuildConfig.class.getDeclaredFields();
         List<String> result = new ArrayList<>(fields.length);
@@ -248,7 +280,6 @@ public class EsBuildConfig {
                             v = v.toLowerCase();
                         }
                         result.add("--%s=%s".formatted(fn, v));
-                        
                     }
                 }
             } catch (IllegalAccessException e) {
@@ -267,7 +298,8 @@ public class EsBuildConfig {
     private static List<String> mapToString(String fieldName, Map<?, ?> map) {
         List<String> result = new ArrayList<>(map.size());
         for (Map.Entry<?, ?> entry : map.entrySet()) {
-            result.add("--%s:%s=%s".formatted(fieldName, entry.getKey(), entry.getValue().toString().toLowerCase()));
+            result.add("--%s:%s=%s".formatted(fieldName, entry.getKey(),
+                    entry.getValue().toString().toLowerCase().replaceAll("_", "-")));
         }
 
         return result;

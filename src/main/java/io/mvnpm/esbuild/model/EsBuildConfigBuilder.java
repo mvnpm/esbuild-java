@@ -1,9 +1,5 @@
 package io.mvnpm.esbuild.model;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import static io.mvnpm.esbuild.model.EsBuildConfig.Loader.CSS;
 import static io.mvnpm.esbuild.model.EsBuildConfig.Loader.FILE;
 import static io.mvnpm.esbuild.model.EsBuildConfig.Loader.JS;
@@ -11,6 +7,10 @@ import static io.mvnpm.esbuild.model.EsBuildConfig.Loader.JSON;
 import static io.mvnpm.esbuild.model.EsBuildConfig.Loader.JSX;
 import static io.mvnpm.esbuild.model.EsBuildConfig.Loader.TS;
 import static io.mvnpm.esbuild.model.EsBuildConfig.Loader.TSX;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class EsBuildConfigBuilder {
     private final EsBuildConfig esBuildConfig;
@@ -157,6 +157,11 @@ public class EsBuildConfigBuilder {
 
     public EsBuildConfigBuilder entryNames(String template) {
         esBuildConfig.setEntryNames(template);
+        return this;
+    }
+
+    public EsBuildConfigBuilder publicPath(String publicPath) {
+        esBuildConfig.setPublicPath(publicPath);
         return this;
     }
 
