@@ -1,0 +1,20 @@
+project:
+  name: esbuild-java
+  description: Small wrapper around esbuild to be able to use it in Java
+  longDescription: |
+    This is a small warpper around the esbuild executable, so that you can invoke it from java.
+  authors:
+    - Erik Jan de Wit
+    - Andy Damevin
+    - Phillip Kruger
+  license: Apache-2.0
+  links:
+    homepage: https://github.com/mvnpm/esbuild-java
+  java:
+    groupId: io.mvnpm
+    version: 17
+  inceptionYear: 2023
+
+release:
+  github:
+    owner: mvnpm
