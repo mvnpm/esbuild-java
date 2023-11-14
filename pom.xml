@@ -7,7 +7,7 @@
   <groupId>io.mvnpm</groupId>
   <artifactId>esbuild-java</artifactId>
   <name>esbuild wrapper for Java</name>
-  <version>1.0.6-SNAPSHOT</version>
+  <version>999-SNAPSHOT</version>
 
   <description>Small wrapper around esbuild to be able to use it in Java</description>
 
@@ -41,7 +41,7 @@
     <quarkus.version>3.3.2</quarkus.version>
     <formatter.plugin.version>2.23.0</formatter.plugin.version>
     <impsort.plugin.version>1.9.0</impsort.plugin.version>
-    <quarkus.ide-config.version>3.0.0.Final</quarkus.ide-config.version>
+    <quarkus.ide-config.version>3.5.0</quarkus.ide-config.version>
     <surefire.plugin.version>3.1.2</surefire.plugin.version>
     <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
     <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
@@ -49,6 +49,7 @@
     <maven-javadoc-plugin.version>3.5.0</maven-javadoc-plugin.version>
     <maven-gpg-plugin.version>3.1.0</maven-gpg-plugin.version>
     <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
+    <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -230,7 +231,7 @@
   </build>
   <profiles>
     <profile>
-      <id>deploy</id>
+      <id>release</id>
       <build>
         <plugins>
           <plugin>
@@ -242,6 +243,19 @@
               <serverId>ossrh</serverId>
               <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
               <autoReleaseAfterClose>true</autoReleaseAfterClose>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-release-plugin</artifactId>
+            <version>${maven-release-plugin.version}</version>
+            <configuration>
+              <preparationGoals>clean install</preparationGoals>
+              <autoVersionSubmodules>true</autoVersionSubmodules>
+              <tagNameFormat>@{project.version}</tagNameFormat>
+              <pushChanges>false</pushChanges>
+              <localCheckout>true</localCheckout>
+              <remoteTagging>false</remoteTagging>
             </configuration>
           </plugin>
           <plugin>
@@ -274,6 +288,12 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
             <version>${maven-gpg-plugin.version}</version>
+            <configuration>
+              <gpgArguments>
+                <arg>--pinentry-mode</arg>
+                <arg>loopback</arg>
+              </gpgArguments>
+            </configuration>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
