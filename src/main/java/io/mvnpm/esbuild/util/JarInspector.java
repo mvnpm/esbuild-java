@@ -31,8 +31,10 @@ public class JarInspector {
 
     public static final String POM_PROPERTIES = "pom.properties";
     private static final String MAVEN_ROOT = "META-INF/maven";
-    private static final String WEBJAR_PACKAGE_PREFIX = "META-INF/resources/webjars";
-    private static final String MVNPM_PACKAGE_PREFIX = "META-INF/resources/_static";
+
+    private static final Map<BundleType, List<String>> PACKAGE_DIRS = Map.of(
+            BundleType.MVNPM, List.of("META-INF/resources/_static", "package"),
+            BundleType.WEBJARS, List.of("META-INF/resources/webjars"));
     private static final List<String> MULTIPLE_GROUP_IDS = List.of("org.mvnpm.at.mvnpm"); // Group Ids that can contain
                                                                                           // multiple package.jsons
                                                                                           // TODO: Allow this to be
@@ -40,9 +42,9 @@ public class JarInspector {
 
     public static Map<String, Path> findPackageNameAndRoot(Path extractDir, BundleType type) {
 
-        Path dir = getBundleTypeRootPath(extractDir, type);
+        Path dir = getPackageRootPath(extractDir, type);
 
-        if (!Files.isDirectory(dir)) {
+        if (dir == null) {
             return Map.of();
         }
 
@@ -61,13 +63,17 @@ public class JarInspector {
         return found;
     }
 
-    private static Path getBundleTypeRootPath(Path extractDir, BundleType type) {
-        if (type.equals(BundleType.MVNPM)) {
-            return extractDir.resolve(MVNPM_PACKAGE_PREFIX);
-        } else if (type.equals(BundleType.WEBJARS)) {
-            return extractDir.resolve(WEBJAR_PACKAGE_PREFIX);
+    private static Path getPackageRootPath(Path extractDir, BundleType type) {
+        if (!PACKAGE_DIRS.containsKey(type)) {
+            throw new RuntimeException("Invalid BundleType: " + type);
         }
-        throw new RuntimeException("Unknown Bundle Type " + type);
+        for (String packageDir : PACKAGE_DIRS.get(type)) {
+            Path dir = extractDir.resolve(packageDir);
+            if (Files.isDirectory(dir)) {
+                return dir;
+            }
+        }
+        return null;
     }
 
     private static Properties getProperties(Path extractDir, BundleType type) {
@@ -166,7 +172,9 @@ public class JarInspector {
         Properties properties = new Properties();
 
         Path metaInfMavenDir = extractDir.resolve(MAVEN_ROOT);
-
+        if (!Files.isDirectory(metaInfMavenDir)) {
+            return properties;
+        }
         Optional<Path> maybePomProperties = searchFile(extractDir.resolve(MAVEN_ROOT), POM_PROPERTIES);
         if (maybePomProperties.isPresent()) {
             Path pomProperties = maybePomProperties.get();
