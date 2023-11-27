@@ -26,6 +26,11 @@ public class BundlerTest {
     }
 
     @Test
+    public void shouldBundleMvnpmSources() throws URISyntaxException, IOException {
+        executeTest("/mvnpm/moment-2.29.4-sources.jar", BundleType.MVNPM, "application-mvnpm.ts", true);
+    }
+
+    @Test
     public void shouldBundleMvnpmAndCreatePackageJson() throws URISyntaxException, IOException {
         executeTest("/mvnpm/stimulus-3.2.0.jar", BundleType.MVNPM, "application-mvnpm.js", true);
     }
