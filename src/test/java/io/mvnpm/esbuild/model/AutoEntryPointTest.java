@@ -31,9 +31,9 @@ public class AutoEntryPointTest {
 
         // then
         assertEquals("""
-                import * as script1 from "./script1";
-                import * as script2test from "./script2-test";
-                import * as sub from "./sub/sub";""", entryContents);
+                export * from "./script1";
+                export * from "./script2-test";
+                export * from "./sub/sub";""", entryContents);
     }
 
     @Test

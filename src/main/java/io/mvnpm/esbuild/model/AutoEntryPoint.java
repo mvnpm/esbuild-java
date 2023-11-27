@@ -48,16 +48,14 @@ public class AutoEntryPoint implements EntryPoint {
             for (String script : scripts) {
                 final String fileName = Path.of(script).getFileName().toString();
                 final int index = fileName.lastIndexOf(".");
-                String name = fileName.substring(0, index);
                 final String ext = fileName.substring(index + 1);
                 final boolean isScript = SCRIPTS.contains(ext);
                 String line;
                 if (isScript) {
                     script = script.substring(0, script.lastIndexOf("."));
-                    name = name.replaceAll("-", "");
-                    line = IMPORT_WITH_FROM.formatted(name, script);
+                    line = EXPORT.formatted(script);
                 } else {
-                    line = IMPORT_WITHOUT_FROM.formatted(script);
+                    line = IMPORT.formatted(script);
                 }
                 sw.write(line);
                 sw.write("\n");
@@ -68,6 +66,6 @@ public class AutoEntryPoint implements EntryPoint {
         }
     }
 
-    private static final String IMPORT_WITH_FROM = "import * as %s from \"./%s\";";
-    private static final String IMPORT_WITHOUT_FROM = "import \"./%s\";";
+    private static final String EXPORT = "export * from \"./%s\";";
+    private static final String IMPORT = "import \"./%s\";";
 }
