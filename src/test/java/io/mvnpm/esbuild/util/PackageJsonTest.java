@@ -11,7 +11,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import io.mvnpm.esbuild.model.BundleType;
+import io.mvnpm.esbuild.model.WebDependency;
 
 class PackageJsonTest {
 
@@ -19,7 +19,8 @@ class PackageJsonTest {
     void findPackageMVNPMTest() throws URISyntaxException, IOException {
         final Path temp = Files.createTempDirectory("findPackageMVNPMTest");
         UnZip.unzip(new File(getClass().getResource("/mvnpm/react-bootstrap-2.7.4.jar").toURI()).toPath(), temp);
-        final Map<String, Path> packageNameAndRoot = JarInspector.findPackageNameAndRoot(temp, BundleType.MVNPM);
+        final Map<String, Path> packageNameAndRoot = JarInspector.findPackageNameAndRoot(temp,
+                WebDependency.WebDependencyType.MVNPM);
         assertFalse(packageNameAndRoot.isEmpty());
         Map.Entry<String, Path> next = packageNameAndRoot.entrySet().iterator().next();
         final String name = next.getKey();
@@ -30,7 +31,8 @@ class PackageJsonTest {
     void findPackageMVNPMCompositeTest() throws URISyntaxException, IOException {
         final Path temp = Files.createTempDirectory("findPackageMVNPMCompositeTest");
         UnZip.unzip(new File(getClass().getResource("/mvnpm/vaadin-webcomponents-24.1.6.jar").toURI()).toPath(), temp);
-        final Map<String, Path> packageNameAndRoot = JarInspector.findPackageNameAndRoot(temp, BundleType.MVNPM);
+        final Map<String, Path> packageNameAndRoot = JarInspector.findPackageNameAndRoot(temp,
+                WebDependency.WebDependencyType.MVNPM);
         assertFalse(packageNameAndRoot.isEmpty());
         assertTrue(packageNameAndRoot.size() > 1);
     }
@@ -39,7 +41,8 @@ class PackageJsonTest {
     void findPackageWebjarsTest() throws URISyntaxException, IOException {
         final Path temp = Files.createTempDirectory("findPackageWebjarsTest");
         UnZip.unzip(new File(getClass().getResource("/webjars/restart__hooks-0.4.9.jar").toURI()).toPath(), temp);
-        final Map<String, Path> packageNameAndRoot = JarInspector.findPackageNameAndRoot(temp, BundleType.WEBJARS);
+        final Map<String, Path> packageNameAndRoot = JarInspector.findPackageNameAndRoot(temp,
+                WebDependency.WebDependencyType.WEBJARS);
         assertFalse(packageNameAndRoot.isEmpty());
         Map.Entry<String, Path> next = packageNameAndRoot.entrySet().iterator().next();
         final String name = next.getKey();

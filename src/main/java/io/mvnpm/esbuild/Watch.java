@@ -1,6 +1,6 @@
 package io.mvnpm.esbuild;
 
-import static io.mvnpm.esbuild.util.Copy.copyEntries;
+import static io.mvnpm.esbuild.util.PathUtils.copyEntries;
 
 import java.nio.file.Path;
 import java.util.List;

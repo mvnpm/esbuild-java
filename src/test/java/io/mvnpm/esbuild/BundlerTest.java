@@ -16,39 +16,40 @@ import org.junit.jupiter.api.Test;
 import io.mvnpm.esbuild.model.BundleOptions;
 import io.mvnpm.esbuild.model.BundleOptionsBuilder;
 import io.mvnpm.esbuild.model.BundleResult;
-import io.mvnpm.esbuild.model.BundleType;
+import io.mvnpm.esbuild.model.WebDependency.WebDependencyType;
 
 public class BundlerTest {
 
     @Test
     public void shouldBundleMvnpm() throws URISyntaxException, IOException {
-        executeTest("/mvnpm/stimulus-3.2.1.jar", BundleType.MVNPM, "application-mvnpm.js", true);
+        executeTest("/mvnpm/stimulus-3.2.1.jar", WebDependencyType.MVNPM, "application-mvnpm.js", true);
     }
 
     @Test
     public void shouldBundleMvnpmSources() throws URISyntaxException, IOException {
-        executeTest("/mvnpm/moment-2.29.4-sources.jar", BundleType.MVNPM, "application-mvnpm.ts", true);
+        executeTest("/mvnpm/moment-2.29.4-sources.jar", WebDependencyType.MVNPM, "application-mvnpm.ts", true);
     }
 
     @Test
     public void shouldBundleMvnpmAndCreatePackageJson() throws URISyntaxException, IOException {
-        executeTest("/mvnpm/stimulus-3.2.0.jar", BundleType.MVNPM, "application-mvnpm.js", true);
+        executeTest("/mvnpm/stimulus-3.2.0.jar", WebDependencyType.MVNPM, "application-mvnpm.js", true);
     }
 
     @Test
     public void shouldBundleMvnpmWithoutPackageJson() throws URISyntaxException, IOException {
-        executeTest("/mvnpm/polymer-3.5.1.jar", BundleType.MVNPM, "application-mvnpm-importmap.js", true);
+        executeTest("/mvnpm/polymer-3.5.1.jar", WebDependencyType.MVNPM, "application-mvnpm-importmap.js", true);
     }
 
     @Test
     public void shouldBundle() throws URISyntaxException, IOException {
-        executeTest("/webjars/htmx.org-1.8.4.jar", BundleType.WEBJARS, "application-webjar.js", true);
+        executeTest("/webjars/htmx.org-1.8.4.jar", WebDependencyType.WEBJARS, "application-webjar.js", true);
     }
 
     @Test
     public void shouldWatch() throws URISyntaxException, IOException, InterruptedException {
         // given
-        final BundleOptions options = getBundleOptions("/mvnpm/stimulus-3.2.1.jar", BundleType.MVNPM, "application-mvnpm.js");
+        final BundleOptions options = getBundleOptions("/mvnpm/stimulus-3.2.1.jar", WebDependencyType.MVNPM,
+                "application-mvnpm.js");
 
         // when
         AtomicBoolean isCalled = new AtomicBoolean(false);
@@ -63,7 +64,7 @@ public class BundlerTest {
     @Test
     public void shouldThrowException() {
         assertThrows(BundleException.class, () -> {
-            executeTest("/mvnpm/stimulus-3.2.1.jar", BundleType.MVNPM, "application-error.js", false);
+            executeTest("/mvnpm/stimulus-3.2.1.jar", WebDependencyType.MVNPM, "application-error.js", false);
         });
     }
 
@@ -71,7 +72,7 @@ public class BundlerTest {
     public void shouldResolveRelativeFolders() throws URISyntaxException, IOException {
         // given
         final Path root = new File(getClass().getResource("/path/").toURI()).toPath();
-        final BundleOptions bundleOptions = new BundleOptionsBuilder().setWorkFolder(root)
+        final BundleOptions bundleOptions = new BundleOptionsBuilder().setWorkDir(root)
                 .addAutoEntryPoint(root, "main", List.of("foo/bar.js")).build();
 
         // when
@@ -81,7 +82,7 @@ public class BundlerTest {
         assertTrue(result.dist().toFile().exists());
     }
 
-    private void executeTest(String jarName, BundleType type, String scriptName, boolean check)
+    private void executeTest(String jarName, WebDependencyType type, String scriptName, boolean check)
             throws URISyntaxException, IOException {
         final BundleOptions bundleOptions = getBundleOptions(jarName, type, scriptName);
         final BundleResult result = Bundler.bundle(bundleOptions);
@@ -92,12 +93,13 @@ public class BundlerTest {
 
     }
 
-    private BundleOptions getBundleOptions(String jarName, BundleType type, String scriptName) throws URISyntaxException {
+    private BundleOptions getBundleOptions(String jarName, WebDependencyType type, String scriptName)
+            throws URISyntaxException {
         final File jar = new File(getClass().getResource(jarName).toURI());
         final List<Path> dependencies = Collections.singletonList(jar.toPath());
         final Path rootDir = new File(getClass().getResource("/").toURI()).toPath();
-        return new BundleOptionsBuilder().withDependencies(dependencies)
-                .addEntryPoint(rootDir, scriptName).withType(type).build();
+        return new BundleOptionsBuilder().withDependencies(dependencies, type)
+                .addEntryPoint(rootDir, scriptName).build();
     }
 
 }

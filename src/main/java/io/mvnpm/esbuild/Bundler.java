@@ -1,32 +1,26 @@
 package io.mvnpm.esbuild;
 
-import static io.mvnpm.esbuild.util.Copy.deleteRecursive;
+import static io.mvnpm.esbuild.util.PathUtils.deleteRecursive;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import io.mvnpm.esbuild.install.WebDepsInstaller;
 import io.mvnpm.esbuild.model.BundleOptions;
 import io.mvnpm.esbuild.model.BundleResult;
-import io.mvnpm.esbuild.model.BundleType;
 import io.mvnpm.esbuild.model.EsBuildConfig;
 import io.mvnpm.esbuild.model.ExecuteResult;
 import io.mvnpm.esbuild.resolve.ExecutableResolver;
-import io.mvnpm.esbuild.util.JarInspector;
-import io.mvnpm.esbuild.util.UnZip;
 
 public class Bundler {
     private static final Logger logger = Logger.getLogger(Bundler.class.getName());
 
-    private static final String NODE_MODULES = "node_modules";
     private static final String DIST = "dist";
     public static final String ESBUILD_EMBEDDED_VERSION = resolveEmbeddedVersion();
 
@@ -52,7 +46,8 @@ public class Bundler {
      * @throws IOException when something could not be written
      */
     public static BundleResult bundle(BundleOptions bundleOptions) throws IOException {
-        final Path workDir = installIfNeeded(bundleOptions);
+        final Path workDir = getWorkDir(bundleOptions);
+        install(workDir, bundleOptions);
         final Path dist = workDir.resolve(DIST);
         final EsBuildConfig esBuildConfig = createBundle(bundleOptions, workDir, dist);
 
@@ -77,7 +72,8 @@ public class Bundler {
     }
 
     public static Watch watch(BundleOptions bundleOptions, BuildEventListener eventListener) throws IOException {
-        final Path workDir = installIfNeeded(bundleOptions);
+        final Path workDir = getWorkDir(bundleOptions);
+        install(workDir, bundleOptions);
         final Path dist = workDir.resolve(DIST);
         final EsBuildConfig esBuildConfig = createBundle(bundleOptions, workDir, dist);
 
@@ -86,59 +82,20 @@ public class Bundler {
         return new Watch(process, workDir);
     }
 
-    public static Path installIfNeeded(BundleOptions bundleOptions) throws IOException {
-        if (bundleOptions.getWorkDir() != null && Files.isDirectory(bundleOptions.getWorkDir().resolve(NODE_MODULES))) {
-            return bundleOptions.getWorkDir();
-        }
-        return install(bundleOptions);
-    }
-
-    public static Path install(BundleOptions bundleOptions) throws IOException {
-        final Path workingDir = bundleOptions.getWorkDir() != null ? bundleOptions.getWorkDir()
+    private static Path getWorkDir(BundleOptions bundleOptions) throws IOException {
+        return bundleOptions.getWorkDir() != null ? bundleOptions.getWorkDir()
                 : Files.createTempDirectory("bundle");
-        return extract(workingDir, bundleOptions.getDependencies(), bundleOptions.getType());
     }
 
-    public static Path install(Path workingDir, List<Path> dependencies, BundleType type) throws IOException {
-        return extract(workingDir, dependencies, type);
+    public static void install(Path workDir, BundleOptions bundleOptions) throws IOException {
+        final Path nodeModulesDir = bundleOptions.getNodeModulesDir() == null
+                ? workDir.resolve(BundleOptions.NODE_MODULES)
+                : bundleOptions.getNodeModulesDir();
+        WebDepsInstaller.install(nodeModulesDir, bundleOptions.getDependencies());
     }
 
-    public static void clearDependencies(Path workingDir) throws IOException {
-        deleteRecursive(workingDir.resolve(NODE_MODULES));
-    }
-
-    protected static Path extract(Path bundleDirectory, List<Path> dependencies, BundleType type) throws IOException {
-        final Path nodeModules = bundleDirectory.resolve(NODE_MODULES);
-        if (!Files.exists(nodeModules)) {
-            Files.createDirectories(nodeModules);
-        }
-        final Path tmp = bundleDirectory.resolve("tmp");
-        for (Path path : dependencies) {
-            final String fileName = path.getFileName().toString();
-            final Path extractDir = tmp.resolve(fileName.substring(0, fileName.lastIndexOf(".")));
-            // Only extract new dependencies
-            if (!Files.isDirectory(extractDir)) {
-                UnZip.unzip(path, extractDir);
-                final Map<String, Path> packageNameAndRoot = JarInspector.findPackageNameAndRoot(extractDir, type);
-
-                if (!packageNameAndRoot.isEmpty()) {
-                    for (Map.Entry<String, Path> nameAndRoot : packageNameAndRoot.entrySet()) {
-                        final String packageName = nameAndRoot.getKey();
-                        final Path source = nameAndRoot.getValue();
-                        final Path target = nodeModules.resolve(packageName);
-                        if (!Files.isDirectory(target)) {
-                            Files.createDirectories(target.getParent());
-                            Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
-                        } else {
-                            logger.log(Level.INFO, "skipping package as it already exists ''{0}''", target);
-                        }
-                    }
-                } else {
-                    logger.log(Level.INFO, "package.json not found in package: ''{0}''", fileName);
-                }
-            }
-        }
-        return bundleDirectory;
+    public static void clearDependencies(Path nodeModulesDir) throws IOException {
+        deleteRecursive(nodeModulesDir);
     }
 
     protected static Process esBuild(EsBuildConfig esBuildConfig, BuildEventListener listener) throws IOException {

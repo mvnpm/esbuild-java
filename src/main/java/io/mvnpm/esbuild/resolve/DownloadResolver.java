@@ -7,12 +7,9 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
-
-import org.apache.commons.text.StringSubstitutor;
 
 public class DownloadResolver extends BaseResolver implements Resolver {
-    private static final String URL_TEMPLATE = "https://registry.npmjs.org/@esbuild/${classifier}/-/${classifier}-${version}.tgz";
+    private static final String URL_TEMPLATE = "https://registry.npmjs.org/@esbuild/%1$s/-/%1$s-%2$s.tgz";
     private static final String FILE_NAME = "esbuild.tgz";
 
     public DownloadResolver(Resolver resolver) {
@@ -21,9 +18,7 @@ public class DownloadResolver extends BaseResolver implements Resolver {
 
     @Override
     public Path resolve(String version) throws IOException {
-        final String url = new StringSubstitutor(Map.of(
-                "classifier", CLASSIFIER,
-                "version", version)).replace(URL_TEMPLATE);
+        final String url = URL_TEMPLATE.formatted(CLASSIFIER, version);
 
         final Path destination = createDestination(version);
         final Path tarFile = destination.resolve(FILE_NAME);
