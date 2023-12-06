@@ -37,7 +37,7 @@ public class BundleOptionsBuilder {
         return this;
     }
 
-    public BundleOptionsBuilder setWorkDir(Path workDir) {
+    public BundleOptionsBuilder withWorkDir(Path workDir) {
         this.options.setWorkDir(workDir);
         return this;
     }

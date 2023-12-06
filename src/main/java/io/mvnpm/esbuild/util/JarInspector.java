@@ -33,7 +33,7 @@ public class JarInspector {
     private static final String MAVEN_ROOT = "META-INF/maven";
 
     private static final Map<WebDependency.WebDependencyType, List<String>> PACKAGE_DIRS = Map.of(
-            WebDependency.WebDependencyType.MVNPM, List.of("META-INF/resources/_static", "package"),
+            WebDependency.WebDependencyType.MVNPM, List.of("META-INF/resources/_static", "package", ""),
             WebDependency.WebDependencyType.WEBJARS, List.of("META-INF/resources/webjars"));
     private static final List<String> MULTIPLE_GROUP_IDS = List.of("org.mvnpm.at.mvnpm"); // Group Ids that can contain
                                                                                           // multiple package.jsons

@@ -72,11 +72,11 @@ public class BundlerTest {
     public void shouldResolveRelativeFolders() throws URISyntaxException, IOException {
         // given
         final Path root = new File(getClass().getResource("/path/").toURI()).toPath();
-        final BundleOptions bundleOptions = new BundleOptionsBuilder().setWorkDir(root)
+        final BundleOptions bundleOptions = new BundleOptionsBuilder().withWorkDir(root)
                 .addAutoEntryPoint(root, "main", List.of("foo/bar.js")).build();
 
         // when
-        final BundleResult result = Bundler.bundle(bundleOptions);
+        final BundleResult result = Bundler.bundle(bundleOptions, true);
 
         // then
         assertTrue(result.dist().toFile().exists());
@@ -85,7 +85,7 @@ public class BundlerTest {
     private void executeTest(String jarName, WebDependencyType type, String scriptName, boolean check)
             throws URISyntaxException, IOException {
         final BundleOptions bundleOptions = getBundleOptions(jarName, type, scriptName);
-        final BundleResult result = Bundler.bundle(bundleOptions);
+        final BundleResult result = Bundler.bundle(bundleOptions, true);
 
         if (check) {
             assertTrue(result.dist().toFile().exists());

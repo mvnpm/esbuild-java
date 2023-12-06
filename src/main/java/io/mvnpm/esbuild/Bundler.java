@@ -42,12 +42,15 @@ public class Bundler {
      * Use esbuild to bundle either webjar or mvnpm dependencies into a bundle.
      *
      * @param bundleOptions options to do the bundling with
+     * @param install if the dependencies should be installed before bundling
      * @return the folder that has the result of the transformation
      * @throws IOException when something could not be written
      */
-    public static BundleResult bundle(BundleOptions bundleOptions) throws IOException {
+    public static BundleResult bundle(BundleOptions bundleOptions, boolean install) throws IOException {
         final Path workDir = getWorkDir(bundleOptions);
-        install(workDir, bundleOptions);
+        if (install) {
+            install(workDir, bundleOptions);
+        }
         final Path dist = workDir.resolve(DIST);
         final EsBuildConfig esBuildConfig = createBundle(bundleOptions, workDir, dist);
 
@@ -87,11 +90,11 @@ public class Bundler {
                 : Files.createTempDirectory("bundle");
     }
 
-    public static void install(Path workDir, BundleOptions bundleOptions) throws IOException {
+    public static boolean install(Path workDir, BundleOptions bundleOptions) throws IOException {
         final Path nodeModulesDir = bundleOptions.getNodeModulesDir() == null
                 ? workDir.resolve(BundleOptions.NODE_MODULES)
                 : bundleOptions.getNodeModulesDir();
-        WebDepsInstaller.install(nodeModulesDir, bundleOptions.getDependencies());
+        return WebDepsInstaller.install(nodeModulesDir, bundleOptions.getDependencies());
     }
 
     public static void clearDependencies(Path nodeModulesDir) throws IOException {

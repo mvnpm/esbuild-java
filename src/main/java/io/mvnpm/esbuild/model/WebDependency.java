@@ -1,6 +1,8 @@
 package io.mvnpm.esbuild.model;
 
 import java.nio.file.Path;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 public record WebDependency(String id, Path path, WebDependencyType type) {
 
@@ -14,7 +16,30 @@ public record WebDependency(String id, Path path, WebDependencyType type) {
     }
 
     public enum WebDependencyType {
-        WEBJARS,
-        MVNPM
+        WEBJARS(s -> s.startsWith("org.webjars.npm")),
+        MVNPM(s -> s.startsWith("org.mvnpm"));
+
+        private final Predicate<String> gavMatcher;
+
+        WebDependencyType(Predicate<String> gavMatcher) {
+            this.gavMatcher = gavMatcher;
+        }
+
+        public boolean matches(String gav) {
+            return this.gavMatcher.test(gav);
+        }
+
+        public static boolean anyMatch(String gav) {
+            return resolveType(gav).isPresent();
+        }
+
+        public static Optional<WebDependencyType> resolveType(String gav) {
+            for (WebDependencyType value : values()) {
+                if (value.matches(gav)) {
+                    return Optional.of(value);
+                }
+            }
+            return Optional.empty();
+        }
     }
 }

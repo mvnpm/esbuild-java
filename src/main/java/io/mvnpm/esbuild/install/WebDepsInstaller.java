@@ -31,19 +31,22 @@ public final class WebDepsInstaller {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    public static void install(Path nodeModulesDir, List<WebDependency> dependencies) throws IOException {
-
+    public static boolean install(Path nodeModulesDir, List<WebDependency> dependencies) throws IOException {
         final Path mvnpmInfoFile = getMvnpmInfoPath(nodeModulesDir);
         final MvnpmInfo mvnpmInfo = readMvnpmInfo(mvnpmInfoFile);
-        if (mvnpmInfo.installed().isEmpty()) {
+        if (mvnpmInfo.installed().isEmpty() || dependencies.isEmpty()) {
             // Make sure it is clean
             PathUtils.deleteRecursive(nodeModulesDir);
+        }
+        if (dependencies.isEmpty()) {
+            return true;
         }
         if (!Files.exists(nodeModulesDir)) {
             Files.createDirectories(nodeModulesDir);
         }
         final Path tmp = nodeModulesDir.resolve(MVNPM_DIR).resolve("tmp");
         final Set<MvnpmInfo.InstalledDependency> installed = new HashSet<>();
+        boolean changed = false;
         for (WebDependency dep : dependencies) {
             final Optional<MvnpmInfo.InstalledDependency> alreadyInstalled = mvnpmInfo.installed().stream()
                     .filter(i -> i.id().equals(dep.id())).findFirst();
@@ -52,6 +55,7 @@ public final class WebDepsInstaller {
                 installed.add(alreadyInstalled.get());
                 continue;
             }
+            changed = true;
             final Path extractDir = tmp.resolve(dep.id());
             PathUtils.deleteRecursive(extractDir);
             UnZip.unzip(dep.path(), extractDir);
@@ -78,6 +82,7 @@ public final class WebDepsInstaller {
         PathUtils.deleteRecursive(tmp);
         for (MvnpmInfo.InstalledDependency installedDependency : mvnpmInfo.installed()) {
             if (!installed.contains(installedDependency)) {
+                changed = true;
                 logger.log(Level.FINE, "removing package as it is not needed anymore ''{0}''", installedDependency.id());
                 for (String dir : installedDependency.dirs()) {
                     PathUtils.deleteRecursive(nodeModulesDir.resolve(dir));
@@ -86,6 +91,7 @@ public final class WebDepsInstaller {
         }
         final MvnpmInfo newMvnpmInfo = new MvnpmInfo(installed);
         WebDepsInstaller.writeMvnpmInfo(mvnpmInfoFile, newMvnpmInfo);
+        return changed;
     }
 
     public static Path getMvnpmInfoPath(Path nodeModulesDir) {
