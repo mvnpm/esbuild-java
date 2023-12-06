@@ -6,7 +6,7 @@ esbuild-java
 [![Maven Central](https://img.shields.io/maven-central/v/io.mvnpm/esbuild-java.svg?label=Maven%20Central)](https://search.maven.org/artifact/io.mvnpm/esbuild-java)
 [![Apache License, Version 2.0, January 2004](https://img.shields.io/github/license/apache/maven.svg?label=License)](https://www.apache.org/licenses/LICENSE-2.0)
 
-This is a small warpper around the esbuild executable, so that you can invoke it from java.
+This is a small wrapper around the esbuild executable, so that you can invoke it from java.
 
 ```java
 // create the command line parameters 
@@ -30,9 +30,9 @@ Additionally, it has a utility to bundle a javascript file with webjar or mvnpm 
 
 ```java
 final BundleOptions bundleOptions = new BundleOptionsBuilder().withDependencies(dependencies)
-        .withEntry(entry).withType(type).build();
-final Path path = Bundler.bundle(bundleOptions);
+        .withEntry(entry).build();
+final Path path = Bundler.bundle(bundleOptions, true);
 ```
 
-Dependencies are a list of either webjar or mvnpm bundles, type is the type of the bundles and entry is the javascript.
+Dependencies are a list of either webjar or mvnpm jars.
 Returned is the folder that contains the result of the transformation.

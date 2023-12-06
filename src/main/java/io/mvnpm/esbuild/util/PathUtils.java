@@ -10,7 +10,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class Copy {
+public class PathUtils {
 
     public static void copyEntries(Path rootDir, List<String> entries, Path targetDir) {
         for (String entry : entries) {

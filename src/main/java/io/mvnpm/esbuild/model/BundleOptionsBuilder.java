@@ -32,18 +32,23 @@ public class BundleOptionsBuilder {
         return this;
     }
 
-    public BundleOptionsBuilder setWorkFolder(Path workFolder) {
-        this.options.setWorkDir(workFolder);
+    public BundleOptionsBuilder withNodeModulesDir(Path nodeModulesDir) {
+        this.options.setNodeModulesDir(nodeModulesDir);
         return this;
     }
 
-    public BundleOptionsBuilder withDependencies(List<Path> dependencies) {
+    public BundleOptionsBuilder withWorkDir(Path workDir) {
+        this.options.setWorkDir(workDir);
+        return this;
+    }
+
+    public BundleOptionsBuilder withDependencies(List<Path> dependencies, WebDependency.WebDependencyType type) {
+        this.options.setDependencies(dependencies.stream().map(d -> WebDependency.of(d, type)).toList());
+        return this;
+    }
+
+    public BundleOptionsBuilder withDependencies(List<WebDependency> dependencies) {
         this.options.setDependencies(dependencies);
-        return this;
-    }
-
-    public BundleOptionsBuilder withType(BundleType type) {
-        this.options.setType(type);
         return this;
     }
 

@@ -6,15 +6,17 @@ import java.util.List;
 
 public class BundleOptions {
 
+    public static final String NODE_MODULES = "node_modules";
+
     private List<EntryPoint> entries;
 
-    private List<Path> dependencies = new ArrayList<>();
-
-    private BundleType type;
+    private List<WebDependency> dependencies = new ArrayList<>();
 
     private EsBuildConfig esBuildConfig;
 
     private Path workDir;
+
+    private Path nodeModulesDir;
 
     public List<EntryPoint> getEntries() {
         return entries;
@@ -24,20 +26,12 @@ public class BundleOptions {
         this.entries = entries;
     }
 
-    public List<Path> getDependencies() {
+    public List<WebDependency> getDependencies() {
         return dependencies;
     }
 
-    public void setDependencies(List<Path> dependencies) {
+    public void setDependencies(List<WebDependency> dependencies) {
         this.dependencies = dependencies;
-    }
-
-    public BundleType getType() {
-        return type;
-    }
-
-    public void setType(BundleType type) {
-        this.type = type;
     }
 
     public EsBuildConfig getEsBuildConfig() {
@@ -58,5 +52,14 @@ public class BundleOptions {
 
     public void setWorkDir(Path workDir) {
         this.workDir = workDir;
+    }
+
+    public Path getNodeModulesDir() {
+        return nodeModulesDir;
+    }
+
+    public BundleOptions setNodeModulesDir(Path nodeModulesDir) {
+        this.nodeModulesDir = nodeModulesDir;
+        return this;
     }
 }

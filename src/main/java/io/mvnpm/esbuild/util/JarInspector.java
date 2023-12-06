@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.mvnpm.esbuild.model.BundleType;
+import io.mvnpm.esbuild.model.WebDependency;
 import io.mvnpm.importmap.ImportsDataBinding;
 
 public class JarInspector {
@@ -32,15 +32,15 @@ public class JarInspector {
     public static final String POM_PROPERTIES = "pom.properties";
     private static final String MAVEN_ROOT = "META-INF/maven";
 
-    private static final Map<BundleType, List<String>> PACKAGE_DIRS = Map.of(
-            BundleType.MVNPM, List.of("META-INF/resources/_static", "package"),
-            BundleType.WEBJARS, List.of("META-INF/resources/webjars"));
+    private static final Map<WebDependency.WebDependencyType, List<String>> PACKAGE_DIRS = Map.of(
+            WebDependency.WebDependencyType.MVNPM, List.of("META-INF/resources/_static", "package", ""),
+            WebDependency.WebDependencyType.WEBJARS, List.of("META-INF/resources/webjars"));
     private static final List<String> MULTIPLE_GROUP_IDS = List.of("org.mvnpm.at.mvnpm"); // Group Ids that can contain
                                                                                           // multiple package.jsons
                                                                                           // TODO: Allow this to be
                                                                                           // configured
 
-    public static Map<String, Path> findPackageNameAndRoot(Path extractDir, BundleType type) {
+    public static Map<String, Path> findPackageNameAndRoot(Path extractDir, WebDependency.WebDependencyType type) {
 
         Path dir = getPackageRootPath(extractDir, type);
 
@@ -56,14 +56,14 @@ public class JarInspector {
         Map<String, Path> found = findPackageNameAndRootWithPackage(dir, shouldDoMultiple);
 
         // If this is mvnpm and we could not find package.json we can try another way
-        if (found.isEmpty() && type.equals(BundleType.MVNPM)) {
+        if (found.isEmpty() && type.equals(WebDependency.WebDependencyType.MVNPM)) {
             found = findPackageNameAndRootWithImportMap(extractDir, properties);
         }
 
         return found;
     }
 
-    private static Path getPackageRootPath(Path extractDir, BundleType type) {
+    private static Path getPackageRootPath(Path extractDir, WebDependency.WebDependencyType type) {
         if (!PACKAGE_DIRS.containsKey(type)) {
             throw new RuntimeException("Invalid BundleType: " + type);
         }
@@ -76,10 +76,10 @@ public class JarInspector {
         return null;
     }
 
-    private static Properties getProperties(Path extractDir, BundleType type) {
+    private static Properties getProperties(Path extractDir, WebDependency.WebDependencyType type) {
         Properties properties = new Properties();
 
-        if (type.equals(BundleType.MVNPM)) { // Only mvnpm support composite
+        if (type.equals(WebDependency.WebDependencyType.MVNPM)) { // Only mvnpm support composite
             properties = getPomProperties(extractDir);
         }
 

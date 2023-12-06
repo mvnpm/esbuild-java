@@ -1,6 +1,6 @@
 package io.mvnpm.esbuild.model;
 
-import static io.mvnpm.esbuild.util.Copy.copyEntries;
+import static io.mvnpm.esbuild.util.PathUtils.copyEntries;
 
 import java.io.IOException;
 import java.io.StringWriter;
