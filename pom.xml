@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.mvnpm</groupId>
   <artifactId>esbuild-java</artifactId>
   <name>esbuild wrapper for Java</name>
-  <version>999-SNAPSHOT</version>
+  <version>1.1.0</version>
 
   <description>Small wrapper around esbuild to be able to use it in Java</description>
 
@@ -16,6 +14,7 @@
     <connection>scm:git:git://github.com/mvnpm/esbuild-java.git</connection>
     <developerConnection>scm:git:ssh://github.com:mvnpm/esbuild-java.git</developerConnection>
     <url>http://github.com/mvnpm/esbuild-java/tree/main</url>
+    <tag>1.1.0</tag>
   </scm>
   <licenses>
     <license>
@@ -122,13 +121,13 @@
             <configuration>
               <target>
                 <get dest="src/main/resources" skipexisting="true">
-                  <url url="https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-${esbuild.version}.tgz"/>
-                  <url url="https://registry.npmjs.org/@esbuild/darwin-x64/-/darwin-x64-${esbuild.version}.tgz"/>
-                  <url url="https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-${esbuild.version}.tgz"/>
-                  <url url="https://registry.npmjs.org/@esbuild/win32-ia32/-/win32-ia32-${esbuild.version}.tgz"/>
-                  <url url="https://registry.npmjs.org/@esbuild/linux-arm64/-/linux-arm64-${esbuild.version}.tgz"/>
-                  <url url="https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-${esbuild.version}.tgz"/>
-                  <url url="https://registry.npmjs.org/@esbuild/linux-ia32/-/linux-ia32-${esbuild.version}.tgz"/>
+                  <url url="https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-${esbuild.version}.tgz" />
+                  <url url="https://registry.npmjs.org/@esbuild/darwin-x64/-/darwin-x64-${esbuild.version}.tgz" />
+                  <url url="https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-${esbuild.version}.tgz" />
+                  <url url="https://registry.npmjs.org/@esbuild/win32-ia32/-/win32-ia32-${esbuild.version}.tgz" />
+                  <url url="https://registry.npmjs.org/@esbuild/linux-arm64/-/linux-arm64-${esbuild.version}.tgz" />
+                  <url url="https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-${esbuild.version}.tgz" />
+                  <url url="https://registry.npmjs.org/@esbuild/linux-ia32/-/linux-ia32-${esbuild.version}.tgz" />
                 </get>
               </target>
             </configuration>
