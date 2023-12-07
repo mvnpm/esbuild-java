@@ -191,7 +191,7 @@
         </dependencies>
         <configuration>
           <configFile>eclipse-format.xml</configFile>
-          <lineEnding>LF</lineEnding>
+          <lineEnding>KEEP</lineEnding>
         </configuration>
         <executions>
           <execution>

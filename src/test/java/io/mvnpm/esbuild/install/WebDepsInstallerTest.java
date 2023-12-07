@@ -27,8 +27,8 @@ public class WebDepsInstallerTest {
         final MvnpmInfo mvnpmInfo = readMvnpmInfo(getMvnpmInfoPath(tempDir));
         assertEquals(2, mvnpmInfo.installed().size());
         assertEquals(mvnpmInfo.installed(),
-                Set.of(new MvnpmInfo.InstalledDependency("stimulus-3.2.1", List.of("@hotwired/stimulus")),
-                        new MvnpmInfo.InstalledDependency("hooks-0.4.9", List.of("@restart/hooks"))));
+                Set.of(new MvnpmInfo.InstalledDependency("org.something:stimulus-3.2.1", List.of("@hotwired/stimulus")),
+                        new MvnpmInfo.InstalledDependency("org.something:hooks-0.4.9", List.of("@restart/hooks"))));
     }
 
     @Test
@@ -39,8 +39,8 @@ public class WebDepsInstallerTest {
         final MvnpmInfo mvnpmInfo = readMvnpmInfo(getMvnpmInfoPath(tempDir));
         assertEquals(2, mvnpmInfo.installed().size());
         assertEquals(mvnpmInfo.installed(),
-                Set.of(new MvnpmInfo.InstalledDependency("stimulus-3.2.1", List.of("@hotwired/stimulus")),
-                        new MvnpmInfo.InstalledDependency("hooks-0.4.9", List.of("@restart/hooks"))));
+                Set.of(new MvnpmInfo.InstalledDependency("org.something:stimulus-3.2.1", List.of("@hotwired/stimulus")),
+                        new MvnpmInfo.InstalledDependency("org.something:hooks-0.4.9", List.of("@restart/hooks"))));
     }
 
     @Test
@@ -51,15 +51,16 @@ public class WebDepsInstallerTest {
         final MvnpmInfo mvnpmInfo = readMvnpmInfo(getMvnpmInfoPath(tempDir));
         assertEquals(2, mvnpmInfo.installed().size());
         assertEquals(mvnpmInfo.installed(),
-                Set.of(new MvnpmInfo.InstalledDependency("react-bootstrap-2.7.4", List.of("react-bootstrap")),
-                        new MvnpmInfo.InstalledDependency("hooks-0.4.9", List.of("@restart/hooks"))));
+                Set.of(new MvnpmInfo.InstalledDependency("org.something:react-bootstrap-2.7.4", List.of("react-bootstrap")),
+                        new MvnpmInfo.InstalledDependency("org.something:hooks-0.4.9", List.of("@restart/hooks"))));
         assertFalse(Files.exists(tempDir.resolve("@hotwired/stimulus")));
         install(tempDir, getWebDependencies(List.of("/mvnpm/react-bootstrap-2.7.4.jar", "/mvnpm/hooks-0.4.9.jar",
                 "/mvnpm/vaadin-webcomponents-24.1.6.jar")));
         final MvnpmInfo mvnpmInfo2 = readMvnpmInfo(getMvnpmInfoPath(tempDir));
         assertEquals(3, mvnpmInfo2.installed().size());
         final MvnpmInfo.InstalledDependency installedVaadin = mvnpmInfo2.installed().stream()
-                .filter(installedDependency -> installedDependency.id().equals("vaadin-webcomponents-24.1.6")).findFirst()
+                .filter(installedDependency -> installedDependency.id().equals("org.something:vaadin-webcomponents-24.1.6"))
+                .findFirst()
                 .get();
         assertEquals(55, installedVaadin.dirs().size());
         install(tempDir, getWebDependencies(
@@ -67,9 +68,9 @@ public class WebDepsInstallerTest {
         final MvnpmInfo mvnpmInfo3 = readMvnpmInfo(getMvnpmInfoPath(tempDir));
         assertEquals(3, mvnpmInfo2.installed().size());
         assertEquals(mvnpmInfo3.installed(),
-                Set.of(new MvnpmInfo.InstalledDependency("react-bootstrap-2.7.4", List.of("react-bootstrap")),
-                        new MvnpmInfo.InstalledDependency("hooks-0.4.9", List.of("@restart/hooks")),
-                        new MvnpmInfo.InstalledDependency("moment-2.29.4-sources", List.of("moment"))));
+                Set.of(new MvnpmInfo.InstalledDependency("org.something:react-bootstrap-2.7.4", List.of("react-bootstrap")),
+                        new MvnpmInfo.InstalledDependency("org.something:hooks-0.4.9", List.of("@restart/hooks")),
+                        new MvnpmInfo.InstalledDependency("org.something:moment-2.29.4-sources", List.of("moment"))));
         for (String dir : installedVaadin.dirs()) {
             assertFalse(Files.exists(tempDir.resolve(dir)));
         }
@@ -84,8 +85,8 @@ public class WebDepsInstallerTest {
         final MvnpmInfo mvnpmInfo = readMvnpmInfo(getMvnpmInfoPath(tempDir));
         assertEquals(2, mvnpmInfo.installed().size());
         assertEquals(mvnpmInfo.installed(),
-                Set.of(new MvnpmInfo.InstalledDependency("react-bootstrap-2.7.4", List.of("react-bootstrap")),
-                        new MvnpmInfo.InstalledDependency("hooks-0.4.9", List.of("@restart/hooks"))));
+                Set.of(new MvnpmInfo.InstalledDependency("org.something:react-bootstrap-2.7.4", List.of("react-bootstrap")),
+                        new MvnpmInfo.InstalledDependency("org.something:hooks-0.4.9", List.of("@restart/hooks"))));
     }
 
     private List<WebDependency> getWebDependencies(List<String> jarNames) {
@@ -95,6 +96,7 @@ public class WebDepsInstallerTest {
             } catch (URISyntaxException e) {
                 throw new RuntimeException(e);
             }
-        }).map(d -> WebDependency.of(d, WebDependency.WebDependencyType.MVNPM)).toList();
+        }).map(d -> WebDependency.of("org.something:" + d.getFileName().toString().replace(".jar", ""), d,
+                WebDependency.WebDependencyType.MVNPM)).toList();
     }
 }
