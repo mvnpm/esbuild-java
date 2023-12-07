@@ -56,7 +56,7 @@ public final class WebDepsInstaller {
                 continue;
             }
             changed = true;
-            final Path extractDir = tmp.resolve(dep.id());
+            final Path extractDir = tmp.resolve(dep.id().replace(":", "/"));
             PathUtils.deleteRecursive(extractDir);
             UnZip.unzip(dep.path(), extractDir);
             final Map<String, Path> packageNameAndRoot = JarInspector.findPackageNameAndRoot(extractDir, dep.type());
