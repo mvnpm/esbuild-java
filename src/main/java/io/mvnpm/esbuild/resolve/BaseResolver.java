@@ -84,7 +84,7 @@ public abstract class BaseResolver {
 
             ArchiveEntry entry;
             while ((entry = tarIn.getNextEntry()) != null) {
-                if (!tarIn.canReadEntryData(entry)) {
+                if (!tarIn.canReadEntryData(entry) || entry.isDirectory()) {
                     // Entry is a directory or symbolic link, skip it
                     continue;
                 }

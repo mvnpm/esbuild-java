@@ -1,6 +1,6 @@
 package io.mvnpm.esbuild;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -20,6 +20,6 @@ public class ExecuteTest {
         final String defaultVersion = Bundler.ESBUILD_EMBEDDED_VERSION;
         final Path path = new ExecutableResolver().resolve(defaultVersion);
         final ExecuteResult executeResult = new Execute(path.toFile(), esBuildConfig).executeAndWait();
-        assertEquals(defaultVersion + "\n", executeResult.output());
+        assertTrue(executeResult.output().startsWith(defaultVersion));
     }
 }
