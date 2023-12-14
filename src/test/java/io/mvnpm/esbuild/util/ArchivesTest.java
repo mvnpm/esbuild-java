@@ -37,7 +37,7 @@ public class ArchivesTest {
 
         // when
         Archives.unzip(jarFile.toPath(), temp);
-        Path mvnpmBuildPackage = JarInspector.findMvnpmBuildArchive(temp);
+        Path mvnpmBuildPackage = JarInspector.findMvnpmMoreArchive(temp);
         Assertions.assertNotNull(mvnpmBuildPackage);
         Archives.unTgz(mvnpmBuildPackage, mvnpmBuildPackage.getParent());
 
