@@ -18,8 +18,8 @@ class PackageJsonTest {
     @Test
     void findPackageMVNPMTest() throws URISyntaxException, IOException {
         final Path temp = Files.createTempDirectory("findPackageMVNPMTest");
-        UnZip.unzip(new File(getClass().getResource("/mvnpm/react-bootstrap-2.7.4.jar").toURI()).toPath(), temp);
-        final Map<String, Path> packageNameAndRoot = JarInspector.findPackageNameAndRoot(temp,
+        Archives.unzip(new File(getClass().getResource("/mvnpm/react-bootstrap-2.7.4.jar").toURI()).toPath(), temp);
+        final Map<String, Path> packageNameAndRoot = JarInspector.findPackageNameAndRoot("react-bootstrap-2.7.4", temp,
                 WebDependency.WebDependencyType.MVNPM);
         assertFalse(packageNameAndRoot.isEmpty());
         Map.Entry<String, Path> next = packageNameAndRoot.entrySet().iterator().next();
@@ -30,8 +30,8 @@ class PackageJsonTest {
     @Test
     void findPackageMVNPMCompositeTest() throws URISyntaxException, IOException {
         final Path temp = Files.createTempDirectory("findPackageMVNPMCompositeTest");
-        UnZip.unzip(new File(getClass().getResource("/mvnpm/vaadin-webcomponents-24.1.6.jar").toURI()).toPath(), temp);
-        final Map<String, Path> packageNameAndRoot = JarInspector.findPackageNameAndRoot(temp,
+        Archives.unzip(new File(getClass().getResource("/mvnpm/vaadin-webcomponents-24.1.6.jar").toURI()).toPath(), temp);
+        final Map<String, Path> packageNameAndRoot = JarInspector.findPackageNameAndRoot("vaadin-webcomponents-24.1.6", temp,
                 WebDependency.WebDependencyType.MVNPM);
         assertFalse(packageNameAndRoot.isEmpty());
         assertTrue(packageNameAndRoot.size() > 1);
@@ -40,8 +40,8 @@ class PackageJsonTest {
     @Test
     void findPackageWebjarsTest() throws URISyntaxException, IOException {
         final Path temp = Files.createTempDirectory("findPackageWebjarsTest");
-        UnZip.unzip(new File(getClass().getResource("/webjars/restart__hooks-0.4.9.jar").toURI()).toPath(), temp);
-        final Map<String, Path> packageNameAndRoot = JarInspector.findPackageNameAndRoot(temp,
+        Archives.unzip(new File(getClass().getResource("/webjars/restart__hooks-0.4.9.jar").toURI()).toPath(), temp);
+        final Map<String, Path> packageNameAndRoot = JarInspector.findPackageNameAndRoot("restart__hooks-0.4.9", temp,
                 WebDependency.WebDependencyType.WEBJARS);
         assertFalse(packageNameAndRoot.isEmpty());
         Map.Entry<String, Path> next = packageNameAndRoot.entrySet().iterator().next();

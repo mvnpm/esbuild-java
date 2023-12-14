@@ -14,12 +14,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Queue;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.mvnpm.esbuild.install.InstallException;
 import io.mvnpm.esbuild.model.WebDependency;
 import io.mvnpm.importmap.ImportsDataBinding;
 
@@ -32,15 +34,27 @@ public class JarInspector {
     public static final String POM_PROPERTIES = "pom.properties";
     private static final String MAVEN_ROOT = "META-INF/maven";
 
+    private static final String MVNPM_PACKAGING_VERSION_KEY = "mvnpm.packagingVersion";
+
+    private static final Set<String> COMPATIBLE_MVNPM_PACKAGING_VERSIONS = Set.of("1");
+    public static final String BUILD_ARCHIVE = "META-INF/.build.tgz";
     private static final Map<WebDependency.WebDependencyType, List<String>> PACKAGE_DIRS = Map.of(
             WebDependency.WebDependencyType.MVNPM, List.of("META-INF/resources/_static", ""),
             WebDependency.WebDependencyType.WEBJARS, List.of("META-INF/resources/webjars"));
     private static final List<String> MULTIPLE_GROUP_IDS = List.of("org.mvnpm.at.mvnpm"); // Group Ids that can contain
-                                                                                          // multiple package.jsons
-                                                                                          // TODO: Allow this to be
-                                                                                          // configured
+    // multiple package.jsons
+    // TODO: Allow this to be
+    // configured
 
-    public static Map<String, Path> findPackageNameAndRoot(Path extractDir, WebDependency.WebDependencyType type) {
+    public static Path findMvnpmBuildArchive(Path dir) {
+        final Path buildPackage = dir.resolve(BUILD_ARCHIVE);
+        if (Files.exists(buildPackage)) {
+            return buildPackage;
+        }
+        return null;
+    }
+
+    public static Map<String, Path> findPackageNameAndRoot(String id, Path extractDir, WebDependency.WebDependencyType type) {
 
         Path dir = getPackageRootPath(extractDir, type);
 
@@ -48,7 +62,7 @@ public class JarInspector {
             return Map.of();
         }
 
-        Properties properties = getProperties(extractDir, type);
+        Properties properties = getProperties(id, extractDir, type);
         String groupId = properties.getProperty("groupId", "");
         boolean shouldDoMultiple = MULTIPLE_GROUP_IDS.contains(groupId);
 
@@ -76,11 +90,22 @@ public class JarInspector {
         return null;
     }
 
-    private static Properties getProperties(Path extractDir, WebDependency.WebDependencyType type) {
+    private static Properties getProperties(String id, Path extractDir, WebDependency.WebDependencyType type) {
         Properties properties = new Properties();
 
         if (type.equals(WebDependency.WebDependencyType.MVNPM)) { // Only mvnpm support composite
             properties = getPomProperties(extractDir);
+        }
+
+        final String mvnpmPackagingVersion = properties.getProperty(MVNPM_PACKAGING_VERSION_KEY);
+        if (mvnpmPackagingVersion != null) {
+            final String[] split = mvnpmPackagingVersion.split("\\.");
+            if (split.length > 0 && !COMPATIBLE_MVNPM_PACKAGING_VERSIONS.contains(split[0])) {
+                throw new InstallException(
+                        "This version of esbuild-java is not compatible with this artifact packaging structure: " + id
+                                + " (upgrade the version of esbuild-java or use a previous version of this package).",
+                        id);
+            }
         }
 
         return properties;
