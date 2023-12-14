@@ -1,5 +1,7 @@
 package io.mvnpm.esbuild.install;
 
+import static io.mvnpm.esbuild.util.JarInspector.findMvnpmBuildArchive;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -20,9 +22,9 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.mvnpm.esbuild.model.WebDependency;
+import io.mvnpm.esbuild.util.Archives;
 import io.mvnpm.esbuild.util.JarInspector;
 import io.mvnpm.esbuild.util.PathUtils;
-import io.mvnpm.esbuild.util.UnZip;
 
 public final class WebDepsInstaller {
 
@@ -59,8 +61,15 @@ public final class WebDepsInstaller {
             changed = true;
             final Path extractDir = tmp.resolve(dep.id().replace(":", "/"));
             PathUtils.deleteRecursive(extractDir);
-            UnZip.unzip(dep.path(), extractDir);
-            final Map<String, Path> packageNameAndRoot = JarInspector.findPackageNameAndRoot(extractDir, dep.type());
+            Archives.unzip(dep.path(), extractDir);
+            if (dep.type() == WebDependency.WebDependencyType.MVNPM) {
+                final Path mvnpmBuildPackage = findMvnpmBuildArchive(extractDir);
+                if (mvnpmBuildPackage != null) {
+                    logger.log(Level.FINE, "found build package ''{0}''", mvnpmBuildPackage);
+                    Archives.unTgz(mvnpmBuildPackage, mvnpmBuildPackage.getParent());
+                }
+            }
+            final Map<String, Path> packageNameAndRoot = JarInspector.findPackageNameAndRoot(dep.id(), extractDir, dep.type());
             List<String> dirs = new ArrayList<>();
             if (!packageNameAndRoot.isEmpty()) {
                 for (Map.Entry<String, Path> nameAndRoot : packageNameAndRoot.entrySet()) {
@@ -83,7 +92,7 @@ public final class WebDepsInstaller {
         PathUtils.deleteRecursive(tmp);
         Set<String> installedDirs = installed.stream().flatMap(i -> i.dirs().stream()).collect(Collectors.toSet());
         Set<String> legacyDirs = mvnpmInfo.installed().stream().flatMap(i -> i.dirs().stream())
-            .collect(Collectors.toSet());
+                .collect(Collectors.toSet());
         // we are not deleting all the legacy dependencies, some of the dirs might still be used by new ones (e.g version or classifier change).
         for (String legacyDir : legacyDirs) {
             if (!installedDirs.contains(legacyDir)) {
