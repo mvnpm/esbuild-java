@@ -1,6 +1,6 @@
 package io.mvnpm.esbuild.install;
 
-import static io.mvnpm.esbuild.util.JarInspector.findMvnpmBuildArchive;
+import static io.mvnpm.esbuild.util.JarInspector.findMvnpmMoreArchive;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,10 +63,10 @@ public final class WebDepsInstaller {
             PathUtils.deleteRecursive(extractDir);
             Archives.unzip(dep.path(), extractDir);
             if (dep.type() == WebDependency.WebDependencyType.MVNPM) {
-                final Path mvnpmBuildPackage = findMvnpmBuildArchive(extractDir);
-                if (mvnpmBuildPackage != null) {
-                    logger.log(Level.FINE, "found build package ''{0}''", mvnpmBuildPackage);
-                    Archives.unTgz(mvnpmBuildPackage, mvnpmBuildPackage.getParent());
+                final Path mvnpmMoreArchive = findMvnpmMoreArchive(extractDir);
+                if (mvnpmMoreArchive != null) {
+                    logger.log(Level.FINE, "Found more archive ''{0}''", mvnpmMoreArchive);
+                    Archives.unTgz(mvnpmMoreArchive, mvnpmMoreArchive.getParent());
                 }
             }
             final Map<String, Path> packageNameAndRoot = JarInspector.findPackageNameAndRoot(dep.id(), extractDir, dep.type());

@@ -37,7 +37,7 @@ public class JarInspector {
     private static final String MVNPM_PACKAGING_VERSION_KEY = "mvnpm.packagingVersion";
 
     private static final Set<String> COMPATIBLE_MVNPM_PACKAGING_VERSIONS = Set.of("1");
-    public static final String BUILD_ARCHIVE = "META-INF/.build.tgz";
+    public static final String MVNPM_MORE_ARCHIVE = "META-INF/.more.tgz";
     private static final Map<WebDependency.WebDependencyType, List<String>> PACKAGE_DIRS = Map.of(
             WebDependency.WebDependencyType.MVNPM, List.of("META-INF/resources/_static", ""),
             WebDependency.WebDependencyType.WEBJARS, List.of("META-INF/resources/webjars"));
@@ -46,10 +46,10 @@ public class JarInspector {
     // TODO: Allow this to be
     // configured
 
-    public static Path findMvnpmBuildArchive(Path dir) {
-        final Path buildPackage = dir.resolve(BUILD_ARCHIVE);
-        if (Files.exists(buildPackage)) {
-            return buildPackage;
+    public static Path findMvnpmMoreArchive(Path dir) {
+        final Path moreArchive = dir.resolve(MVNPM_MORE_ARCHIVE);
+        if (Files.exists(moreArchive)) {
+            return moreArchive;
         }
         return null;
     }
