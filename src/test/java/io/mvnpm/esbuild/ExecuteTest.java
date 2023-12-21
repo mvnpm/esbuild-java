@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +20,9 @@ public class ExecuteTest {
         esBuildConfig.setVersion(true);
         final String defaultVersion = Bundler.ESBUILD_EMBEDDED_VERSION;
         final Path path = new ExecutableResolver().resolve(defaultVersion);
-        final ExecuteResult executeResult = new Execute(path.toFile(), esBuildConfig).executeAndWait();
+        String workingDirectory = System.getProperty("user.dir");
+        final ExecuteResult executeResult = new Execute(Paths.get(workingDirectory), path.toFile(), esBuildConfig)
+                .executeAndWait();
         assertTrue(executeResult.output().startsWith(defaultVersion));
     }
 }
