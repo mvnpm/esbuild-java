@@ -54,7 +54,7 @@ public class Bundler {
         final Path dist = workDir.resolve(DIST);
         final EsBuildConfig esBuildConfig = createBundle(bundleOptions, workDir, dist);
 
-        final ExecuteResult executeResult = esBuild(esBuildConfig);
+        final ExecuteResult executeResult = esBuild(workDir, esBuildConfig);
 
         if (!Files.isDirectory(dist)) {
             throw new BundleException("Unexpected Error during bundling", executeResult.output());
@@ -81,7 +81,7 @@ public class Bundler {
         final EsBuildConfig esBuildConfig = createBundle(bundleOptions, workDir, dist);
 
         bundleOptions.getEsBuildConfig().setWatch(true);
-        final Process process = esBuild(esBuildConfig, eventListener);
+        final Process process = esBuild(workDir, esBuildConfig, eventListener);
         return new Watch(process, workDir);
     }
 
@@ -101,15 +101,16 @@ public class Bundler {
         deleteRecursive(nodeModulesDir);
     }
 
-    protected static Process esBuild(EsBuildConfig esBuildConfig, BuildEventListener listener) throws IOException {
+    protected static Process esBuild(Path workDir, EsBuildConfig esBuildConfig, BuildEventListener listener)
+            throws IOException {
         final Path esBuildExec = new ExecutableResolver().resolve(Bundler.ESBUILD_EMBEDDED_VERSION);
-        final Execute execute = new Execute(esBuildExec.toFile(), esBuildConfig);
+        final Execute execute = new Execute(workDir, esBuildExec.toFile(), esBuildConfig);
         return execute.execute(listener);
     }
 
-    protected static ExecuteResult esBuild(EsBuildConfig esBuildConfig) throws IOException {
+    protected static ExecuteResult esBuild(Path workDir, EsBuildConfig esBuildConfig) throws IOException {
         final Path esBuildExec = new ExecutableResolver().resolve(Bundler.ESBUILD_EMBEDDED_VERSION);
-        final Execute execute = new Execute(esBuildExec.toFile(), esBuildConfig);
+        final Execute execute = new Execute(workDir, esBuildExec.toFile(), esBuildConfig);
         return execute.executeAndWait();
     }
 

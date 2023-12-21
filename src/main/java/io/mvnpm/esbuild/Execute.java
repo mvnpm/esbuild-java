@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,16 +30,19 @@ public class Execute {
     });
     private static final Logger logger = Logger.getLogger(Execute.class.getName());
 
+    private final Path workDir;
     private final File esBuildExec;
     private EsBuildConfig esBuildConfig;
     private String[] args;
 
-    public Execute(File esBuildExec, EsBuildConfig esBuildConfig) {
+    public Execute(Path workDir, File esBuildExec, EsBuildConfig esBuildConfig) {
+        this.workDir = workDir;
         this.esBuildExec = esBuildExec;
         this.esBuildConfig = esBuildConfig;
     }
 
-    public Execute(File esBuildExec, String[] args) {
+    public Execute(Path workDir, File esBuildExec, String[] args) {
+        this.workDir = workDir;
         this.esBuildExec = esBuildExec;
         this.args = args;
     }
@@ -85,7 +89,7 @@ public class Execute {
     }
 
     public Process createProcess(final String[] command, final Optional<BuildEventListener> listener) throws IOException {
-        Process process = new ProcessBuilder().command(command).start();
+        Process process = new ProcessBuilder().directory(workDir.toFile()).command(command).start();
         final InputStream s = process.getErrorStream();
         if (listener.isPresent()) {
             EXECUTOR.execute(new Streamer(process::isAlive, s, listener.get()));
