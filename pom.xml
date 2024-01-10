@@ -38,7 +38,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <esbuild.version>0.19.5</esbuild.version>
     <quarkus.version>3.6.0</quarkus.version>
-    <esbuild.scss.version>v0.0.2</esbuild.scss.version>
+    <esbuild.scss.version>v0.0.3</esbuild.scss.version>
     <formatter.plugin.version>2.23.0</formatter.plugin.version>
     <impsort.plugin.version>1.9.0</impsort.plugin.version>
     <quarkus.ide-config.version>3.5.0</quarkus.ide-config.version>
