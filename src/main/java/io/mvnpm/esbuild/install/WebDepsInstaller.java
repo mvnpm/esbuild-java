@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -79,7 +78,7 @@ public final class WebDepsInstaller {
                     dirs.add(packageName);
                     PathUtils.deleteRecursive(target);
                     Files.createDirectories(target.getParent());
-                    Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+                    PathUtils.safeMove(source, target);
                     logger.log(Level.FINE, "installed package ''{0}''", packageName);
                 }
                 installed.add(new MvnpmInfo.InstalledDependency(dep.id(), dirs));
