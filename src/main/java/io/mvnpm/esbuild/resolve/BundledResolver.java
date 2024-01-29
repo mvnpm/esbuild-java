@@ -12,7 +12,7 @@ public class BundledResolver extends BaseResolver implements Resolver {
 
     @Override
     public Path resolve(String version) throws IOException {
-        final InputStream resource = getClass().getResourceAsStream("/%s-%s.tgz".formatted(CLASSIFIER, version));
+        final InputStream resource = getClass().getResourceAsStream("/mvnpm-esbuild-%s-%s.tgz".formatted(CLASSIFIER, version));
 
         if (resource != null) {
             return extract(resource, version);

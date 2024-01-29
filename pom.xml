@@ -122,13 +122,13 @@
             <configuration>
               <target>
                 <get dest="src/main/resources" skipexisting="true">
-                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/darwin-arm64-${esbuild.version}.tgz"/>
-                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/darwin-x64-${esbuild.version}.tgz"/>
-                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/win32-x64-${esbuild.version}.tgz"/>
-                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/win32-ia32-${esbuild.version}.tgz"/>
-                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/linux-arm64-${esbuild.version}.tgz"/>
-                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/linux-x64-${esbuild.version}.tgz"/>
-                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/linux-ia32-${esbuild.version}.tgz"/>
+                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/mvnpm-esbuild-darwin-arm64-${esbuild.version}.tgz"/>
+                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/mvnpm-esbuild-darwin-x64-${esbuild.version}.tgz"/>
+                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/mvnpm-esbuild-win32-x64-${esbuild.version}.tgz"/>
+                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/mvnpm-esbuild-win32-ia32-${esbuild.version}.tgz"/>
+                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/mvnpm-esbuild-linux-arm64-${esbuild.version}.tgz"/>
+                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/mvnpm-esbuild-linux-x64-${esbuild.version}.tgz"/>
+                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/mvnpm-esbuild-linux-ia32-${esbuild.version}.tgz"/>
                 </get>
               </target>
             </configuration>
