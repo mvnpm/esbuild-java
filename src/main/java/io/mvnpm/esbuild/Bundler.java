@@ -103,15 +103,19 @@ public class Bundler {
 
     protected static Process esBuild(Path workDir, EsBuildConfig esBuildConfig, BuildEventListener listener)
             throws IOException {
-        final Path esBuildExec = new ExecutableResolver().resolve(Bundler.ESBUILD_EMBEDDED_VERSION);
-        final Execute execute = new Execute(workDir, esBuildExec.toFile(), esBuildConfig);
+        final Execute execute = getExecute(workDir, esBuildConfig);
         return execute.execute(listener);
     }
 
     protected static ExecuteResult esBuild(Path workDir, EsBuildConfig esBuildConfig) throws IOException {
-        final Path esBuildExec = new ExecutableResolver().resolve(Bundler.ESBUILD_EMBEDDED_VERSION);
-        final Execute execute = new Execute(workDir, esBuildExec.toFile(), esBuildConfig);
+        final Execute execute = getExecute(workDir, esBuildConfig);
         return execute.executeAndWait();
     }
 
+    private static Execute getExecute(Path workDir, EsBuildConfig esBuildConfig) throws IOException {
+        final String version = esBuildConfig.getEsBuildVersion() != null ? esBuildConfig.getEsBuildVersion()
+                : Bundler.ESBUILD_EMBEDDED_VERSION;
+        final Path esBuildExec = new ExecutableResolver().resolve(version);
+        return new Execute(workDir, esBuildExec.toFile(), esBuildConfig);
+    }
 }

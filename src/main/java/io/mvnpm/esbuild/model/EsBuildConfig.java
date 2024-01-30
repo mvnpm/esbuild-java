@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class EsBuildConfig {
+    private String esBuildVersion;
     private boolean bundle;
 
     private String[] entryPoint;
@@ -87,6 +88,14 @@ public class EsBuildConfig {
     private String publicPath;
 
     private final List<String> external = new ArrayList<>();
+
+    public String getEsBuildVersion() {
+        return esBuildVersion;
+    }
+
+    public void setEsBuildVersion(String esBuildVersion) {
+        this.esBuildVersion = esBuildVersion;
+    }
 
     public boolean isBundle() {
         return bundle;

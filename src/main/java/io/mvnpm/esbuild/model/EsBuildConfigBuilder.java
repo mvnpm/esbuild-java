@@ -50,6 +50,11 @@ public class EsBuildConfigBuilder {
         return loaders;
     }
 
+    public EsBuildConfigBuilder esbuildVersion(String esbuildVersion) {
+        esBuildConfig.setEsBuildVersion(esbuildVersion);
+        return this;
+    }
+
     public EsBuildConfigBuilder bundle() {
         esBuildConfig.setBundle(true);
         return this;
