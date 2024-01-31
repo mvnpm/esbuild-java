@@ -69,9 +69,9 @@ public abstract class BaseResolver {
         return classifier;
     }
 
-    static Path extract(InputStream archive, String version) throws IOException {
-        final File destination = createDestination(version).toFile();
-        return extract(archive, destination);
+    static Path extract(InputStream archive, String destination) throws IOException {
+        final File destinationFile = createDestination(destination).toFile();
+        return extract(archive, destinationFile);
     }
 
     static Path extract(InputStream archive, File destination) throws IOException {
@@ -84,7 +84,7 @@ public abstract class BaseResolver {
 
             ArchiveEntry entry;
             while ((entry = tarIn.getNextEntry()) != null) {
-                if (!tarIn.canReadEntryData(entry)) {
+                if (!tarIn.canReadEntryData(entry) || entry.isDirectory()) {
                     // Entry is a directory or symbolic link, skip it
                     continue;
                 }

@@ -9,19 +9,18 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import io.mvnpm.esbuild.Bundler;
-
 public class DownloadResolverTest extends BundleTester {
+    private static final String TEST_VERSION = "0.19.9";
 
     @BeforeAll
     public static void cleanUp() throws IOException {
-        cleanUpDefault();
+        cleanUp(TEST_VERSION);
     }
 
     @Test
     public void download() throws IOException {
         // when
-        final Path path = new DownloadResolver(THROWING_RESOLVER).resolve(Bundler.ESBUILD_EMBEDDED_VERSION);
+        final Path path = new DownloadResolver(THROWING_RESOLVER).resolve(TEST_VERSION);
 
         // then
         assertTrue(path.toFile().exists());

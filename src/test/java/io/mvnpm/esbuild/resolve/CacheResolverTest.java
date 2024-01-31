@@ -50,7 +50,7 @@ public class CacheResolverTest extends BundleTester {
         assertTrue(location.toFile().list().length > 0);
     }
 
-    private Path createEsBuildBinary(String version) throws IOException {
+    protected static Path createEsBuildBinary(String version) throws IOException {
         final Path destination = BaseResolver.createDestination(version);
         final Path exec = destination.resolve(EXECUTABLE_PATH);
         Files.createDirectories(exec.getParent());

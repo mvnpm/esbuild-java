@@ -12,7 +12,8 @@ public class ExecutableResolver implements Resolver {
             throw new RuntimeException("could not resolve esbuild with version " + version);
         });
         final BundledResolver bundledResolver = new BundledResolver(downloadResolver);
-        this.resolver = new CacheResolver(bundledResolver);
+        final CacheResolver bundleCacheResolver = new BundleCacheResolver(bundledResolver);
+        this.resolver = new BundleCacheResolver(bundleCacheResolver);
     }
 
     @Override
