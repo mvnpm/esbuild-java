@@ -24,6 +24,14 @@ public class BundleOptionsBuilder {
         return this;
     }
 
+    public BundleOptionsBuilder addEntryPoint(String script) {
+        if (options.getWorkDir() == null) {
+            throw new IllegalArgumentException("Workdir must be set");
+        }
+        addEntryPoint(new FileEntryPoint(options.getWorkDir(), script));
+        return this;
+    }
+
     protected BundleOptionsBuilder addEntryPoint(EntryPoint entry) {
         if (options.getEntries() == null) {
             options.setEntries(new ArrayList<>());
