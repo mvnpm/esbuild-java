@@ -36,9 +36,9 @@
     <maven.compiler.target>17</maven.compiler.target>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <esbuild.version>0.19.9</esbuild.version>
+    <esbuild.version>0.19.9-mvnpm-0.0.5</esbuild.version>
     <quarkus.version>3.6.0</quarkus.version>
-    <esbuild.scss.version>v0.0.4</esbuild.scss.version>
+    <esbuild.scss.version>v0.0.5</esbuild.scss.version>
     <formatter.plugin.version>2.23.0</formatter.plugin.version>
     <impsort.plugin.version>1.9.0</impsort.plugin.version>
     <quarkus.ide-config.version>3.5.0</quarkus.ide-config.version>
@@ -122,13 +122,13 @@
             <configuration>
               <target>
                 <get dest="src/main/resources" skipexisting="true">
-                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/mvnpm-esbuild-darwin-arm64-${esbuild.version}.tgz"/>
-                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/mvnpm-esbuild-darwin-x64-${esbuild.version}.tgz"/>
-                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/mvnpm-esbuild-win32-x64-${esbuild.version}.tgz"/>
-                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/mvnpm-esbuild-win32-ia32-${esbuild.version}.tgz"/>
-                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/mvnpm-esbuild-linux-arm64-${esbuild.version}.tgz"/>
-                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/mvnpm-esbuild-linux-x64-${esbuild.version}.tgz"/>
-                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/mvnpm-esbuild-linux-ia32-${esbuild.version}.tgz"/>
+                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/esbuild-darwin-arm64-${esbuild.version}.tgz"/>
+                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/esbuild-darwin-x64-${esbuild.version}.tgz"/>
+                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/esbuild-win32-x64-${esbuild.version}.tgz"/>
+                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/esbuild-win32-ia32-${esbuild.version}.tgz"/>
+                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/esbuild-linux-arm64-${esbuild.version}.tgz"/>
+                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/esbuild-linux-x64-${esbuild.version}.tgz"/>
+                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/esbuild-linux-ia32-${esbuild.version}.tgz"/>
                 </get>
               </target>
             </configuration>

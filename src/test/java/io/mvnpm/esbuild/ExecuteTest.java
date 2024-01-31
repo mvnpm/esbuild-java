@@ -1,6 +1,6 @@
 package io.mvnpm.esbuild;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -23,6 +23,6 @@ public class ExecuteTest {
         String workingDirectory = System.getProperty("user.dir");
         final ExecuteResult executeResult = new Execute(Paths.get(workingDirectory), path.toFile(), esBuildConfig)
                 .executeAndWait();
-        assertTrue(executeResult.output().startsWith(defaultVersion));
+        assertEquals(defaultVersion + "\n", executeResult.output());
     }
 }
