@@ -4,6 +4,7 @@ import static io.mvnpm.esbuild.resolve.BundleResolverTest.THROWING_RESOLVER;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -23,6 +24,6 @@ public class DownloadResolverTest extends BundleTester {
         final Path path = new DownloadResolver(THROWING_RESOLVER).resolve(TEST_VERSION);
 
         // then
-        assertTrue(path.toFile().exists());
+        assertTrue(Files.exists(path));
     }
 }

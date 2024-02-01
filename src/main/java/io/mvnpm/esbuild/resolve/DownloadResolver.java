@@ -25,7 +25,7 @@ public class DownloadResolver extends BaseResolver implements Resolver {
 
         try {
             downloadFile(new URL(url), tarFile);
-            return extract(Files.newInputStream(tarFile), destination.toFile());
+            return extract(Files.newInputStream(tarFile), destination.toFile()).resolve(resolveExecutablePath());
         } catch (IOException e) {
             return resolver.resolve(version);
         }

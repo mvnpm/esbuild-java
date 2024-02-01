@@ -17,7 +17,7 @@ public class BundledResolver extends BaseResolver implements Resolver {
         final InputStream resource = getClass().getResourceAsStream("/esbuild-%s-%s.tgz".formatted(CLASSIFIER, version));
 
         if (resource != null) {
-            return extract(resource, ESBUILD_EMBEDDED_VERSION);
+            return extract(resource, ESBUILD_EMBEDDED_VERSION).resolve(resolveBundledExecutablePath());
         }
 
         return resolver.resolve(version);
