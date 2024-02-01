@@ -1,6 +1,5 @@
 package io.mvnpm.esbuild.resolve;
 
-import static io.mvnpm.esbuild.resolve.BaseResolver.EXECUTABLE_PATH;
 import static io.mvnpm.esbuild.resolve.BundleResolverTest.THROWING_RESOLVER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -52,7 +51,7 @@ public class CacheResolverTest extends BundleTester {
 
     protected static Path createEsBuildBinary(String version) throws IOException {
         final Path destination = BaseResolver.createDestination(version);
-        final Path exec = destination.resolve(EXECUTABLE_PATH);
+        final Path exec = destination.resolve(BaseResolver.resolveExecutablePath());
         Files.createDirectories(exec.getParent());
         Files.writeString(exec, "hello");
         exec.toFile().setExecutable(true, true);

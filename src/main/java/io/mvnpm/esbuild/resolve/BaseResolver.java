@@ -20,10 +20,9 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 
 public abstract class BaseResolver {
-    private static final String UNIX_PATH = "package/bin/esbuild";
-    private static final String WINDOWS_EXE_PATH = "package/esbuild.exe";
+    private static final String PATH = "package/bin/esbuild";
 
-    public static final String EXECUTABLE_PATH = resolveExecutablePath();
+    private static final String WINDOWS_EXE_PATH = "package/esbuild.exe";
 
     public static final String CLASSIFIER = determineClassifier();
 
@@ -33,8 +32,12 @@ public abstract class BaseResolver {
         this.resolver = requireNonNull(resolver, "resolver is required");
     }
 
-    private static String resolveExecutablePath() {
-        return isWindows() ? WINDOWS_EXE_PATH : UNIX_PATH;
+    public static String resolveBundledExecutablePath() {
+        return isWindows() ? PATH + ".exe" : PATH;
+    }
+
+    public static String resolveExecutablePath() {
+        return isWindows() ? WINDOWS_EXE_PATH : PATH;
     }
 
     private static boolean isWindows() {
@@ -119,7 +122,7 @@ public abstract class BaseResolver {
             }
         }
 
-        return destination.toPath().resolve(resolveExecutablePath());
+        return destination.toPath();
     }
 
     static Path createDestination(String version) throws IOException {

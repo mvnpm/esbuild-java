@@ -13,9 +13,10 @@ public class BundleCacheResolver extends CacheResolver {
 
     @Override
     public Path resolve(String version) throws IOException {
-        final Path path = super.resolve(ESBUILD_EMBEDDED_VERSION);
-        if (Files.isExecutable(path)) {
-            return path;
+        final Path path = getLocation(ESBUILD_EMBEDDED_VERSION);
+        final Path executablePath = path.resolve(resolveBundledExecutablePath());
+        if (Files.isExecutable(executablePath)) {
+            return executablePath;
         }
         return resolver.resolve(version);
     }
