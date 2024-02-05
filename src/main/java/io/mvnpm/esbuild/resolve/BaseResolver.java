@@ -100,6 +100,10 @@ public abstract class BaseResolver {
                     parentDir.mkdirs();
                 }
 
+                if (Files.exists(outputFile.toPath())) {
+                    Files.delete(outputFile.toPath());
+                }
+
                 // Create the output file with its original permissions
                 Files.createFile(outputFile.toPath());
 
