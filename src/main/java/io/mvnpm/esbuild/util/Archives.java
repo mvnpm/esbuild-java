@@ -27,7 +27,7 @@ public class Archives {
         }
     }
 
-    public static void unTgz(Path source, Path target) {
+    public static void unTgz(Path source, Path target) throws IOException {
         try (var is = Files.newInputStream(source);
                 var bis = new BufferedInputStream(is);
                 var gzis = new GzipCompressorInputStream(bis);
@@ -36,9 +36,7 @@ public class Archives {
             while ((entry = tar.getNextTarEntry()) != null) {
                 extractEntry(target, entry.getName(), entry.isDirectory(), tar);
             }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+       }
 
     }
 

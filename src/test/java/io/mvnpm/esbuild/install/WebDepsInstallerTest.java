@@ -125,6 +125,20 @@ public class WebDepsInstallerTest {
     }
 
     @Test
+    void testVaadinInputError() throws IOException {
+        Path tempDir = Files.createTempDirectory("testVaadinInputError");
+        install(tempDir, getWebDependencies(List.of("/mvnpm/vaadin-webcomponents-24.3.5.jar")));
+        final MvnpmInfo mvnpmInfo = readMvnpmInfo(getMvnpmInfoPath(tempDir));
+        checkNodeModulesDir(tempDir, mvnpmInfo);
+        assertEquals(1, mvnpmInfo.installed().size());
+        final MvnpmInfo.InstalledDependency installedVaadin = mvnpmInfo.installed().stream()
+                .filter(installedDependency -> installedDependency.id().equals("org.something:vaadin-webcomponents-24.3.5"))
+                .findFirst()
+                .get();
+        assertEquals(55, installedVaadin.dirs().size());
+    }
+
+    @Test
     void testNoInfo() throws IOException {
         Path tempDir = Files.createTempDirectory("testNoInfo");
         install(tempDir, getWebDependencies(List.of("/mvnpm/stimulus-3.2.1.jar", "/mvnpm/hooks-0.4.9.jar")));
