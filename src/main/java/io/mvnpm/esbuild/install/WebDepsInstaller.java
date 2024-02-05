@@ -86,10 +86,10 @@ public final class WebDepsInstaller {
                     logger.log(Level.FINE, "installed package ''{0}''", packageName);
                 }
                 installed.add(new MvnpmInfo.InstalledDependency(dep.id(), dirs));
-                logger.log(Level.FINE, "installed dep ''{0}'' (''{1}'')", new Object[]{dep.path(), dep.id()});
+                logger.log(Level.FINE, "installed dep ''{0}'' (''{1}'')", new Object[] { dep.path(), dep.id() });
             } else {
                 logger.log(Level.WARNING, "package.json not found in dep: ''{0}'' (''{1}'')",
-                        new Object[]{dep.path(), dep.id()});
+                        new Object[] { dep.path(), dep.id() });
             }
         }
         PathUtils.deleteRecursive(tmp);

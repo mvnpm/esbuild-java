@@ -3,7 +3,6 @@ package io.mvnpm.esbuild.util;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -36,7 +35,7 @@ public class Archives {
             while ((entry = tar.getNextTarEntry()) != null) {
                 extractEntry(target, entry.getName(), entry.isDirectory(), tar);
             }
-       }
+        }
 
     }
 
