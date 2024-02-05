@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import io.mvnpm.esbuild.model.ExecuteResult;
-import io.mvnpm.esbuild.resolve.ExecutableResolver;
+import io.mvnpm.esbuild.resolve.Resolver;
 
 public class Main {
 
@@ -24,7 +24,7 @@ public class Main {
             final String unParsedEsbuildVersion = esbuildVersionArgument.get();
             esbuildVersion = unParsedEsbuildVersion.split("=")[1];
         }
-        final Path esBuildExec = new ExecutableResolver().resolve(esbuildVersion);
+        final Path esBuildExec = Resolver.create().resolve(esbuildVersion);
         final ExecuteResult executeResult = new Execute(Paths.get(workingDirectory), esBuildExec.toFile(),
                 arguments.toArray(new String[] {}))
                 .executeAndWait();

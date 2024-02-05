@@ -1,12 +1,6 @@
 package io.mvnpm.esbuild.resolve;
 
-import static java.util.Objects.requireNonNull;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
@@ -19,24 +13,22 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 
-public abstract class BaseResolver {
+final class Resolvers {
+
+    private Resolvers() {
+    }
+
     private static final String PATH = "package/bin/esbuild";
 
     private static final String WINDOWS_EXE_PATH = "package/esbuild.exe";
 
-    public static final String CLASSIFIER = determineClassifier();
+    static final String CLASSIFIER = determineClassifier();
 
-    protected Resolver resolver;
-
-    public BaseResolver(Resolver resolver) {
-        this.resolver = requireNonNull(resolver, "resolver is required");
-    }
-
-    public static String resolveBundledExecutablePath() {
+    static String resolveBundledExecutablePath() {
         return isWindows() ? PATH + ".exe" : PATH;
     }
 
-    public static String resolveExecutablePath() {
+    static String resolveExecutablePath() {
         return isWindows() ? WINDOWS_EXE_PATH : PATH;
     }
 
