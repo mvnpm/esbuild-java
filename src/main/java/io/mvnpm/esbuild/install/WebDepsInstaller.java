@@ -65,7 +65,11 @@ public final class WebDepsInstaller {
                 final Path mvnpmMoreArchive = findMvnpmMoreArchive(extractDir);
                 if (mvnpmMoreArchive != null) {
                     logger.log(Level.FINE, "Found more archive ''{0}''", mvnpmMoreArchive);
-                    Archives.unTgz(mvnpmMoreArchive, mvnpmMoreArchive.getParent());
+                    try {
+                        Archives.unTgz(mvnpmMoreArchive, mvnpmMoreArchive.getParent());
+                    } catch (IOException e) {
+                        logger.log(Level.WARNING, "Could not extract .more.tgz archive '" + mvnpmMoreArchive + "'", e);
+                    }
                 }
             }
             final Map<String, Path> packageNameAndRoot = JarInspector.findPackageNameAndRoot(dep.id(), extractDir, dep.type());
@@ -82,10 +86,10 @@ public final class WebDepsInstaller {
                     logger.log(Level.FINE, "installed package ''{0}''", packageName);
                 }
                 installed.add(new MvnpmInfo.InstalledDependency(dep.id(), dirs));
-                logger.log(Level.FINE, "installed dep ''{0}'' (''{1}'')", new Object[] { dep.path(), dep.id() });
+                logger.log(Level.FINE, "installed dep ''{0}'' (''{1}'')", new Object[]{dep.path(), dep.id()});
             } else {
                 logger.log(Level.WARNING, "package.json not found in dep: ''{0}'' (''{1}'')",
-                        new Object[] { dep.path(), dep.id() });
+                        new Object[]{dep.path(), dep.id()});
             }
         }
         PathUtils.deleteRecursive(tmp);
