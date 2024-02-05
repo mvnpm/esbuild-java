@@ -1,25 +1,36 @@
 package io.mvnpm.esbuild.resolve;
 
 import static io.mvnpm.esbuild.Bundler.ESBUILD_EMBEDDED_VERSION;
+import static io.mvnpm.esbuild.resolve.Resolvers.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class BundledResolver extends BaseResolver implements Resolver {
+public class BundledResolver implements Resolver {
 
-    public BundledResolver(Resolver resolver) {
-        super(resolver);
+    private final Resolver fallbackResolver;
+
+    public BundledResolver(Resolver fallbackResolver) {
+        this.fallbackResolver = fallbackResolver;
     }
 
     @Override
     public Path resolve(String version) throws IOException {
+        final Path path = getLocation(ESBUILD_EMBEDDED_VERSION);
+        final String bundledExecutableRelativePath = resolveBundledExecutablePath();
+        final Path executablePath = path.resolve(bundledExecutableRelativePath);
+        if (Files.isExecutable(executablePath)) {
+            return executablePath;
+        }
+
         final InputStream resource = getClass().getResourceAsStream("/esbuild-%s-%s.tgz".formatted(CLASSIFIER, version));
 
         if (resource != null) {
-            return extract(resource, ESBUILD_EMBEDDED_VERSION).resolve(resolveBundledExecutablePath());
+            return extract(resource, ESBUILD_EMBEDDED_VERSION).resolve(bundledExecutableRelativePath);
         }
 
-        return resolver.resolve(version);
+        return fallbackResolver.resolve(version);
     }
 }

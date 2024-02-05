@@ -16,7 +16,7 @@ import io.mvnpm.esbuild.model.BundleOptions;
 import io.mvnpm.esbuild.model.BundleResult;
 import io.mvnpm.esbuild.model.EsBuildConfig;
 import io.mvnpm.esbuild.model.ExecuteResult;
-import io.mvnpm.esbuild.resolve.ExecutableResolver;
+import io.mvnpm.esbuild.resolve.Resolver;
 
 public class Bundler {
     private static final Logger logger = Logger.getLogger(Bundler.class.getName());
@@ -115,7 +115,7 @@ public class Bundler {
     private static Execute getExecute(Path workDir, EsBuildConfig esBuildConfig) throws IOException {
         final String version = esBuildConfig.getEsBuildVersion() != null ? esBuildConfig.getEsBuildVersion()
                 : Bundler.ESBUILD_EMBEDDED_VERSION;
-        final Path esBuildExec = new ExecutableResolver().resolve(version);
+        final Path esBuildExec = Resolver.create().resolve(version);
         return new Execute(workDir, esBuildExec.toFile(), esBuildConfig);
     }
 }
