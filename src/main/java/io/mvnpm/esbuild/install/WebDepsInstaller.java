@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,31 +33,42 @@ public final class WebDepsInstaller {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    public static boolean install(Path nodeModulesDir, List<WebDependency> dependencies) throws IOException {
+    public static void install(Path nodeModulesDir, List<WebDependency> dependencies) throws IOException {
         final Path mvnpmInfoFile = getMvnpmInfoPath(nodeModulesDir);
         final MvnpmInfo mvnpmInfo = readMvnpmInfo(mvnpmInfoFile);
         if (mvnpmInfo.installed().isEmpty() || dependencies.isEmpty()) {
             // Make sure it is clean
             PathUtils.deleteRecursive(nodeModulesDir);
         }
-        if (dependencies.isEmpty()) {
-            return true;
-        }
+        if (dependencies.isEmpty())
+            return;
         if (!Files.exists(nodeModulesDir)) {
             Files.createDirectories(nodeModulesDir);
         }
         final Path tmp = nodeModulesDir.resolve(MVNPM_DIR).resolve("tmp");
         final Set<MvnpmInfo.InstalledDependency> installed = new HashSet<>();
-        boolean changed = false;
-        for (WebDependency dep : dependencies) {
-            final Optional<MvnpmInfo.InstalledDependency> alreadyInstalled = mvnpmInfo.installed().stream()
-                    .filter(i -> i.id().equals(dep.id())).findFirst();
-            if (alreadyInstalled.isPresent()) {
-                logger.log(Level.FINE, "skipping package as it already exists ''{0}''", dep.id());
-                installed.add(alreadyInstalled.get());
-                continue;
-            }
-            changed = true;
+
+        mvnpmInfo.installed().stream()
+                .filter(i -> dependencies.stream().map(WebDependency::id).anyMatch(id -> id.equals(i.id())))
+                .peek(dep -> logger.log(Level.FINE, "Skipping package ''{0}''", dep.id()))
+                .forEach(installed::add);
+
+        List<WebDependency> installableDependencies = dependencies.stream()
+                .filter(d -> !mvnpmInfo.installed().stream()
+                        .map(MvnpmInfo.InstalledDependency::id)
+                        .anyMatch(id -> id.equals(d.id())))
+                .toList();
+
+        installDependencies(nodeModulesDir, installableDependencies, tmp, installed);
+        PathUtils.deleteRecursive(tmp);
+        legacyCleanUp(nodeModulesDir, installed, mvnpmInfo);
+        final MvnpmInfo newMvnpmInfo = new MvnpmInfo(installed);
+        WebDepsInstaller.writeMvnpmInfo(mvnpmInfoFile, newMvnpmInfo);
+    }
+
+    private static void installDependencies(Path nodeModulesDir, List<WebDependency> installableDependencies, Path tmp,
+            Set<MvnpmInfo.InstalledDependency> installed) throws IOException {
+        for (WebDependency dep : installableDependencies) {
             final Path extractDir = tmp.resolve(dep.id().replace(":", "/"));
             PathUtils.deleteRecursive(extractDir);
             Archives.unzip(dep.path(), extractDir);
@@ -89,21 +99,20 @@ public final class WebDepsInstaller {
                         new Object[] { dep.path(), dep.id() });
             }
         }
-        PathUtils.deleteRecursive(tmp);
+    }
+
+    private static void legacyCleanUp(Path nodeModulesDir, Set<MvnpmInfo.InstalledDependency> installed, MvnpmInfo mvnpmInfo)
+            throws IOException {
         Set<String> installedDirs = installed.stream().flatMap(i -> i.dirs().stream()).collect(Collectors.toSet());
         Set<String> legacyDirs = mvnpmInfo.installed().stream().flatMap(i -> i.dirs().stream())
                 .collect(Collectors.toSet());
-        // we are not deleting all the legacy dependencies, some of the dirs might still be used by new ones (e.g version or classifier change).
+        // we are not deleting all the legacy dependencies, some of the dirs might still be used by new ones (e.g. version or classifier change).
         for (String legacyDir : legacyDirs) {
             if (!installedDirs.contains(legacyDir)) {
-                changed = true;
                 logger.log(Level.FINE, "removing package as it is not needed anymore ''{0}''", legacyDir);
                 PathUtils.deleteRecursive(nodeModulesDir.resolve(legacyDir));
             }
         }
-        final MvnpmInfo newMvnpmInfo = new MvnpmInfo(installed);
-        WebDepsInstaller.writeMvnpmInfo(mvnpmInfoFile, newMvnpmInfo);
-        return changed;
     }
 
     public static Path getMvnpmInfoPath(Path nodeModulesDir) {

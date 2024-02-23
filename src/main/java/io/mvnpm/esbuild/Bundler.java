@@ -90,11 +90,11 @@ public class Bundler {
                 : Files.createTempDirectory("bundle");
     }
 
-    public static boolean install(Path workDir, BundleOptions bundleOptions) throws IOException {
+    public static void install(Path workDir, BundleOptions bundleOptions) throws IOException {
         final Path nodeModulesDir = bundleOptions.getNodeModulesDir() == null
                 ? workDir.resolve(BundleOptions.NODE_MODULES)
                 : bundleOptions.getNodeModulesDir();
-        return WebDepsInstaller.install(nodeModulesDir, bundleOptions.getDependencies());
+        WebDepsInstaller.install(nodeModulesDir, bundleOptions.getDependencies());
     }
 
     public static void clearDependencies(Path nodeModulesDir) throws IOException {
