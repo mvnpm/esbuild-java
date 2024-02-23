@@ -37,13 +37,13 @@ public class AutoEntryPoint implements EntryPoint {
     }
 
     private Path bundleScripts(Path workDir, String bundleName, List<String> scripts) throws IOException {
-        final String entryString = convert(workDir, scripts);
+        final String entryString = convert(scripts);
         final Path entry = workDir.resolve("%s.js".formatted(bundleName));
         Files.writeString(entry, entryString, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         return entry;
     }
 
-    private String convert(Path workDir, List<String> scripts) {
+    private static String convert(List<String> scripts) {
         try (StringWriter sw = new StringWriter()) {
             for (String script : scripts) {
                 final String fileName = Path.of(script).getFileName().toString();
