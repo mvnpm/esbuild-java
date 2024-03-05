@@ -48,7 +48,7 @@ public class ScriptlessEntryPoint implements EntryPoint {
             return entryType.formatted(data.get("name"));
         }).collect(Collectors.joining("\n"));
 
-        Path entry = workDir.resolve("index.js");
+        Path entry = workDir.resolve("main.js");
         try {
             Files.writeString(entry, entries, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
@@ -73,5 +73,5 @@ public class ScriptlessEntryPoint implements EntryPoint {
     }
 
     private static final String EXPORT = "export * from \"%s\";";
-    private static final String IMPORT = "import from \"%s\";";
+    private static final String IMPORT = "import \"%s\";";
 }
