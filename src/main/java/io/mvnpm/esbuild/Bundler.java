@@ -16,6 +16,7 @@ import io.mvnpm.esbuild.model.BundleOptions;
 import io.mvnpm.esbuild.model.BundleResult;
 import io.mvnpm.esbuild.model.EsBuildConfig;
 import io.mvnpm.esbuild.model.ExecuteResult;
+import io.mvnpm.esbuild.model.ScriptlessEntryPoint;
 import io.mvnpm.esbuild.resolve.Resolver;
 
 public class Bundler {
@@ -69,6 +70,9 @@ public class Bundler {
         deleteRecursive(dist);
         Files.createDirectories(dist);
         esBuildConfig.setOutdir(dist.toString());
+        if (bundleOptions.getEntries() == null) {
+            bundleOptions.setEntries(List.of(new ScriptlessEntryPoint(getNodeModulesDir(workDir, bundleOptions))));
+        }
         final List<String> paths = bundleOptions.getEntries().stream().map(entry -> entry.process(workDir).toString()).toList();
         esBuildConfig.setEntryPoint(paths.toArray(String[]::new));
         return esBuildConfig;
@@ -91,10 +95,14 @@ public class Bundler {
     }
 
     public static boolean install(Path workDir, BundleOptions bundleOptions) throws IOException {
-        final Path nodeModulesDir = bundleOptions.getNodeModulesDir() == null
+        final Path nodeModulesDir = getNodeModulesDir(workDir, bundleOptions);
+        return WebDepsInstaller.install(nodeModulesDir, bundleOptions.getDependencies());
+    }
+
+    private static Path getNodeModulesDir(Path workDir, BundleOptions bundleOptions) {
+        return bundleOptions.getNodeModulesDir() == null
                 ? workDir.resolve(BundleOptions.NODE_MODULES)
                 : bundleOptions.getNodeModulesDir();
-        return WebDepsInstaller.install(nodeModulesDir, bundleOptions.getDependencies());
     }
 
     public static void clearDependencies(Path nodeModulesDir) throws IOException {

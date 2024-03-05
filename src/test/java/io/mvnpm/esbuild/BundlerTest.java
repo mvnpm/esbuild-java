@@ -61,6 +61,11 @@ public class BundlerTest {
     }
 
     @Test
+    public void shouldBundleWithoutEntryPoint() throws URISyntaxException, IOException {
+        executeTest(List.of("/mvnpm/stimulus-3.2.1.jar"), WebDependencyType.MVNPM, null, true);
+    }
+
+    @Test
     public void shouldBundle() throws URISyntaxException, IOException {
         executeTest(List.of("/webjars/htmx.org-1.8.4.jar"), WebDependencyType.WEBJARS, "application-webjar.js", true);
     }
@@ -118,8 +123,12 @@ public class BundlerTest {
             throws URISyntaxException {
         final List<Path> jars = getJars(jarNames);
         final Path rootDir = new File(getClass().getResource("/").toURI()).toPath();
-        return new BundleOptionsBuilder().withDependencies(jars, type)
-                .addEntryPoint(rootDir, scriptName);
+        final BundleOptionsBuilder bundleOptionsBuilder = new BundleOptionsBuilder().withDependencies(jars, type);
+        if (scriptName != null) {
+            bundleOptionsBuilder
+                    .addEntryPoint(rootDir, scriptName);
+        }
+        return bundleOptionsBuilder;
     }
 
     private List<Path> getJars(List<String> jarNames) {
