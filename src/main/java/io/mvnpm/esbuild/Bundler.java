@@ -16,7 +16,6 @@ import io.mvnpm.esbuild.model.BundleOptions;
 import io.mvnpm.esbuild.model.BundleResult;
 import io.mvnpm.esbuild.model.EsBuildConfig;
 import io.mvnpm.esbuild.model.ExecuteResult;
-import io.mvnpm.esbuild.model.ScriptlessEntryPoint;
 import io.mvnpm.esbuild.resolve.Resolver;
 
 public class Bundler {
@@ -71,7 +70,7 @@ public class Bundler {
         Files.createDirectories(dist);
         esBuildConfig.setOutdir(dist.toString());
         if (bundleOptions.getEntries() == null) {
-            bundleOptions.setEntries(List.of(new ScriptlessEntryPoint(getNodeModulesDir(workDir, bundleOptions))));
+            throw new IllegalArgumentException("At least one entry point is required");
         }
         final List<String> paths = bundleOptions.getEntries().stream().map(entry -> entry.process(workDir).toString()).toList();
         esBuildConfig.setEntryPoint(paths.toArray(String[]::new));
