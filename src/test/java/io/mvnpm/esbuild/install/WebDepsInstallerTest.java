@@ -152,10 +152,10 @@ public class WebDepsInstallerTest {
                         new MvnpmInfo.InstalledDependency("org.something:hooks-0.4.9", List.of("@restart/hooks"))));
     }
 
-    private List<WebDependency> getWebDependencies(List<String> jarNames) {
+    public static List<WebDependency> getWebDependencies(List<String> jarNames) {
         return jarNames.stream().map(jarName -> {
             try {
-                return new File(getClass().getResource(jarName).toURI()).toPath();
+                return new File(WebDepsInstallerTest.class.getResource(jarName).toURI()).toPath();
             } catch (URISyntaxException e) {
                 throw new RuntimeException(e);
             }

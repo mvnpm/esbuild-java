@@ -61,11 +61,6 @@ public class BundlerTest {
     }
 
     @Test
-    public void shouldBundleWithoutEntryPoint() throws URISyntaxException, IOException {
-        executeTest(List.of("/mvnpm/stimulus-3.2.1.jar"), WebDependencyType.MVNPM, null, true);
-    }
-
-    @Test
     public void shouldBundle() throws URISyntaxException, IOException {
         executeTest(List.of("/webjars/htmx.org-1.8.4.jar"), WebDependencyType.WEBJARS, "application-webjar.js", true);
     }
