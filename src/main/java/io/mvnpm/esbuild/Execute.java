@@ -89,11 +89,11 @@ public class Execute {
     }
 
     public Process createProcess(final String[] command, final Optional<BuildEventListener> listener) throws IOException {
-        Process process = new ProcessBuilder().directory(workDir.toFile()).command(command).start();
-        final InputStream s = process.getErrorStream();
-        if (listener.isPresent()) {
-            EXECUTOR.execute(new Streamer(process::isAlive, s, listener.get()));
-        }
+        Process process = new ProcessBuilder().redirectErrorStream(listener.isPresent()).directory(workDir.toFile())
+                .command(command).start();
+        final InputStream errorStream = process.getInputStream();
+        listener.ifPresent(
+                buildEventListener -> EXECUTOR.execute(new Streamer(process::isAlive, errorStream, buildEventListener)));
         return process;
     }
 
@@ -102,11 +102,10 @@ public class Execute {
 
         @Override
         public void run() {
-            final StringBuilder errorBuilder = new StringBuilder();
             consumeStream(isAlive, processStream, l -> {
                 logger.fine(l);
-                if (l.contains("[ERROR]") || !errorBuilder.isEmpty()) {
-                    errorBuilder.append("\n").append(l);
+                if (l.toUpperCase().contains("ERROR")) {
+                    logger.severe(l);
                 } else if (l.contains("build finished")) {
                     logger.info("Build finished!");
                     listener.onChange();

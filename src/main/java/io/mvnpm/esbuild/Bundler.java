@@ -98,7 +98,7 @@ public class Bundler {
         return WebDepsInstaller.install(nodeModulesDir, bundleOptions.getDependencies());
     }
 
-    private static Path getNodeModulesDir(Path workDir, BundleOptions bundleOptions) {
+    protected static Path getNodeModulesDir(Path workDir, BundleOptions bundleOptions) {
         return bundleOptions.getNodeModulesDir() == null
                 ? workDir.resolve(BundleOptions.NODE_MODULES)
                 : bundleOptions.getNodeModulesDir();

@@ -1,5 +1,6 @@
 package io.mvnpm.esbuild;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -9,7 +10,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
@@ -73,13 +74,22 @@ public class BundlerTest {
                 "application-mvnpm.js").build();
 
         // when
-        AtomicBoolean isCalled = new AtomicBoolean(false);
-        final Watch watch = Bundler.watch(options, () -> isCalled.set(true));
+        AtomicInteger isCalled = new AtomicInteger(0);
+        final Watch watch = Bundler.watch(options, () -> isCalled.set(isCalled.get() + 1));
+
+        Thread.sleep(2000);
+
+        BundleOptionsBuilder changedOptions = getBundleOptions(List.of("/mvnpm/polymer-3.5.1.jar", "/mvnpm/stimulus-3.2.1.jar"),
+                WebDependencyType.MVNPM, "application-mvnpm.js");
+        Path sourceDir = new File(getClass().getResource("/changed").toURI()).toPath();
+        changedOptions.addEntryPoint(sourceDir, "application-mvnpm.js");
+        watch.change(changedOptions.build());
+
+        Thread.sleep(2000);
 
         // then
-        Thread.sleep(2000);
         watch.stop();
-        assertTrue(isCalled.get());
+        assertEquals(2, isCalled.get(), "Should have build twice");
     }
 
     @Test
