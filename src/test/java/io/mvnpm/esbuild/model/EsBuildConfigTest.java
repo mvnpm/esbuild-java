@@ -13,12 +13,12 @@ public class EsBuildConfigTest {
     @Test
     public void shouldOutputFlags() {
         // given
-        final EsBuildConfig esBuildConfig = new EsBuildConfig();
-        esBuildConfig.setBundle(true);
-        esBuildConfig.setFormat(EsBuildConfig.Format.ESM);
+        final EsBuildConfigBuilder esBuildConfig = new EsBuildConfigBuilder();
+        esBuildConfig.bundle(true);
+        esBuildConfig.format(EsBuildConfig.Format.ESM);
 
         // when
-        final String[] params = esBuildConfig.toParams();
+        final String[] params = esBuildConfig.build().toParams();
 
         // then
         assertThat(asList(params), containsInAnyOrder("--bundle", "--format=esm"));
@@ -27,11 +27,11 @@ public class EsBuildConfigTest {
     @Test
     public void shouldOutputLoaderFlags() {
         // given
-        final EsBuildConfig esBuildConfig = new EsBuildConfig();
-        esBuildConfig.setLoader(Map.of(".js", EsBuildConfig.Loader.JSX, ".css", EsBuildConfig.Loader.LOCAL_CSS));
+        final EsBuildConfigBuilder esBuildConfig = new EsBuildConfigBuilder();
+        esBuildConfig.loader(Map.of(".js", EsBuildConfig.Loader.JSX, ".css", EsBuildConfig.Loader.LOCAL_CSS));
 
         // when
-        final String[] params = esBuildConfig.toParams();
+        final String[] params = esBuildConfig.build().toParams();
 
         // then
         assertThat(asList(params), containsInAnyOrder("--loader:.js=jsx", "--loader:.css=local-css"));
@@ -40,11 +40,11 @@ public class EsBuildConfigTest {
     @Test
     public void shouldOutputPublicPathFlag() {
         // given
-        final EsBuildConfig esBuildConfig = new EsBuildConfig();
-        esBuildConfig.setPublicPath("https://www.example.com/v1");
+        final EsBuildConfigBuilder esBuildConfig = new EsBuildConfigBuilder();
+        esBuildConfig.publicPath("https://www.example.com/v1");
 
         // when
-        final String[] params = esBuildConfig.toParams();
+        final String[] params = esBuildConfig.build().toParams();
 
         // then
         assertThat(asList(params), containsInAnyOrder("--public-path=https://www.example.com/v1"));
@@ -53,7 +53,7 @@ public class EsBuildConfigTest {
     @Test
     public void shouldOutputStandardFlags() {
         // given
-        final EsBuildConfig esBuildConfig = new EsBuildConfigBuilder().bundle()
+        final EsBuildConfig esBuildConfig = EsBuildConfig.builder().bundle()
                 .entryPoint(new String[] { "main.js", "bundle.js" }).outDir("/tmp").minify().build();
 
         // when
@@ -71,12 +71,12 @@ public class EsBuildConfigTest {
     @Test
     public void shouldExternal() {
         // given
-        final EsBuildConfig esBuildConfig = new EsBuildConfig();
+        final EsBuildConfigBuilder esBuildConfig = new EsBuildConfigBuilder();
         esBuildConfig.addExternal("*.png");
         esBuildConfig.addExternal("/images/*");
 
         // when
-        final String[] params = esBuildConfig.toParams();
+        final String[] params = esBuildConfig.build().toParams();
 
         // then
         assertThat(asList(params), containsInAnyOrder("--external:*.png", "--external:/images/*"));
@@ -85,11 +85,11 @@ public class EsBuildConfigTest {
     @Test
     public void shouldAddChunkNames() {
         // given
-        final EsBuildConfig esBuildConfig = new EsBuildConfig();
-        esBuildConfig.setChunkNames("chunks/[name]-[hash]");
+        final EsBuildConfigBuilder esBuildConfig = new EsBuildConfigBuilder();
+        esBuildConfig.chunkNames("chunks/[name]-[hash]");
 
         //when
-        final String[] params = esBuildConfig.toParams();
+        final String[] params = esBuildConfig.build().toParams();
 
         // then
         assertThat(asList(params), containsInAnyOrder("--chunk-names=chunks/[name]-[hash]"));

@@ -9,6 +9,11 @@ public class BundleException extends RuntimeException {
         this.output = output;
     }
 
+    @Override
+    public String getMessage() {
+        return super.getMessage() + ": \n" + output;
+    }
+
     public String output() {
         return output;
     }

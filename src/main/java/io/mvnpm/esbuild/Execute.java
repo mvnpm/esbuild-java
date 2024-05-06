@@ -23,11 +23,13 @@ import io.mvnpm.esbuild.model.ExecuteResult;
 
 public class Execute {
 
-    private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor(r -> {
+    private static final ExecutorService EXECUTOR_STREAMER = Executors.newSingleThreadExecutor(r -> {
         final Thread t = new Thread(r, "Process stdout streamer");
         t.setDaemon(true);
         return t;
     });
+    private static final ExecutorService EXECUTOR_BUILD_LISTENERS = Executors
+            .newSingleThreadExecutor(r -> new Thread(r, "Build Listeners"));
     private static final Logger logger = Logger.getLogger(Execute.class.getName());
 
     private final Path workDir;
@@ -93,7 +95,8 @@ public class Execute {
                 .command(command).start();
         final InputStream errorStream = process.getInputStream();
         listener.ifPresent(
-                buildEventListener -> EXECUTOR.execute(new Streamer(process::isAlive, errorStream, buildEventListener)));
+                buildEventListener -> EXECUTOR_STREAMER
+                        .execute(new Streamer(process::isAlive, errorStream, buildEventListener)));
         return process;
     }
 
@@ -102,13 +105,22 @@ public class Execute {
 
         @Override
         public void run() {
+            final StringBuilder errorBuilder = new StringBuilder();
             consumeStream(isAlive, processStream, l -> {
                 logger.fine(l);
-                if (l.toUpperCase().contains("ERROR")) {
-                    logger.severe(l);
-                } else if (l.contains("build finished")) {
-                    logger.info("Build finished!");
-                    listener.onChange();
+                if (l.contains("build finished")) {
+                    logger.fine("Build finished!");
+                    final String error = errorBuilder.toString();
+                    errorBuilder.setLength(0);
+                    EXECUTOR_BUILD_LISTENERS.execute(() -> {
+                        if (error.isEmpty()) {
+                            listener.onBuild(Optional.empty());
+                        } else {
+                            listener.onBuild(Optional.of(new BundleException("Error during bundling", error)));
+                        }
+                    });
+                } else if (l.contains("[ERROR]") || !errorBuilder.isEmpty()) {
+                    errorBuilder.append("\n").append(l);
                 }
             });
         }

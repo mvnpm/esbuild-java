@@ -7,26 +7,125 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class EsBuildConfig {
-    private String esBuildVersion;
-    private boolean bundle;
+public record EsBuildConfig(
+        String esBuildVersion,
+        boolean bundle,
+        String[] entryPoint,
+        boolean minify,
 
-    private String[] entryPoint;
-    private boolean minify;
+        boolean version,
 
-    private boolean version;
+        Map<String, Loader> loader,
+        boolean preserveSymlinks,
+        Target target,
 
-    private Map<String, String> substitutes;
+        boolean watch,
 
-    private List<String> excludes;
+        String outdir,
+        String packages,
 
-    enum Format {
+        Platform platform,
+
+        boolean serve,
+        boolean sourcemap,
+
+        boolean splitting,
+
+        Map<String, String> alias,
+
+        Map<String, String> define,
+
+        List<String> excludes,
+        Format format,
+
+        String chunkNames,
+
+        String entryNames,
+
+        String assetNames,
+
+        String publicPath,
+
+        List<String> external) {
+
+    public static EsBuildConfigBuilder builder() {
+        return new EsBuildConfigBuilder().withDefault();
+    }
+
+    public EsBuildConfig(EsBuildConfigBuilder builder) {
+        this(builder.esBuildVersion,
+                builder.bundle,
+                builder.entryPoint,
+                builder.minify,
+
+                builder.version,
+
+                builder.loader,
+                builder.preserveSymlinks,
+                builder.target,
+
+                builder.watch,
+
+                builder.outdir,
+                builder.packages,
+
+                builder.platform,
+
+                builder.serve,
+                builder.sourceMap,
+
+                builder.splitting,
+
+                builder.alias,
+                builder.define,
+
+                builder.excludes,
+                builder.format,
+
+                builder.chunkNames,
+
+                builder.entryNames,
+
+                builder.assetNames,
+
+                builder.publicPath,
+
+                builder.external);
+    }
+
+    public EsBuildConfigBuilder edit() {
+        return new EsBuildConfigBuilder()
+                .esbuildVersion(this.esBuildVersion)
+                .bundle(this.bundle)
+                .entryPoint(this.entryPoint)
+                .minify(this.minify)
+                .version(this.version)
+                .loader(this.loader)
+                .preserveSymlinks(this.preserveSymlinks)
+                .target(this.target)
+                .watch(this.watch)
+                .outDir(this.outdir)
+                .packages(this.packages)
+                .platform(this.platform)
+                .serve(this.serve)
+                .sourceMap(this.sourcemap)
+                .splitting(this.splitting)
+                .alias(this.alias)
+                .define(this.define)
+                .excludes(this.excludes)
+                .format(this.format)
+                .chunkNames(this.chunkNames)
+                .entryNames(this.entryNames)
+                .assetNames(this.assetNames)
+                .publicPath(this.publicPath)
+                .external(this.external);
+    }
+
+    public enum Format {
         IIFE,
         CJS,
         ESM,
     }
-
-    private Format format;
 
     public enum Loader {
         BASE64,
@@ -46,25 +145,13 @@ public class EsBuildConfig {
         TSX
     }
 
-    private Map<String, Loader> loader;
-
-    private String outdir;
-    private String packages;
-
-    enum Platform {
+    public enum Platform {
         BROWSER,
         NODE,
         NEUTRAL
     }
 
-    private Platform platform;
-
-    private boolean serve;
-    private boolean sourceMap;
-
-    private boolean splitting;
-
-    enum Target {
+    public enum Target {
         ES2017,
         CHROME58,
         FIREFOX57,
@@ -75,207 +162,16 @@ public class EsBuildConfig {
         OPERA45
     }
 
-    private Target target;
-
-    private boolean watch;
-
-    private String chunkNames;
-
-    private String entryNames;
-
-    private String assetNames;
-
-    private String publicPath;
-
-    private final List<String> external = new ArrayList<>();
-
-    public String getEsBuildVersion() {
-        return esBuildVersion;
-    }
-
-    public void setEsBuildVersion(String esBuildVersion) {
-        this.esBuildVersion = esBuildVersion;
-    }
-
-    public boolean isBundle() {
-        return bundle;
-    }
-
-    public void setBundle(boolean bundle) {
-        this.bundle = bundle;
-    }
-
-    public String[] getEntryPoint() {
-        return entryPoint;
-    }
-
-    public void setEntryPoint(String[] entryPoint) {
-        this.entryPoint = entryPoint;
-    }
-
-    public boolean isMinify() {
-        return minify;
-    }
-
-    public void setMinify(boolean minify) {
-        this.minify = minify;
-    }
-
-    public boolean isVersion() {
-        return version;
-    }
-
-    public void setVersion(boolean version) {
-        this.version = version;
-    }
-
-    public Map<String, String> getSubstitutes() {
-        return substitutes;
-    }
-
-    public void setSubstitutes(Map<String, String> substitutes) {
-        this.substitutes = substitutes;
-    }
-
-    public List<String> getExcludes() {
-        return excludes;
-    }
-
-    public void setExcludes(List<String> excludes) {
-        this.excludes = excludes;
-    }
-
-    public Format getFormat() {
-        return format;
-    }
-
-    public void setFormat(Format format) {
-        this.format = format;
-    }
-
-    public Map<String, Loader> getLoader() {
-        return loader;
-    }
-
-    public void setLoader(Map<String, Loader> loader) {
-        this.loader = loader;
-    }
-
-    public String getOutdir() {
-        return outdir;
-    }
-
-    public void setOutdir(String outdir) {
-        this.outdir = outdir;
-    }
-
-    public String getPackages() {
-        return packages;
-    }
-
-    public void setPackages(String packages) {
-        this.packages = packages;
-    }
-
-    public Platform getPlatform() {
-        return platform;
-    }
-
-    public void setPlatform(Platform platform) {
-        this.platform = platform;
-    }
-
-    public boolean isServe() {
-        return serve;
-    }
-
-    public void setServe(boolean serve) {
-        this.serve = serve;
-    }
-
-    public boolean isSourceMap() {
-        return sourceMap;
-    }
-
-    public void setSourceMap(boolean sourceMap) {
-        this.sourceMap = sourceMap;
-    }
-
-    public boolean isSplitting() {
-        return splitting;
-    }
-
-    public void setSplitting(boolean splitting) {
-        this.splitting = splitting;
-    }
-
-    public Target getTarget() {
-        return target;
-    }
-
-    public void setTarget(Target target) {
-        this.target = target;
-    }
-
-    public boolean isWatch() {
-        return watch;
-    }
-
-    public void setWatch(boolean watch) {
-        this.watch = watch;
-    }
-
-    public String getChunkNames() {
-        return chunkNames;
-    }
-
-    public void setChunkNames(String chunkNames) {
-        this.chunkNames = chunkNames;
-    }
-
-    public String getEntryNames() {
-        return entryNames;
-    }
-
-    public void setEntryNames(String entryNames) {
-        this.entryNames = entryNames;
-    }
-
-    public String getAssetNames() {
-        return assetNames;
-    }
-
-    public void setAssetNames(String assetNames) {
-        this.assetNames = assetNames;
-    }
-
-    public List<String> getExternal() {
-        return external;
-    }
-
-    public void addExternal(String name) {
-        external.add(name);
-    }
-
-    public String getPublicPath() {
-        return publicPath;
-    }
-
-    public void setPublicPath(String publicPath) {
-        this.publicPath = publicPath;
-    }
-
     public String[] toParams() {
         final Field[] fields = EsBuildConfig.class.getDeclaredFields();
         List<String> result = new ArrayList<>(fields.length);
         for (Field field : fields) {
-            field.setAccessible(true);
             try {
                 final Object value = field.get(this);
                 if (value != null) {
                     final String fieldName = field.getName();
                     if (value == Boolean.TRUE) {
-                        result.add("--" + fieldName.toLowerCase());
+                        result.add("--" + convertField(fieldName));
                     } else if (value instanceof List) {
                         ((List<?>) value).forEach(e -> result.add("--%s:%s".formatted(convertField(fieldName), e.toString())));
                     } else if (value instanceof Map) {
@@ -299,7 +195,7 @@ public class EsBuildConfig {
         return result.toArray(String[]::new);
     }
 
-    private String convertField(String field) {
+    private static String convertField(String field) {
         final String[] split = field.split("(?=\\p{Upper})");
         return Arrays.stream(split).map(String::toLowerCase).collect(Collectors.joining("-"));
     }

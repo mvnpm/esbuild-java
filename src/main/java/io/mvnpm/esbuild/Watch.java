@@ -1,31 +1,37 @@
 package io.mvnpm.esbuild;
 
-import static io.mvnpm.esbuild.Bundler.getNodeModulesDir;
-
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
-import io.mvnpm.esbuild.install.WebDepsInstaller;
-import io.mvnpm.esbuild.model.BundleOptions;
+import io.mvnpm.esbuild.model.EntryPoint;
 
 public class Watch {
 
     private final Process process;
-    private final Path workingFolder;
+    private final Path workDir;
 
-    public Watch(Process process, Path workingFolder) {
+    private final Path dist;
+
+    public Watch(Process process, Path workDir, Path dist) {
         this.process = process;
-        this.workingFolder = workingFolder;
+        this.workDir = workDir;
+        this.dist = dist;
     }
 
-    public void change(BundleOptions bundleOptions) throws IOException {
-        Path nodeModulesDir = getNodeModulesDir(workingFolder, bundleOptions);
-        WebDepsInstaller.install(nodeModulesDir, bundleOptions.getDependencies());
-        bundleOptions.getEntries().forEach(entry -> entry.process(workingFolder));
+    public void updateEntries(List<EntryPoint> entries) throws IOException {
+        entries.forEach(entry -> entry.process(workDir));
     }
 
     public void stop() {
         process.destroy();
     }
 
+    public Path workDir() {
+        return workDir;
+    }
+
+    public Path dist() {
+        return dist;
+    }
 }

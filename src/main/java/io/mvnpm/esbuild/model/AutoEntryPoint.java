@@ -14,26 +14,22 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public class AutoEntryPoint implements EntryPoint {
+public record AutoEntryPoint(Path rootDir, String name, List<Source> sources, AutoDeps autoDeps) implements EntryPoint {
+
     private static final Set<String> SCRIPTS = Set.of("js", "ts", "jsx", "tsx", "mjs", "mts", "cjs", "cts");
-    private final String name;
-    private final Path rootDir;
-    private final List<Source> sources;
-    private final AutoDeps autoDeps;
-
-    private AutoEntryPoint(Path rootDir, String name, List<String> sources, AutoDeps autoDeps) {
-        this.name = requireNonNull(name, "name is required");
-        this.rootDir = requireNonNull(rootDir, "rootDir is required");
-        this.sources = requireNonNull(sources, "sources are required").stream().map(Source::of).toList();
-        this.autoDeps = autoDeps;
+    public AutoEntryPoint {
+        requireNonNull(name, "name is required");
+        requireNonNull(rootDir, "rootDir is required");
+        requireNonNull(sources, "sources are required");
     }
 
-    public static AutoEntryPoint withoutAutoDeps(Path rootDir, String name, List<String> sources) {
-        return new AutoEntryPoint(rootDir, name, sources, null);
+    public static EntryPoint withoutAutoDeps(Path rootDir, String name, List<String> sources) {
+        return withAutoDeps(rootDir, name, sources, null);
     }
 
-    public static AutoEntryPoint withAutoDeps(Path rootDir, String name, List<String> sources, AutoDeps autoDeps) {
-        return new AutoEntryPoint(rootDir, name, sources, autoDeps);
+    public static EntryPoint withAutoDeps(Path rootDir, String name, List<String> sources, AutoDeps autoDeps) {
+        final List<Source> sourceList = requireNonNull(sources, "sources are required").stream().map(Source::of).toList();
+        return new AutoEntryPoint(rootDir, name, sourceList, autoDeps);
     }
 
     @Override

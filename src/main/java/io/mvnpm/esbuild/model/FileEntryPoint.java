@@ -9,15 +9,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 
-public class FileEntryPoint implements EntryPoint {
-
-    private final Path rootDir;
-    private final String script;
-
-    public FileEntryPoint(Path rootDir, String script) {
-        this.rootDir = rootDir;
-        this.script = script;
-    }
+public record FileEntryPoint(Path rootDir, String script) implements EntryPoint {
 
     @Override
     public Path process(Path workDir) {

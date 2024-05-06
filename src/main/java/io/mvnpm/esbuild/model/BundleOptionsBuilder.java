@@ -9,14 +9,18 @@ import io.mvnpm.esbuild.model.AutoEntryPoint.AutoDeps;
 import io.mvnpm.esbuild.model.AutoEntryPoint.AutoDepsMode;
 
 public class BundleOptionsBuilder {
-    private final BundleOptions options = new BundleOptions();
 
-    public BundleOptionsBuilder() {
-        options.setEsBuildConfig(useDefaultConfig());
-    }
+    List<EntryPoint> entries = new ArrayList<>();
 
-    private static EsBuildConfig useDefaultConfig() {
-        return new EsBuildConfigBuilder().build();
+    List<WebDependency> dependencies = new ArrayList<>();
+
+    EsBuildConfig esBuildConfig = EsBuildConfig.builder().build();
+
+    Path workDir;
+
+    Path nodeModulesDir;
+
+    BundleOptionsBuilder() {
     }
 
     public BundleOptionsBuilder addAutoEntryPoint(Path sourceDir, String name, List<String> sources) {
@@ -26,7 +30,7 @@ public class BundleOptionsBuilder {
     public BundleOptionsBuilder addAutoEntryPoint(Path sourceDir, String name, List<String> sources, AutoDepsMode mode,
             Predicate<String> autoDepsIdsPredicate) {
         return addEntryPoint(AutoEntryPoint.withAutoDeps(sourceDir, name, sources,
-                new AutoDeps(mode, options.getNodeModulesDir(), autoDepsIdsPredicate)));
+                new AutoDeps(mode, nodeModulesDir, autoDepsIdsPredicate)));
     }
 
     public BundleOptionsBuilder addEntryPoint(Path rootDir, String script) {
@@ -35,48 +39,45 @@ public class BundleOptionsBuilder {
     }
 
     public BundleOptionsBuilder addEntryPoint(String script) {
-        if (options.getWorkDir() == null) {
+        if (workDir == null) {
             throw new IllegalArgumentException("Workdir must be set");
         }
-        addEntryPoint(new FileEntryPoint(options.getWorkDir(), script));
+        addEntryPoint(new FileEntryPoint(workDir, script));
         return this;
     }
 
     protected BundleOptionsBuilder addEntryPoint(EntryPoint entry) {
-        if (options.getEntries() == null) {
-            options.setEntries(new ArrayList<>());
-        }
-        options.getEntries().add(entry);
+        entries.add(entry);
         return this;
     }
 
     public BundleOptionsBuilder withNodeModulesDir(Path nodeModulesDir) {
-        this.options.setNodeModulesDir(nodeModulesDir);
+        this.nodeModulesDir = nodeModulesDir;
         return this;
     }
 
     public BundleOptionsBuilder withWorkDir(Path workDir) {
-        this.options.setWorkDir(workDir);
+        this.workDir = workDir;
         return this;
     }
 
     public BundleOptionsBuilder withDependencies(List<Path> dependencies, WebDependency.WebDependencyType type) {
-        this.options.setDependencies(dependencies.stream().map(d -> WebDependency.of(d, type)).toList());
+        this.dependencies = dependencies.stream().map(d -> WebDependency.of(d, type)).toList();
         return this;
     }
 
     public BundleOptionsBuilder withDependencies(List<WebDependency> dependencies) {
-        this.options.setDependencies(dependencies);
+        this.dependencies = dependencies;
         return this;
     }
 
     public BundleOptionsBuilder withEsConfig(EsBuildConfig esBuildConfig) {
-        this.options.setEsBuildConfig(esBuildConfig);
+        this.esBuildConfig = esBuildConfig;
         return this;
     }
 
     public BundleOptions build() {
-        return options;
+        return new BundleOptions(this);
     }
 
 }

@@ -4,12 +4,7 @@ import static io.mvnpm.esbuild.install.WebDepsInstaller.install;
 import static io.mvnpm.esbuild.install.WebDepsInstallerTest.getWebDependencies;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -30,7 +25,7 @@ public class AutoEntryPointTest {
         final Path workDir = Files.createTempDirectory("test");
         final Path rootDir = getRootScriptsDir();
         // when
-        final AutoEntryPoint entry = AutoEntryPoint.withoutAutoDeps(rootDir, "bundle",
+        final EntryPoint entry = AutoEntryPoint.withoutAutoDeps(rootDir, "bundle",
                 List.of("script1.js", "script2-test.js", "sub/sub.js"));
         String entryContents = readEntry(entry, workDir);
 
@@ -50,7 +45,7 @@ public class AutoEntryPointTest {
         final Path rootDir = getRootScriptsDir();
 
         // when
-        final AutoEntryPoint entry = AutoEntryPoint.withoutAutoDeps(rootDir, "name", List.of("style.css"));
+        final EntryPoint entry = AutoEntryPoint.withoutAutoDeps(rootDir, "name", List.of("style.css"));
         String entryContents = readEntry(entry, tempDirectory);
 
         // then
@@ -70,7 +65,7 @@ public class AutoEntryPointTest {
         install(nodeModules, getWebDependencies(List.of("/mvnpm/bootstrap-5.2.3.jar", "/mvnpm/stimulus-3.2.1.jar")));
 
         // when
-        final AutoEntryPoint entry = AutoEntryPoint.withAutoDeps(rootDir, "name", List.of("style.css"),
+        final EntryPoint entry = AutoEntryPoint.withAutoDeps(rootDir, "name", List.of("style.css"),
                 new AutoDeps(AutoDepsMode.AUTO,
                         nodeModules));
         String entryContents = readEntry(entry, tempDirectory);
@@ -97,7 +92,7 @@ public class AutoEntryPointTest {
         install(nodeModules, getWebDependencies(List.of("/mvnpm/bootstrap-5.2.3.jar", "/mvnpm/stimulus-3.2.1.jar")));
 
         // when
-        final AutoEntryPoint entry = AutoEntryPoint.withAutoDeps(rootDir, "name", List.of("style.css", "script1.js"),
+        final EntryPoint entry = AutoEntryPoint.withAutoDeps(rootDir, "name", List.of("style.css", "script1.js"),
                 new AutoDeps(AutoDepsMode.AUTO, nodeModules));
         String entryContents = readEntry(entry, tempDirectory);
 
@@ -122,7 +117,7 @@ public class AutoEntryPointTest {
         install(nodeModules, getWebDependencies(List.of("/mvnpm/bootstrap-5.2.3.jar", "/mvnpm/stimulus-3.2.1.jar")));
 
         // when
-        final AutoEntryPoint entry = AutoEntryPoint.withAutoDeps(rootDir, "name", List.of("style.css", "script1.js"),
+        final EntryPoint entry = AutoEntryPoint.withAutoDeps(rootDir, "name", List.of("style.css", "script1.js"),
                 new AutoDeps(AutoDepsMode.ALL, nodeModules));
         String entryContents = readEntry(entry, tempDirectory);
 
@@ -143,7 +138,7 @@ public class AutoEntryPointTest {
         return new File(getClass().getResource("/multi/").toURI()).toPath();
     }
 
-    private static String readEntry(AutoEntryPoint entry, Path tempDirectory) throws FileNotFoundException {
+    private static String readEntry(EntryPoint entry, Path tempDirectory) throws FileNotFoundException {
         final FileInputStream inputStream = new FileInputStream(entry.process(tempDirectory).toFile());
         return new BufferedReader(
                 new InputStreamReader(inputStream, StandardCharsets.UTF_8))
