@@ -28,21 +28,13 @@ public class PathUtils {
                     throw new IOException("Entry file not found: " + src);
                 }
                 final Path dest = targetDir.resolve(entry);
-                if (!Files.exists(dest)) {
+                if (!Files.exists(dest.getParent())) {
                     Files.createDirectories(dest.getParent());
-                    Files.copy(src, dest);
                 }
+                Files.copy(src, dest, REPLACE_EXISTING);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        }
-    }
-
-    public static void copy(Path source, Path dest) {
-        try {
-            Files.copy(source, dest, REPLACE_EXISTING);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 

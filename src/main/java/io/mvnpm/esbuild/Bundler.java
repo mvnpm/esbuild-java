@@ -21,7 +21,6 @@ import io.mvnpm.esbuild.resolve.Resolver;
 public class Bundler {
     private static final Logger logger = Logger.getLogger(Bundler.class.getName());
 
-    private static final String DIST = "dist";
     public static final String ESBUILD_EMBEDDED_VERSION = resolveEmbeddedVersion();
 
     private static String resolveEmbeddedVersion() {
@@ -51,8 +50,9 @@ public class Bundler {
         if (install) {
             install(workDir, bundleOptions);
         }
-        final Path dist = workDir.resolve(DIST);
-        final EsBuildConfig esBuildConfig = createBundle(bundleOptions, workDir, dist);
+        final String out = bundleOptions.esBuildConfig().outdir() != null ? bundleOptions.esBuildConfig().outdir() : "dist";
+        final Path dist = workDir.resolve(out);
+        final EsBuildConfig esBuildConfig = prepareForBundling(bundleOptions, workDir, dist, false);
 
         final ExecuteResult executeResult = esBuild(workDir, esBuildConfig);
 
@@ -60,48 +60,55 @@ public class Bundler {
             throw new BundleException("Unexpected Error during bundling", executeResult.output());
         }
 
-        return new BundleResult(dist, executeResult);
+        return new BundleResult(dist, workDir, executeResult);
     }
 
-    private static EsBuildConfig createBundle(BundleOptions bundleOptions, Path workDir, Path dist) throws IOException {
-        final EsBuildConfig esBuildConfig = bundleOptions.getEsBuildConfig();
+    private static EsBuildConfig prepareForBundling(BundleOptions bundleOptions, Path workDir, Path dist, boolean watch)
+            throws IOException {
+        final EsBuildConfig esBuildConfig = bundleOptions.esBuildConfig();
         // Clean the dist directory from a previous bundling
         deleteRecursive(dist);
         Files.createDirectories(dist);
-        esBuildConfig.setOutdir(dist.toString());
-        if (bundleOptions.getEntries() == null) {
+
+        if (bundleOptions.entries() == null) {
             throw new IllegalArgumentException("At least one entry point is required");
         }
-        final List<String> paths = bundleOptions.getEntries().stream().map(entry -> entry.process(workDir).toString()).toList();
-        esBuildConfig.setEntryPoint(paths.toArray(String[]::new));
-        return esBuildConfig;
+        final List<String> paths = bundleOptions.entries().stream().map(entry -> entry.process(workDir).toString()).toList();
+        return esBuildConfig.edit()
+                .outDir(dist.toString())
+                .watch(watch)
+                .entryPoint(paths.toArray(String[]::new))
+                .build();
     }
 
-    public static Watch watch(BundleOptions bundleOptions, BuildEventListener eventListener) throws IOException {
+    public static Watch watch(BundleOptions bundleOptions, BuildEventListener eventListener, boolean install)
+            throws IOException {
         final Path workDir = getWorkDir(bundleOptions);
-        install(workDir, bundleOptions);
-        final Path dist = workDir.resolve(DIST);
-        final EsBuildConfig esBuildConfig = createBundle(bundleOptions, workDir, dist);
+        if (install) {
+            install(workDir, bundleOptions);
+        }
+        final String out = bundleOptions.esBuildConfig().outdir() != null ? bundleOptions.esBuildConfig().outdir() : "dist";
+        final Path dist = workDir.resolve(out);
+        final EsBuildConfig esBuildConfig = prepareForBundling(bundleOptions, workDir, dist, true);
 
-        bundleOptions.getEsBuildConfig().setWatch(true);
         final Process process = esBuild(workDir, esBuildConfig, eventListener);
-        return new Watch(process, workDir);
+        return new Watch(process, workDir, dist);
     }
 
     private static Path getWorkDir(BundleOptions bundleOptions) throws IOException {
-        return bundleOptions.getWorkDir() != null ? bundleOptions.getWorkDir()
+        return bundleOptions.workDir() != null ? bundleOptions.workDir()
                 : Files.createTempDirectory("bundle");
     }
 
     public static boolean install(Path workDir, BundleOptions bundleOptions) throws IOException {
         final Path nodeModulesDir = getNodeModulesDir(workDir, bundleOptions);
-        return WebDepsInstaller.install(nodeModulesDir, bundleOptions.getDependencies());
+        return WebDepsInstaller.install(nodeModulesDir, bundleOptions.dependencies());
     }
 
-    private static Path getNodeModulesDir(Path workDir, BundleOptions bundleOptions) {
-        return bundleOptions.getNodeModulesDir() == null
+    protected static Path getNodeModulesDir(Path workDir, BundleOptions bundleOptions) {
+        return bundleOptions.nodeModulesDir() == null
                 ? workDir.resolve(BundleOptions.NODE_MODULES)
-                : bundleOptions.getNodeModulesDir();
+                : bundleOptions.nodeModulesDir();
     }
 
     public static void clearDependencies(Path nodeModulesDir) throws IOException {
@@ -120,7 +127,7 @@ public class Bundler {
     }
 
     private static Execute getExecute(Path workDir, EsBuildConfig esBuildConfig) throws IOException {
-        final String version = esBuildConfig.getEsBuildVersion() != null ? esBuildConfig.getEsBuildVersion()
+        final String version = esBuildConfig.esBuildVersion() != null ? esBuildConfig.esBuildVersion()
                 : Bundler.ESBUILD_EMBEDDED_VERSION;
         final Path esBuildExec = Resolver.create().resolve(version);
         return new Execute(workDir, esBuildExec.toFile(), esBuildConfig);

@@ -1,22 +1,22 @@
 package io.mvnpm.esbuild;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 
-import io.mvnpm.esbuild.model.BundleOptions;
-import io.mvnpm.esbuild.model.BundleOptionsBuilder;
-import io.mvnpm.esbuild.model.BundleResult;
-import io.mvnpm.esbuild.model.EsBuildConfigBuilder;
+import io.mvnpm.esbuild.model.*;
 import io.mvnpm.esbuild.model.WebDependency.WebDependencyType;
 
 public class BundlerTest {
@@ -36,17 +36,17 @@ public class BundlerTest {
     void shouldBundleWithScss() throws IOException, URISyntaxException {
         final Path root = new File(getClass().getResource("/scss/").toURI()).toPath();
 
-        final BundleOptions options = new BundleOptionsBuilder()
+        final BundleOptions options = BundleOptions.builder()
                 .withWorkDir(root)
-                .withEsConfig(new EsBuildConfigBuilder().entryNames("[name]").build())
+                .withEsConfig(EsBuildConfig.builder().entryNames("[name]").build())
                 .withDependencies(getJars(List.of("/mvnpm/stimulus-3.2.1.jar", "/mvnpm/bootstrap-5.2.3.jar")),
                         WebDependencyType.MVNPM)
                 .addEntryPoint("app.js").build();
 
         Bundler.bundle(options, true);
 
-        assertTrue(options.getWorkDir().resolve("dist").resolve("app.js").toFile().exists());
-        assertTrue(options.getWorkDir().resolve("dist").resolve("app.css").toFile().exists());
+        assertTrue(options.workDir().resolve("dist").resolve("app.js").toFile().exists());
+        assertTrue(options.workDir().resolve("dist").resolve("app.css").toFile().exists());
 
     }
 
@@ -70,16 +70,74 @@ public class BundlerTest {
         // given
         final BundleOptions options = getBundleOptions(List.of("/mvnpm/stimulus-3.2.1.jar"),
                 WebDependencyType.MVNPM,
-                "application-mvnpm.js").build();
+                "application-mvnpm.js").withEsConfig(EsBuildConfig.builder().fixedEntryNames().build()).build();
 
         // when
-        AtomicBoolean isCalled = new AtomicBoolean(false);
-        final Watch watch = Bundler.watch(options, () -> isCalled.set(true));
+        AtomicReference<CountDownLatch> latch = new AtomicReference<>(new CountDownLatch(1));
+        AtomicReference<BundleException> bundleException = new AtomicReference<>();
+        final Watch watch = Bundler.watch(options, (error) -> {
+            error.ifPresent(bundleException::set);
+            latch.get().countDown();
+        }, true);
 
         // then
-        Thread.sleep(2000);
+        assertTrue(latch.get().await(2, TimeUnit.SECONDS));
+        assertNull(bundleException.get(), "No error during bundling");
+        final Path app = watch.workDir().resolve("application-mvnpm.js");
+        assertTrue(Files.exists(app));
+        final Path distApp = watch.dist().resolve("application-mvnpm.js");
+        assertTrue(Files.exists(distApp));
+
+        //  when
+        latch.set(new CountDownLatch(1));
+        Files.writeString(app, "\nalert(\"foo\");", StandardOpenOption.APPEND);
+        assertTrue(latch.get().await(2, TimeUnit.SECONDS));
+        assertNull(bundleException.get(), "No error during bundling");
+
+        assertTrue(Files.readString(distApp).contains("alert(\"foo\");"));
+
+        // then
         watch.stop();
-        assertTrue(isCalled.get());
+    }
+
+    @Test
+    public void shouldWatchWithError() throws URISyntaxException, IOException, InterruptedException {
+
+        // given
+        final BundleOptions options = getBundleOptions(List.of("/mvnpm/stimulus-3.2.1.jar"),
+                WebDependencyType.MVNPM,
+                "application-error.js").withEsConfig(EsBuildConfig.builder().fixedEntryNames().build()).build();
+
+        // when
+        AtomicReference<CountDownLatch> latch = new AtomicReference<>(new CountDownLatch(1));
+        AtomicReference<BundleException> bundleException = new AtomicReference<>();
+        final Watch watch = Bundler.watch(options, (error) -> {
+            error.ifPresent(bundleException::set);
+            latch.get().countDown();
+        }, true);
+
+        // then
+        assertTrue(latch.get().await(2, TimeUnit.SECONDS));
+        assertNotNull(bundleException.get(), "Error during bundling");
+        assertTrue(bundleException.get().output().contains("[ERROR] Could not resolve \"\""));
+
+        final Path app = watch.workDir().resolve("application-error.js");
+        assertTrue(Files.exists(app));
+
+        // when
+        bundleException.set(null);
+        latch.set(new CountDownLatch(1));
+        Files.writeString(app, "alert(\"foo\");", StandardOpenOption.TRUNCATE_EXISTING);
+
+        // then
+        assertTrue(latch.get().await(2, TimeUnit.SECONDS));
+        assertNull(bundleException.get(), "No error during bundling");
+        final Path distApp = watch.dist().resolve("application-error.js");
+        assertTrue(Files.exists(distApp));
+        assertTrue(Files.readString(distApp).contains("alert(\"foo\");"));
+
+        // then
+        watch.stop();
     }
 
     @Test
@@ -93,7 +151,7 @@ public class BundlerTest {
     public void shouldResolveRelativeFolders() throws URISyntaxException, IOException {
         // given
         final Path root = new File(getClass().getResource("/path/").toURI()).toPath();
-        final BundleOptions bundleOptions = new BundleOptionsBuilder().withWorkDir(root)
+        final BundleOptions bundleOptions = BundleOptions.builder().withWorkDir(root)
                 .addAutoEntryPoint(root, "main", List.of("foo/bar.js")).build();
 
         // when
@@ -118,7 +176,7 @@ public class BundlerTest {
             throws URISyntaxException {
         final List<Path> jars = getJars(jarNames);
         final Path rootDir = new File(getClass().getResource("/").toURI()).toPath();
-        final BundleOptionsBuilder bundleOptionsBuilder = new BundleOptionsBuilder().withDependencies(jars, type);
+        final BundleOptionsBuilder bundleOptionsBuilder = BundleOptions.builder().withDependencies(jars, type);
         if (scriptName != null) {
             bundleOptionsBuilder
                     .addEntryPoint(rootDir, scriptName);

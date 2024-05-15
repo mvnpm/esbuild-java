@@ -8,27 +8,76 @@ import static io.mvnpm.esbuild.model.EsBuildConfig.Loader.JSX;
 import static io.mvnpm.esbuild.model.EsBuildConfig.Loader.TS;
 import static io.mvnpm.esbuild.model.EsBuildConfig.Loader.TSX;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class EsBuildConfigBuilder {
-    private final EsBuildConfig esBuildConfig;
 
-    public EsBuildConfigBuilder() {
-        this.esBuildConfig = new EsBuildConfig();
-        initDefault();
+    String esBuildVersion;
+    boolean bundle;
+
+    String[] entryPoint;
+    boolean minify;
+
+    boolean version;
+
+    Map<String, EsBuildConfig.Loader> loader;
+
+    boolean preserveSymlinks;
+
+    EsBuildConfig.Target target;
+
+    boolean watch;
+
+    String outdir;
+    String packages;
+
+    EsBuildConfig.Platform platform;
+
+    boolean serve;
+    boolean sourceMap;
+
+    boolean splitting;
+
+    final Map<String, String> alias = new HashMap<>();
+    final Map<String, String> define = new HashMap<>();
+
+    List<String> excludes;
+
+    EsBuildConfig.Format format;
+
+    String chunkNames;
+
+    String entryNames;
+
+    String assetNames;
+
+    String publicPath;
+
+    List<String> external = new ArrayList<>();
+
+    EsBuildConfigBuilder() {
     }
 
-    private void initDefault() {
-        this.bundle()
+    public EsBuildConfigBuilder withDefault() {
+        return this.bundle()
                 .minify()
                 .sourceMap()
                 .splitting()
-                .entryNames("[name]-[hash]")
-                .assetNames("assets/[name]-[hash]")
+                .hashedNames()
                 .format(EsBuildConfig.Format.ESM)
                 .loader(getDefaultLoadersMap());
+    }
+
+    public EsBuildConfigBuilder hashedNames() {
+        return this.entryNames("[name]-[hash]")
+                .assetNames("assets/[name]-[hash]");
+    }
+
+    public EsBuildConfigBuilder fixedEntryNames() {
+        return this.entryNames("[name]");
     }
 
     public static Map<String, EsBuildConfig.Loader> getDefaultLoadersMap() {
@@ -51,131 +100,181 @@ public class EsBuildConfigBuilder {
     }
 
     public EsBuildConfigBuilder esbuildVersion(String esbuildVersion) {
-        esBuildConfig.setEsBuildVersion(esbuildVersion);
+        this.esBuildVersion = esbuildVersion;
         return this;
     }
 
     public EsBuildConfigBuilder bundle() {
-        esBuildConfig.setBundle(true);
+        this.bundle = true;
+        return this;
+    }
+
+    public EsBuildConfigBuilder bundle(boolean bundle) {
+        this.bundle = bundle;
         return this;
     }
 
     public EsBuildConfigBuilder entryPoint(String[] entryPoint) {
-        esBuildConfig.setEntryPoint(entryPoint);
+        this.entryPoint = entryPoint;
         return this;
     }
 
     public EsBuildConfigBuilder minify() {
-        esBuildConfig.setMinify(true);
+        this.minify = true;
         return this;
     }
 
     public EsBuildConfigBuilder minify(boolean minify) {
-        esBuildConfig.setMinify(minify);
+        this.minify = minify;
         return this;
     }
 
     public EsBuildConfigBuilder version() {
-        esBuildConfig.setVersion(true);
+        this.version = true;
         return this;
     }
 
-    public EsBuildConfigBuilder substitutes(Map<String, String> substitutes) {
-        esBuildConfig.setSubstitutes(substitutes);
+    public EsBuildConfigBuilder version(boolean version) {
+        this.version = version;
+        return this;
+    }
+
+    public EsBuildConfigBuilder alias(Map<String, String> alias) {
+        this.alias.putAll(alias);
+        return this;
+    }
+
+    public EsBuildConfigBuilder define(Map<String, String> define) {
+        this.define.putAll(define);
+        return this;
+    }
+
+    public EsBuildConfigBuilder alias(String key, String value) {
+        this.define.put(key, value);
+        return this;
+    }
+
+    public EsBuildConfigBuilder define(String key, String value) {
+        this.define.put(key, value);
         return this;
     }
 
     public EsBuildConfigBuilder excludes(List<String> excludes) {
-        esBuildConfig.setExcludes(excludes);
+        this.excludes = excludes;
         return this;
     }
 
     public EsBuildConfigBuilder format(EsBuildConfig.Format format) {
-        esBuildConfig.setFormat(format);
+        this.format = format;
         return this;
     }
 
     public EsBuildConfigBuilder loader(Map<String, EsBuildConfig.Loader> loader) {
-        esBuildConfig.setLoader(loader);
+        this.loader = loader;
+        return this;
+    }
+
+    public EsBuildConfigBuilder preserveSymlinks() {
+        this.preserveSymlinks = true;
+        return this;
+    }
+
+    public EsBuildConfigBuilder preserveSymlinks(boolean preserveSymlinks) {
+        this.preserveSymlinks = preserveSymlinks;
         return this;
     }
 
     public EsBuildConfigBuilder outDir(String outDir) {
-        esBuildConfig.setOutdir(outDir);
+        this.outdir = outDir;
         return this;
     }
 
     public EsBuildConfigBuilder packages(String packages) {
-        esBuildConfig.setPackages(packages);
+        this.packages = packages;
         return this;
     }
 
     public EsBuildConfigBuilder platform(EsBuildConfig.Platform platform) {
-        esBuildConfig.setPlatform(platform);
+        this.platform = platform;
         return this;
     }
 
     public EsBuildConfigBuilder serve() {
-        esBuildConfig.setServe(true);
+        this.serve = true;
+        return this;
+    }
+
+    public EsBuildConfigBuilder serve(boolean serve) {
+        this.serve = serve;
         return this;
     }
 
     public EsBuildConfigBuilder sourceMap() {
-        esBuildConfig.setSourceMap(true);
+        this.sourceMap = true;
         return this;
     }
 
     public EsBuildConfigBuilder sourceMap(boolean sourceMap) {
-        esBuildConfig.setSourceMap(sourceMap);
+        this.sourceMap = sourceMap;
         return this;
     }
 
     public EsBuildConfigBuilder splitting() {
-        esBuildConfig.setSplitting(true);
+        this.splitting = true;
         return this;
     }
 
     public EsBuildConfigBuilder splitting(boolean splitting) {
-        esBuildConfig.setSplitting(splitting);
+        this.splitting = splitting;
         return this;
     }
 
     public EsBuildConfigBuilder addExternal(String name) {
-        esBuildConfig.addExternal(name);
+        this.external.add(name);
+        return this;
+    }
+
+    public EsBuildConfigBuilder external(List<String> names) {
+        this.external = names;
         return this;
     }
 
     public EsBuildConfigBuilder target(EsBuildConfig.Target target) {
-        esBuildConfig.setTarget(target);
+        this.target = target;
         return this;
     }
 
     public EsBuildConfigBuilder watch() {
-        esBuildConfig.setWatch(true);
+        this.watch = true;
+        return this;
+    }
+
+    public EsBuildConfigBuilder watch(boolean watch) {
+        this.watch = watch;
         return this;
     }
 
     public EsBuildConfigBuilder chunkNames(String template) {
-        esBuildConfig.setChunkNames(template);
+        this.chunkNames = template;
         return this;
     }
 
     public EsBuildConfigBuilder entryNames(String template) {
-        esBuildConfig.setEntryNames(template);
+        this.entryNames = template;
         return this;
     }
 
     public EsBuildConfigBuilder publicPath(String publicPath) {
-        esBuildConfig.setPublicPath(publicPath);
+        this.publicPath = publicPath;
         return this;
     }
 
     public EsBuildConfigBuilder assetNames(String assetNames) {
-        esBuildConfig.setAssetNames(assetNames);
+        this.assetNames = assetNames;
         return this;
     }
 
     public EsBuildConfig build() {
-        return esBuildConfig;
+        return new EsBuildConfig(this);
     }
 }

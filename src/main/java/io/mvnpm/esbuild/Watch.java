@@ -1,26 +1,37 @@
 package io.mvnpm.esbuild;
 
-import static io.mvnpm.esbuild.util.PathUtils.copyEntries;
-
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+
+import io.mvnpm.esbuild.model.EntryPoint;
 
 public class Watch {
 
     private final Process process;
-    private final Path workingFolder;
+    private final Path workDir;
 
-    public Watch(Process process, Path workingFolder) {
+    private final Path dist;
+
+    public Watch(Process process, Path workDir, Path dist) {
         this.process = process;
-        this.workingFolder = workingFolder;
+        this.workDir = workDir;
+        this.dist = dist;
     }
 
-    public void change(Path sourceDir, List<String> entries) {
-        copyEntries(sourceDir, entries, workingFolder);
+    public void updateEntries(List<EntryPoint> entries) throws IOException {
+        entries.forEach(entry -> entry.process(workDir));
     }
 
     public void stop() {
         process.destroy();
     }
 
+    public Path workDir() {
+        return workDir;
+    }
+
+    public Path dist() {
+        return dist;
+    }
 }
