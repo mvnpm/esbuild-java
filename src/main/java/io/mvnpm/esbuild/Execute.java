@@ -11,8 +11,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -20,6 +23,8 @@ import java.util.logging.Logger;
 
 import io.mvnpm.esbuild.model.EsBuildConfig;
 import io.mvnpm.esbuild.model.ExecuteResult;
+import io.mvnpm.esbuild.model.WatchBuildResult;
+import io.mvnpm.esbuild.model.WatchStartResult;
 
 public class Execute {
 
@@ -65,8 +70,36 @@ public class Execute {
         }
     }
 
-    public Process execute(BuildEventListener listener) throws IOException {
-        return createProcess(getCommand(), Optional.of(listener));
+    public WatchStartResult watch(BuildEventListener listener) throws IOException {
+        final Process process = createProcess(getCommand(), Optional.of(listener));
+        try {
+            final InputStream processStream = process.getInputStream();
+            CountDownLatch latch = new CountDownLatch(1);
+            final AtomicReference<WatchBuildResult> result = new AtomicReference<>();
+            EXECUTOR_STREAMER.execute(new Streamer(process::isAlive, processStream, (r) -> {
+                if (latch.getCount() == 1) {
+                    result.set(r);
+                    latch.countDown();
+                } else {
+                    listener.onBuild(r);
+                }
+            }, r -> {
+                if (latch.getCount() == 1) {
+                    result.set(r);
+                    latch.countDown();
+                } else if (!r.isSuccess()) {
+                    listener.onBuild(r);
+                }
+            }));
+            latch.await();
+            if (!process.isAlive() && !result.get().isSuccess()) {
+                throw result.get().bundleException();
+            }
+            return new WatchStartResult(result.get(), process);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        }
     }
 
     private String[] getCommand() {
@@ -91,38 +124,43 @@ public class Execute {
     }
 
     public Process createProcess(final String[] command, final Optional<BuildEventListener> listener) throws IOException {
-        Process process = new ProcessBuilder().redirectErrorStream(listener.isPresent()).directory(workDir.toFile())
+        return new ProcessBuilder().redirectErrorStream(listener.isPresent()).directory(workDir.toFile())
                 .command(command).start();
-        final InputStream errorStream = process.getInputStream();
-        listener.ifPresent(
-                buildEventListener -> EXECUTOR_STREAMER
-                        .execute(new Streamer(process::isAlive, errorStream, buildEventListener)));
-        return process;
     }
 
     private record Streamer(BooleanSupplier isAlive, InputStream processStream,
-            BuildEventListener listener) implements Runnable {
+            BuildEventListener listener, Consumer<WatchBuildResult> onExit) implements Runnable {
 
         @Override
         public void run() {
-            final StringBuilder errorBuilder = new StringBuilder();
+            final AtomicBoolean hasError = new AtomicBoolean();
+            final StringBuilder outputBuilder = new StringBuilder();
             consumeStream(isAlive, processStream, l -> {
                 logger.fine(l);
+                outputBuilder.append("\n").append(l);
                 if (l.contains("build finished")) {
                     logger.fine("Build finished!");
-                    final String error = errorBuilder.toString();
-                    errorBuilder.setLength(0);
+                    final String output = outputBuilder.toString();
+                    final boolean error = hasError.getAndSet(false);
+                    outputBuilder.setLength(0);
                     EXECUTOR_BUILD_LISTENERS.execute(() -> {
-                        if (error.isEmpty()) {
-                            listener.onBuild(Optional.empty());
+                        if (!error) {
+                            listener.onBuild(new WatchBuildResult(output));
                         } else {
-                            listener.onBuild(Optional.of(new BundleException("Error during bundling", error)));
+                            listener.onBuild(
+                                    new WatchBuildResult(output, new BundleException("Error during bundling", output)));
                         }
                     });
-                } else if (l.contains("[ERROR]") || !errorBuilder.isEmpty()) {
-                    errorBuilder.append("\n").append(l);
+                } else if (l.contains("[ERROR]")) {
+                    hasError.set(true);
                 }
             });
+            if (!hasError.get()) {
+                onExit.accept(new WatchBuildResult(outputBuilder.toString()));
+            } else {
+                onExit.accept(new WatchBuildResult(outputBuilder.toString(),
+                        new BundleException("Process exited with error", outputBuilder.toString())));
+            }
         }
     }
 
@@ -132,13 +170,16 @@ public class Execute {
         return s.toString();
     }
 
-    private static void consumeStream(BooleanSupplier shouldStop, InputStream stream, Consumer<String> newLineConsumer) {
+    private static void consumeStream(BooleanSupplier stayAlive, InputStream stream, Consumer<String> newLineConsumer) {
         try (
                 final InputStreamReader in = new InputStreamReader(stream, StandardCharsets.UTF_8);
                 final BufferedReader reader = new BufferedReader(in)) {
             String line;
-            while ((line = reader.readLine()) != null && shouldStop.getAsBoolean()) {
+            while ((line = reader.readLine()) != null) {
                 newLineConsumer.accept(line);
+                if (!stayAlive.getAsBoolean()) {
+                    break;
+                }
             }
         } catch (IOException e) {
             // ignore
