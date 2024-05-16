@@ -12,10 +12,7 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import io.mvnpm.esbuild.install.WebDepsInstaller;
-import io.mvnpm.esbuild.model.BundleOptions;
-import io.mvnpm.esbuild.model.BundleResult;
-import io.mvnpm.esbuild.model.EsBuildConfig;
-import io.mvnpm.esbuild.model.ExecuteResult;
+import io.mvnpm.esbuild.model.*;
 import io.mvnpm.esbuild.resolve.Resolver;
 
 public class Bundler {
@@ -91,8 +88,8 @@ public class Bundler {
         final Path dist = workDir.resolve(out);
         final EsBuildConfig esBuildConfig = prepareForBundling(bundleOptions, workDir, dist, true);
 
-        final Process process = esBuild(workDir, esBuildConfig, eventListener);
-        return new Watch(process, workDir, dist);
+        final WatchStartResult r = esBuildWatch(workDir, esBuildConfig, eventListener);
+        return new Watch(r.process(), workDir, dist, r.firstBuildResult());
     }
 
     private static Path getWorkDir(BundleOptions bundleOptions) throws IOException {
@@ -115,10 +112,10 @@ public class Bundler {
         deleteRecursive(nodeModulesDir);
     }
 
-    protected static Process esBuild(Path workDir, EsBuildConfig esBuildConfig, BuildEventListener listener)
+    protected static WatchStartResult esBuildWatch(Path workDir, EsBuildConfig esBuildConfig, BuildEventListener listener)
             throws IOException {
         final Execute execute = getExecute(workDir, esBuildConfig);
-        return execute.execute(listener);
+        return execute.watch(listener);
     }
 
     protected static ExecuteResult esBuild(Path workDir, EsBuildConfig esBuildConfig) throws IOException {

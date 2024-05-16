@@ -1,9 +1,9 @@
 package io.mvnpm.esbuild;
 
-import java.util.Optional;
+import io.mvnpm.esbuild.model.WatchBuildResult;
 
 public interface BuildEventListener {
 
-    void onBuild(Optional<BundleException> error);
+    void onBuild(WatchBuildResult result);
 
 }

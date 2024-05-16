@@ -66,6 +66,19 @@ public class BundlerTest {
     }
 
     @Test
+    public void shouldWatchExitWithError() throws URISyntaxException, IOException, InterruptedException {
+        final BundleOptions options = getBundleOptions(List.of("/mvnpm/stimulus-3.2.1.jar"),
+                WebDependencyType.MVNPM,
+                "application-mvnpm.js").withEsConfig(EsBuildConfig.builder().fixedEntryNames().define("foo", "\"bar").build())
+                .build();
+
+        assertThrows(BundleException.class, () -> {
+            Bundler.watch(options, (r) -> {
+            }, true);
+        });
+    }
+
+    @Test
     public void shouldWatch() throws URISyntaxException, IOException, InterruptedException {
         // given
         final BundleOptions options = getBundleOptions(List.of("/mvnpm/stimulus-3.2.1.jar"),
@@ -75,29 +88,32 @@ public class BundlerTest {
         // when
         AtomicReference<CountDownLatch> latch = new AtomicReference<>(new CountDownLatch(1));
         AtomicReference<BundleException> bundleException = new AtomicReference<>();
-        final Watch watch = Bundler.watch(options, (error) -> {
-            error.ifPresent(bundleException::set);
+        final Watch watch = Bundler.watch(options, (r) -> {
+            if (!r.isSuccess()) {
+                bundleException.set(r.bundleException());
+            }
             latch.get().countDown();
         }, true);
 
         // then
-        assertTrue(latch.get().await(2, TimeUnit.SECONDS));
-        assertNull(bundleException.get(), "No error during bundling");
+        assertTrue(latch.get().getCount() == 1, "First build is not using the listener");
+        assertTrue(watch.firstBuildResult().isSuccess(), "first build is success");
+        assertTrue(watch.isAlive(), "process is alive");
         final Path app = watch.workDir().resolve("application-mvnpm.js");
         assertTrue(Files.exists(app));
         final Path distApp = watch.dist().resolve("application-mvnpm.js");
         assertTrue(Files.exists(distApp));
 
         //  when
-        latch.set(new CountDownLatch(1));
         Files.writeString(app, "\nalert(\"foo\");", StandardOpenOption.APPEND);
         assertTrue(latch.get().await(2, TimeUnit.SECONDS));
         assertNull(bundleException.get(), "No error during bundling");
-
         assertTrue(Files.readString(distApp).contains("alert(\"foo\");"));
 
         // then
-        watch.stop();
+        watch.waitForStop();
+
+        assertFalse(watch.isAlive());
     }
 
     @Test
@@ -111,22 +127,23 @@ public class BundlerTest {
         // when
         AtomicReference<CountDownLatch> latch = new AtomicReference<>(new CountDownLatch(1));
         AtomicReference<BundleException> bundleException = new AtomicReference<>();
-        final Watch watch = Bundler.watch(options, (error) -> {
-            error.ifPresent(bundleException::set);
+        final Watch watch = Bundler.watch(options, (r) -> {
+            if (!r.isSuccess()) {
+                bundleException.set(r.bundleException());
+            }
             latch.get().countDown();
         }, true);
 
         // then
-        assertTrue(latch.get().await(2, TimeUnit.SECONDS));
-        assertNotNull(bundleException.get(), "Error during bundling");
-        assertTrue(bundleException.get().output().contains("[ERROR] Could not resolve \"\""));
+        assertTrue(latch.get().getCount() == 1, "First build is not using the listener");
+        assertTrue(watch.isAlive(), "process is alive");
+        assertNotNull(watch.firstBuildResult().bundleException(), "Error during bundling");
+        assertTrue(watch.firstBuildResult().bundleException().output().contains("[ERROR] Could not resolve \"\""));
 
         final Path app = watch.workDir().resolve("application-error.js");
         assertTrue(Files.exists(app));
 
         // when
-        bundleException.set(null);
-        latch.set(new CountDownLatch(1));
         Files.writeString(app, "alert(\"foo\");", StandardOpenOption.TRUNCATE_EXISTING);
 
         // then
