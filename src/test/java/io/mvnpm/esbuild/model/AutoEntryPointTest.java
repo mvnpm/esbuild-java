@@ -72,13 +72,13 @@ public class AutoEntryPointTest {
 
         // then
         assertEquals("""
-                // Auto-generated imports for project sources
-                import "./style.css";
-
                 // Auto-generated imports for web dependencies
                 import "bootstrap/scss/bootstrap.scss";
                 import "bootstrap";
                 import "@hotwired/stimulus";
+
+                // Auto-generated imports for project sources
+                import "./style.css";
                 """, entryContents);
     }
 
@@ -98,12 +98,12 @@ public class AutoEntryPointTest {
 
         // then
         assertEquals("""
+                // Auto-generated imports for web dependencies
+                import "bootstrap/scss/bootstrap.scss";
+
                 // Auto-generated imports for project sources
                 import "./style.css";
                 export * from "./script1";
-
-                // Auto-generated imports for web dependencies
-                import "bootstrap/scss/bootstrap.scss";
                 """, entryContents);
     }
 
@@ -123,14 +123,14 @@ public class AutoEntryPointTest {
 
         // then
         assertEquals("""
-                // Auto-generated imports for project sources
-                import "./style.css";
-                export * from "./script1";
-
                 // Auto-generated imports for web dependencies
                 import "bootstrap/scss/bootstrap.scss";
                 import "bootstrap";
                 import "@hotwired/stimulus";
+
+                // Auto-generated imports for project sources
+                import "./style.css";
+                export * from "./script1";
                 """, entryContents);
     }
 

@@ -35,7 +35,7 @@ public record AutoEntryPoint(Path rootDir, String name, List<Source> sources, Au
     @Override
     public Path process(Path workDir) {
         try {
-            String content = autoImportsSources(workDir);
+            String content = "";
             AutoDepsMode resolvedMode = autoDeps != null ? autoDeps.mode() : AutoDepsMode.NONE;
             if (resolvedMode == AutoDepsMode.AUTO) {
                 resolvedMode = sources.stream().noneMatch(Source::isScript) ? AutoDepsMode.ALL : AutoDepsMode.STYLES;
@@ -48,6 +48,7 @@ public record AutoEntryPoint(Path rootDir, String name, List<Source> sources, Au
                 case NONE -> {
                 }
             }
+            content += autoImportsSources(workDir);
             return createEntryPoint(name, workDir, content);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -60,7 +61,7 @@ public record AutoEntryPoint(Path rootDir, String name, List<Source> sources, Au
         return entry;
     }
 
-    protected String autoImportsSources(Path workDir) {
+    private String autoImportsSources(Path workDir) {
         if (sources.isEmpty()) {
             return "";
         }
