@@ -5,7 +5,7 @@
   <groupId>io.mvnpm</groupId>
   <artifactId>esbuild-java</artifactId>
   <name>esbuild wrapper for Java</name>
-  <version>1.4.3</version>
+  <version>999-SNAPSHOT</version>
 
   <description>Small wrapper around esbuild to be able to use it in Java</description>
 
@@ -14,7 +14,7 @@
     <connection>scm:git:git://github.com/mvnpm/esbuild-java.git</connection>
     <developerConnection>scm:git:ssh://github.com:mvnpm/esbuild-java.git</developerConnection>
     <url>http://github.com/mvnpm/esbuild-java/tree/main</url>
-    <tag>1.4.3</tag>
+    <tag>HEAD</tag>
   </scm>
   <licenses>
     <license>
