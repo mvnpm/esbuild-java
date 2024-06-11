@@ -23,7 +23,7 @@ public class Bundler {
     private static String resolveEmbeddedVersion() {
         Properties properties = new Properties();
         try {
-            final InputStream resource = Bundler.class.getResourceAsStream("/version.properties");
+            final InputStream resource = Bundler.class.getResourceAsStream("/esbuild-java-version.properties");
             if (resource != null) {
                 properties.load(resource);
             }
@@ -31,7 +31,7 @@ public class Bundler {
             // ignore we use the default
         }
         String version = properties.getProperty("esbuild.version");
-        return requireNonNull(version, "Make sure the version.properties contains 'esbuild.version'.");
+        return requireNonNull(version, "Make sure the esbuild-java-version.properties contains 'esbuild.version'.");
     }
 
     /**
