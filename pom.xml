@@ -149,7 +149,7 @@
               <goal>write-project-properties</goal>
             </goals>
             <configuration>
-              <outputFile>${project.build.outputDirectory}/version.properties</outputFile>
+              <outputFile>${project.build.outputDirectory}/esbuild-java-version.properties</outputFile>
             </configuration>
           </execution>
         </executions>
