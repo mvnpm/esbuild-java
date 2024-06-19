@@ -1,6 +1,5 @@
 package io.mvnpm.esbuild.resolve;
 
-import static io.mvnpm.esbuild.Bundler.ESBUILD_EMBEDDED_VERSION;
 import static io.mvnpm.esbuild.resolve.Resolvers.*;
 
 import java.io.IOException;
@@ -18,7 +17,7 @@ public class BundledResolver implements Resolver {
 
     @Override
     public Path resolve(String version) throws IOException {
-        final Path path = getLocation(ESBUILD_EMBEDDED_VERSION);
+        final Path path = getLocation(version);
         final String bundledExecutableRelativePath = resolveBundledExecutablePath();
         final Path executablePath = path.resolve(bundledExecutableRelativePath);
         if (Files.isExecutable(executablePath)) {
@@ -28,7 +27,7 @@ public class BundledResolver implements Resolver {
         final InputStream resource = getClass().getResourceAsStream("/esbuild-%s-%s.tgz".formatted(CLASSIFIER, version));
 
         if (resource != null) {
-            return extract(resource, ESBUILD_EMBEDDED_VERSION).resolve(bundledExecutableRelativePath);
+            return extract(resource, version).resolve(bundledExecutableRelativePath);
         }
 
         return fallbackResolver.resolve(version);

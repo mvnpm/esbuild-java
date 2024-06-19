@@ -7,6 +7,14 @@
   <name>esbuild wrapper for Java</name>
   <version>999-SNAPSHOT</version>
 
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>unbundled</module>
+    <module>bundled-esbuild</module>
+    <module>bundled-esbuild-scss</module>
+  </modules>
+
   <description>Small wrapper around esbuild to be able to use it in Java</description>
 
   <url>https://github.com/mvnpm/esbuild-java/</url>
@@ -110,33 +118,6 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${surefire.plugin.version}</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>${maven-antrun-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>download</id>
-            <phase>generate-resources</phase>
-            <configuration>
-              <target>
-                <get dest="src/main/resources" skipexisting="true">
-                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/esbuild-darwin-arm64-${esbuild.version}.tgz" />
-                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/esbuild-darwin-x64-${esbuild.version}.tgz" />
-                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/esbuild-win32-x64-${esbuild.version}.tgz" />
-                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/esbuild-win32-ia32-${esbuild.version}.tgz" />
-                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/esbuild-linux-arm64-${esbuild.version}.tgz" />
-                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/esbuild-linux-x64-${esbuild.version}.tgz" />
-                  <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/esbuild-linux-ia32-${esbuild.version}.tgz" />
-                </get>
-              </target>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
