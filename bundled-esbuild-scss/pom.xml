@@ -1,0 +1,44 @@
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.mvnpm</groupId>
+        <artifactId>esbuild-java</artifactId>
+        <version>999-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>esbuild-java-bundled-scss</artifactId>
+
+    <build>
+        <sourceDirectory>../src/main/java</sourceDirectory>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>download</id>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <target>
+                                <get dest="src/main/resources" skipexisting="true">
+                                    <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/esbuild-darwin-arm64-${esbuild.version}.tgz"/>
+                                    <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/esbuild-darwin-x64-${esbuild.version}.tgz"/>
+                                    <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/esbuild-win32-x64-${esbuild.version}.tgz"/>
+                                    <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/esbuild-win32-ia32-${esbuild.version}.tgz"/>
+                                    <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/esbuild-linux-arm64-${esbuild.version}.tgz"/>
+                                    <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/esbuild-linux-x64-${esbuild.version}.tgz"/>
+                                    <url url="https://github.com/mvnpm/esbuild/releases/download/${esbuild.scss.version}/esbuild-linux-ia32-${esbuild.version}.tgz"/>
+                                </get>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

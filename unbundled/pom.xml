@@ -1,0 +1,14 @@
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.mvnpm</groupId>
+        <artifactId>esbuild-java</artifactId>
+        <version>999-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>esbuild-java-core</artifactId>
+
+    <build>
+        <sourceDirectory>../src/main/java</sourceDirectory>
+    </build>
+</project>

@@ -13,21 +13,16 @@ import java.nio.file.Path;
 
 public class DownloadResolver implements Resolver {
     private static final String URL_TEMPLATE = "https://registry.npmjs.org/@esbuild/%1$s/-/%1$s-%2$s.tgz";
+    public static final String SCSS_TEMPLATE = "https://github.com/mvnpm/esbuild/releases/download/v%1$s/esbuild-%2$s-%3$s.tgz";
     private static final String FILE_NAME = "esbuild.tgz";
 
     @Override
     public Path resolve(String version) throws IOException {
-        final Path path = getLocation(version);
-        final String resolveExecutableRelativePath = resolveExecutablePath();
-        final Path executable = path.resolve(resolveExecutableRelativePath);
-        if (Files.isExecutable(executable)) {
-            return executable;
-        }
-
-        final String url = URL_TEMPLATE.formatted(CLASSIFIER, version);
-
+        final String url = getDownloadUrl(version);
         final Path destination = createDestination(version);
         final Path tarFile = destination.resolve(FILE_NAME);
+
+        final String resolveExecutableRelativePath = resolveExecutablePath();
 
         try {
             downloadFile(new URL(url), tarFile);
@@ -43,5 +38,13 @@ public class DownloadResolver implements Resolver {
             fileOutputStream.getChannel()
                     .transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
         }
+    }
+
+    private String getDownloadUrl(String version) {
+        if (version.contains("mvnpm")) {
+            return SCSS_TEMPLATE.formatted(version.substring(version.lastIndexOf("-") + 1), CLASSIFIER, version);
+        }
+
+        return URL_TEMPLATE.formatted(CLASSIFIER, version);
     }
 }
