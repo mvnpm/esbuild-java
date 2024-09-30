@@ -1,10 +1,6 @@
 package io.mvnpm.esbuild;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -33,8 +29,6 @@ public class Execute {
         t.setDaemon(true);
         return t;
     });
-    private static final ExecutorService EXECUTOR_BUILD_LISTENERS = Executors
-            .newSingleThreadExecutor(r -> new Thread(r, "Build Listeners"));
     private static final Logger logger = Logger.getLogger(Execute.class.getName());
 
     private final Path workDir;
@@ -72,11 +66,38 @@ public class Execute {
 
     public WatchStartResult watch(BuildEventListener listener) throws IOException {
         final Process process = createProcess(getCommand(), Optional.of(listener));
+        final ExecutorService executorStreamer = Executors
+                .newSingleThreadExecutor(r -> new Thread(r, "Esbuild watch stdout streamer"));
+        final ExecutorService executorBuild = Executors
+                .newSingleThreadExecutor(r -> new Thread(r, "Esbuild build listeners notify"));
+        final AtomicReference<WatchBuildResult> result = new AtomicReference<>();
+        CountDownLatch latch = new CountDownLatch(1);
+        final WatchStartResult.WatchProcess watchProcess = new WatchStartResult.WatchProcess() {
+            @Override
+            public boolean isAlive() {
+                return process.isAlive();
+            }
+
+            @Override
+            public void close() throws IOException {
+                process.destroyForcibly();
+                executorStreamer.shutdownNow();
+                executorBuild.shutdownNow();
+                try {
+                    process.waitFor();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException(e);
+                }
+                if (latch.getCount() == 1) {
+                    latch.countDown();
+                }
+            }
+        };
         try {
             final InputStream processStream = process.getInputStream();
-            CountDownLatch latch = new CountDownLatch(1);
-            final AtomicReference<WatchBuildResult> result = new AtomicReference<>();
-            EXECUTOR_STREAMER.execute(new Streamer(process::isAlive, processStream, (r) -> {
+
+            executorStreamer.execute(new Streamer(executorBuild, process::isAlive, processStream, (r) -> {
                 if (latch.getCount() == 1) {
                     result.set(r);
                     latch.countDown();
@@ -95,9 +116,11 @@ public class Execute {
             if (!process.isAlive() && !result.get().isSuccess()) {
                 throw result.get().bundleException();
             }
-            return new WatchStartResult(result.get(), process);
+
+            return new WatchStartResult(result.get(), watchProcess);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            watchProcess.close();
             throw new RuntimeException(e);
         }
     }
@@ -128,7 +151,7 @@ public class Execute {
                 .command(command).start();
     }
 
-    private record Streamer(BooleanSupplier isAlive, InputStream processStream,
+    private record Streamer(ExecutorService executorBuild, BooleanSupplier isAlive, InputStream processStream,
             BuildEventListener listener, Consumer<WatchBuildResult> onExit) implements Runnable {
 
         @Override
@@ -143,7 +166,7 @@ public class Execute {
                     final String output = outputBuilder.toString();
                     final boolean error = hasError.getAndSet(false);
                     outputBuilder.setLength(0);
-                    EXECUTOR_BUILD_LISTENERS.execute(() -> {
+                    executorBuild.execute(() -> {
                         if (!error) {
                             listener.onBuild(new WatchBuildResult(output));
                         } else {

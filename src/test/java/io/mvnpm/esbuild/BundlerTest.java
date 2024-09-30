@@ -111,7 +111,7 @@ public class BundlerTest {
         assertTrue(Files.readString(distApp).contains("alert(\"foo\");"));
 
         // then
-        watch.waitForStop();
+        watch.close();
 
         assertFalse(watch.isAlive());
     }
@@ -154,7 +154,7 @@ public class BundlerTest {
         assertTrue(Files.readString(distApp).contains("alert(\"foo\");"));
 
         // then
-        watch.stop();
+        watch.close();
     }
 
     @Test
