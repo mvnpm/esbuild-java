@@ -1,4 +1,13 @@
 package io.mvnpm.esbuild.model;
 
-public record WatchStartResult(WatchBuildResult firstBuildResult, Process process) {
+import java.io.Closeable;
+
+public record WatchStartResult(WatchBuildResult firstBuildResult, WatchProcess process) {
+
+    public interface WatchProcess extends Closeable {
+
+        boolean isAlive();
+
+    }
+
 }
