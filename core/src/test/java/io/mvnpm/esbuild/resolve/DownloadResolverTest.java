@@ -23,6 +23,6 @@ public class DownloadResolverTest extends BundleTester {
         final Path path = new DownloadResolver().resolve(TEST_VERSION);
 
         // then
-        assertTrue(Files.exists(path));
+        assertTrue(Files.exists(path), path + " does not exist");
     }
 }
