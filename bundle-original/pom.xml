@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.mvnpm</groupId>
         <artifactId>esbuild-java-parent</artifactId>
-        <version>999-SNAPSHOT</version>
+        <version>1.5.0</version>
     </parent>
     <artifactId>esbuild-java-bundle-original</artifactId>
     <name>Esbuild wrapper for Java bundled with original binaries</name>
@@ -61,13 +61,13 @@
                         <configuration>
                             <target>
                                 <get dest="src/main/resources" skipexisting="true">
-                                    <url url="https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-${esbuild.version}.tgz"/>
-                                    <url url="https://registry.npmjs.org/@esbuild/darwin-x64/-/darwin-x64-${esbuild.version}.tgz"/>
-                                    <url url="https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-${esbuild.version}.tgz"/>
-                                    <url url="https://registry.npmjs.org/@esbuild/win32-ia32/-/win32-ia32-${esbuild.version}.tgz"/>
-                                    <url url="https://registry.npmjs.org/@esbuild/linux-arm64/-/linux-arm64-${esbuild.version}.tgz"/>
-                                    <url url="https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-${esbuild.version}.tgz"/>
-                                    <url url="https://registry.npmjs.org/@esbuild/linux-ia32/-/linux-ia32-${esbuild.version}.tgz"/>
+                                    <url url="https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-${esbuild.version}.tgz" />
+                                    <url url="https://registry.npmjs.org/@esbuild/darwin-x64/-/darwin-x64-${esbuild.version}.tgz" />
+                                    <url url="https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-${esbuild.version}.tgz" />
+                                    <url url="https://registry.npmjs.org/@esbuild/win32-ia32/-/win32-ia32-${esbuild.version}.tgz" />
+                                    <url url="https://registry.npmjs.org/@esbuild/linux-arm64/-/linux-arm64-${esbuild.version}.tgz" />
+                                    <url url="https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-${esbuild.version}.tgz" />
+                                    <url url="https://registry.npmjs.org/@esbuild/linux-ia32/-/linux-ia32-${esbuild.version}.tgz" />
                                 </get>
                             </target>
                         </configuration>
