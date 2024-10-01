@@ -1,5 +1,6 @@
 package io.mvnpm.esbuild.resolve;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -25,6 +26,8 @@ public class BundleResolverTest extends BundleTester {
     public void resolve() throws IOException {
         // when
         final Path resolve = new BundledResolver(THROWING_RESOLVER).resolve(Bundler.ESBUILD_EMBEDDED_VERSION);
+
+        assertFalse(Bundler.ESBUILD_EMBEDDED_VERSION.contains("mvnpm"));
 
         // then
         assertTrue(resolve.toFile().exists());

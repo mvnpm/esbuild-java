@@ -7,6 +7,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -14,22 +15,44 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 
 final class Resolvers {
+    private static final Logger logger = Logger.getLogger(Resolvers.class.getName());
 
     private Resolvers() {
     }
 
+    public static final String MVNPM_TGZ_PATH_TEMPLATE = "/esbuild-%1$s-%2$s.tgz";
+    public static final String ESBUILD_TGZ_PATH_TEMPLATE = "/%1$s-%2$s.tgz";
+
     private static final String PATH = "package/bin/esbuild";
 
-    private static final String WINDOWS_EXE_PATH = "package/esbuild.exe";
+    private static final String LEGACY_PATH = "package/esbuild";
 
     static final String CLASSIFIER = determineClassifier();
 
-    static String resolveBundledExecutablePath() {
-        return isWindows() ? PATH + ".exe" : PATH;
+    static Path resolveExecutablePath(Path bundleDir) {
+        String path;
+        if (isLegacyBundle(bundleDir)) {
+            path = LEGACY_PATH;
+        } else {
+            path = PATH;
+        }
+        return bundleDir.resolve(isWindows() ? path + ".exe" : path);
     }
 
-    static String resolveExecutablePath() {
-        return isWindows() ? WINDOWS_EXE_PATH : PATH;
+    static Path requireExecutablePath(Path bundleDir) throws IOException {
+        final Path path = resolveExecutablePath(bundleDir);
+        if (!Files.isExecutable(path)) {
+            throw new IOException("Invalid esbuild executable: " + path);
+        }
+        return path;
+    }
+
+    static String getTgzPath(String version) {
+        if (version.contains("mvnpm")) {
+            return MVNPM_TGZ_PATH_TEMPLATE.formatted(CLASSIFIER, version);
+        } else {
+            return ESBUILD_TGZ_PATH_TEMPLATE.formatted(CLASSIFIER, version);
+        }
     }
 
     private static boolean isWindows() {
@@ -127,6 +150,10 @@ final class Resolvers {
 
     static Path getLocation(String version) {
         return Path.of(System.getProperty("java.io.tmpdir")).resolve("esbuild-" + version);
+    }
+
+    static boolean isLegacyBundle(Path location) {
+        return !Files.isDirectory(location.resolve("package/bin"));
     }
 
     // Helper method to convert Tar mode to PosixFilePermission

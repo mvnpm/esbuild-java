@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.mvnpm</groupId>
+        <artifactId>esbuild-java-parent</artifactId>
+        <version>999-SNAPSHOT</version>
+    </parent>
+    <artifactId>esbuild-java-bundle-original</artifactId>
+    <name>Esbuild wrapper for Java bundled with original binaries</name>
+    <properties>
+        <esbuild.version>0.23.0</esbuild.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>io.mvnpm</groupId>
+            <artifactId>esbuild-java</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <version>1.3</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources-filtered</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>net.revelc.code.formatter</groupId>
+                <artifactId>formatter-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>net.revelc.code</groupId>
+                <artifactId>impsort-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>${maven-antrun-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>download</id>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <target>
+                                <get dest="src/main/resources" skipexisting="true">
+                                    <url url="https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-${esbuild.version}.tgz"/>
+                                    <url url="https://registry.npmjs.org/@esbuild/darwin-x64/-/darwin-x64-${esbuild.version}.tgz"/>
+                                    <url url="https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-${esbuild.version}.tgz"/>
+                                    <url url="https://registry.npmjs.org/@esbuild/win32-ia32/-/win32-ia32-${esbuild.version}.tgz"/>
+                                    <url url="https://registry.npmjs.org/@esbuild/linux-arm64/-/linux-arm64-${esbuild.version}.tgz"/>
+                                    <url url="https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-${esbuild.version}.tgz"/>
+                                    <url url="https://registry.npmjs.org/@esbuild/linux-ia32/-/linux-ia32-${esbuild.version}.tgz"/>
+                                </get>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
