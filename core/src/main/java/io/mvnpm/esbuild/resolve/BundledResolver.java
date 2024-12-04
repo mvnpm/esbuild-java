@@ -20,7 +20,7 @@ public class BundledResolver implements Resolver {
     public Path resolve(String version) throws IOException {
         final Path path = getLocation(version);
         final Path executablePath = resolveExecutablePath(path);
-        if (Files.isExecutable(path)) {
+        if (Files.isExecutable(executablePath)) {
             return executablePath;
         }
 
