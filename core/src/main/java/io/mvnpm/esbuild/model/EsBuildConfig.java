@@ -142,7 +142,13 @@ public record EsBuildConfig(
         JSX,
         TEXT,
         TS,
-        TSX
+        TSX;
+
+        @Override
+        public String toString() {
+            return this.name().toLowerCase();
+        }
+
     }
 
     public enum Platform {
@@ -204,7 +210,7 @@ public record EsBuildConfig(
         List<String> result = new ArrayList<>(map.size());
         for (Map.Entry<?, ?> entry : map.entrySet()) {
             result.add("--%s:%s=%s".formatted(fieldName, entry.getKey(),
-                    entry.getValue().toString().toLowerCase().replaceAll("_", "-")));
+                    entry.getValue().toString().replaceAll("_", "-")));
         }
 
         return result;

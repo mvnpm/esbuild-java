@@ -94,4 +94,19 @@ public class EsBuildConfigTest {
         // then
         assertThat(asList(params), containsInAnyOrder("--chunk-names=chunks/[name]-[hash]"));
     }
+
+    @Test
+    public void shouldNotChangeCase() {
+        // given
+        final EsBuildConfigBuilder esBuildConfig = new EsBuildConfigBuilder();
+        esBuildConfig.define.put("FOO", "BAR");
+        esBuildConfig.define.put("foo", "bar");
+
+        // when
+        final String[] params = esBuildConfig.build().toParams();
+
+        // then
+        assertThat(asList(params), containsInAnyOrder("--define:FOO=BAR", "--define:foo=bar"));
+    }
+
 }
