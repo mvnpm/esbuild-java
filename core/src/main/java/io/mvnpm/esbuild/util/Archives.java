@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -52,6 +54,11 @@ public class Archives {
             }
 
             Files.copy(is, newPath, StandardCopyOption.REPLACE_EXISTING);
+            if (newPath.toString().contains("/bin/")) {
+                Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(newPath);
+                permissions.add(PosixFilePermission.OWNER_EXECUTE);
+                Files.setPosixFilePermissions(newPath, permissions);
+            }
         }
     }
 
