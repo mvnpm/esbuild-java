@@ -1,12 +1,11 @@
 package io.mvnpm.esbuild;
 
+import static io.mvnpm.esbuild.install.BuildDependency.getDependencies;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.Scanner;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -14,13 +13,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caoccao.javet.exceptions.JavetException;
+import com.caoccao.javet.interop.NodeRuntime;
+import com.caoccao.javet.interop.V8Host;
+
+import io.mvnpm.esbuild.install.WebDepsInstaller;
 import io.mvnpm.esbuild.model.EsBuildConfig;
 import io.mvnpm.esbuild.model.ExecuteResult;
 import io.mvnpm.esbuild.model.WatchBuildResult;
 import io.mvnpm.esbuild.model.WatchStartResult;
+import io.mvnpm.esbuild.util.EntryCreator;
 
 public class Execute {
 
@@ -32,40 +36,41 @@ public class Execute {
     private static final Logger logger = Logger.getLogger(Execute.class.getName());
 
     private final Path workDir;
-    private final File esBuildExec;
     private EsBuildConfig esBuildConfig;
-    private String[] args;
 
-    public Execute(Path workDir, File esBuildExec, EsBuildConfig esBuildConfig) {
+    public Execute(Path workDir, EsBuildConfig esBuildConfig) {
         this.workDir = workDir;
-        this.esBuildExec = esBuildExec;
         this.esBuildConfig = esBuildConfig;
     }
 
-    public Execute(Path workDir, File esBuildExec, String[] args) {
-        this.workDir = workDir;
-        this.esBuildExec = esBuildExec;
-        this.args = args;
+    public ExecuteResult executeAndWait() throws IOException {
+        runBuild();
+        Path path = workDir.resolve(esBuildConfig.outdir());
+        try (Scanner scanner = new Scanner(path, StandardCharsets.UTF_8)) {
+            String output = scanner.useDelimiter("\\A").hasNext() ? scanner.next() : "";
+            return new ExecuteResult(output);
+        }
     }
 
-    public ExecuteResult executeAndWait() throws IOException {
-        final Process process = createProcess(getCommand(), Optional.empty());
-        try {
-            final int exitCode = process.waitFor();
-            final String content = readStream(process.getInputStream());
-            final String errors = readStream(process.getErrorStream());
-            if (exitCode != 0) {
-                throw new BundleException(errors.isEmpty() ? "Unexpected Error during bundling" : errors, content);
+    private void runBuild() throws IOException {
+        File entryJs = EntryCreator.createEntryJs(workDir, esBuildConfig);
+        WebDepsInstaller.install(workDir.resolve("node_modules"), getDependencies());
+
+        try (NodeRuntime nodeRuntime = V8Host.getNodeInstance().createV8Runtime()) {
+            nodeRuntime.allowEval(true);
+            try {
+                nodeRuntime.getExecutor(entryJs).executeVoid();
+            } catch (JavetException e) {
+                throw new RuntimeException(e);
             }
-            return new ExecuteResult(content);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+            nodeRuntime.await();
+        } catch (JavetException e) {
             throw new RuntimeException(e);
         }
     }
 
     public WatchStartResult watch(BuildEventListener listener) throws IOException {
-        final Process process = createProcess(getCommand(), Optional.of(listener));
+        runBuild();
         final ExecutorService executorStreamer = Executors
                 .newSingleThreadExecutor(r -> new Thread(r, "Esbuild watch stdout streamer"));
         final ExecutorService executorBuild = Executors
@@ -75,12 +80,11 @@ public class Execute {
         final WatchStartResult.WatchProcess watchProcess = new WatchStartResult.WatchProcess() {
             @Override
             public boolean isAlive() {
-                return process.isAlive();
+                return true;
             }
 
             @Override
             public void close() throws IOException {
-                process.destroyForcibly();
                 executorStreamer.shutdownNow();
                 executorBuild.shutdownNow();
                 try {
@@ -94,8 +98,10 @@ public class Execute {
             }
         };
         try {
-            final InputStream processStream = process.getInputStream();
-            executorStreamer.execute(new Streamer(executorBuild, process::isAlive, processStream, (r) -> {
+            final ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            final PrintStream printStream = new PrintStream(stream, true, StandardCharsets.UTF_8);
+            System.setOut(printStream);
+            executorStreamer.execute(new Streamer(executorBuild, () -> true, stream, (r) -> {
                 if (latch.getCount() == 1) {
                     result.set(r);
                     latch.countDown();
@@ -119,7 +125,7 @@ public class Execute {
                 }
             }));
             latch.await();
-            if (!process.isAlive() && !result.get().isSuccess()) {
+            if (!result.get().isSuccess()) {
                 throw result.get().bundleException();
             }
             return new WatchStartResult(result.get(), watchProcess);
@@ -130,34 +136,8 @@ public class Execute {
         }
     }
 
-    private String[] getCommand() {
-        String[] command = args != null ? getCommand(args) : getCommand(esBuildConfig);
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "running esbuild with flags: \n > `{0}`", String.join(" ", command));
-        }
-        return command;
-    }
-
-    private String[] getCommand(EsBuildConfig esBuildConfig) {
-        String[] params = esBuildConfig.toParams();
-        return getCommand(params);
-    }
-
-    private String[] getCommand(String[] args) {
-        List<String> argList = new ArrayList<>(args.length + 1);
-        argList.add(esBuildExec.toString());
-        argList.addAll(Arrays.asList(args));
-
-        return argList.toArray(String[]::new);
-    }
-
-    public Process createProcess(final String[] command, final Optional<BuildEventListener> listener) throws IOException {
-        return new ProcessBuilder().redirectErrorStream(listener.isPresent()).directory(workDir.toFile())
-                .command(command).start();
-    }
-
-    private record Streamer(ExecutorService executorBuild, BooleanSupplier isAlive, InputStream processStream,
-            BuildEventListener listener, Consumer<WatchBuildResult> onExit) implements Runnable {
+    private record Streamer(ExecutorService executorBuild, BooleanSupplier isAlive, ByteArrayOutputStream processStream,
+                            BuildEventListener listener, Consumer<WatchBuildResult> onExit) implements Runnable {
 
         @Override
         public void run() {
@@ -192,15 +172,9 @@ public class Execute {
         }
     }
 
-    private static String readStream(InputStream stream) {
-        final StringBuilder s = new StringBuilder();
-        consumeStream(() -> true, stream, l -> s.append(l).append("\n"));
-        return s.toString();
-    }
-
-    private static void consumeStream(BooleanSupplier stayAlive, InputStream stream, Consumer<String> newLineConsumer) {
+    private static void consumeStream(BooleanSupplier stayAlive, ByteArrayOutputStream stream, Consumer<String> newLineConsumer) {
         try (
-                final InputStreamReader in = new InputStreamReader(stream, StandardCharsets.UTF_8);
+                final InputStreamReader in = new InputStreamReader(new ByteArrayInputStream(stream.toByteArray()));
                 final BufferedReader reader = new BufferedReader(in)) {
             String line;
             while ((line = reader.readLine()) != null) {
