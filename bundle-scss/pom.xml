@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.mvnpm</groupId>
         <artifactId>esbuild-java-parent</artifactId>
-        <version>1.5.3</version>
+        <version>999-SNAPSHOT</version>
     </parent>
     <artifactId>esbuild-java-bundle-scss</artifactId>
     <name>Esbuild wrapper for Java bundled with mvnpm scss binaries</name>
