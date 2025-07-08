@@ -209,8 +209,9 @@ public record EsBuildConfig(
                 final Object value = field.get(this);
                 final String fieldName = field.getName();
 
-                if ("version".equals(fieldName) || "serve".equals(fieldName))
+                if ("serve".equals(fieldName)) {
                     continue;
+                }
                 if (value instanceof Boolean) {
                     node.put(fieldName, (Boolean) value);
                 } else if (value instanceof Map<?, ?> map) {
