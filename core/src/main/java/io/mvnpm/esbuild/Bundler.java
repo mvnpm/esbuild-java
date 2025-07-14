@@ -13,7 +13,6 @@ import java.util.logging.Logger;
 
 import io.mvnpm.esbuild.install.WebDepsInstaller;
 import io.mvnpm.esbuild.model.*;
-import io.mvnpm.esbuild.resolve.Resolver;
 
 public class Bundler {
     private static final Logger logger = Logger.getLogger(Bundler.class.getName());
@@ -124,9 +123,6 @@ public class Bundler {
     }
 
     private static Execute getExecute(Path workDir, EsBuildConfig esBuildConfig) throws IOException {
-        final String version = esBuildConfig.esBuildVersion() != null ? esBuildConfig.esBuildVersion()
-                : Bundler.ESBUILD_EMBEDDED_VERSION;
-        final Path esBuildExec = Resolver.create().resolve(version);
-        return new Execute(workDir, esBuildExec.toFile(), esBuildConfig);
+        return new Execute(workDir, esBuildConfig);
     }
 }

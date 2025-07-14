@@ -2,13 +2,11 @@ package io.mvnpm.esbuild;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import io.mvnpm.esbuild.model.ExecuteResult;
 import io.mvnpm.esbuild.resolve.Resolver;
 
 public class Main {
@@ -25,9 +23,9 @@ public class Main {
             esbuildVersion = unParsedEsbuildVersion.split("=")[1];
         }
         final Path esBuildExec = Resolver.create().resolve(esbuildVersion);
-        final ExecuteResult executeResult = new Execute(Paths.get(workingDirectory), esBuildExec.toFile(),
-                arguments.toArray(new String[] {}))
-                .executeAndWait();
-        System.out.println(executeResult.output());
+        //        final ExecuteResult executeResult = new Execute(Paths.get(workingDirectory), esBuildExec.toFile(),
+        //                arguments.toArray(new String[] {}))
+        //                .executeAndWait();
+        //        System.out.println(executeResult.output());
     }
 }

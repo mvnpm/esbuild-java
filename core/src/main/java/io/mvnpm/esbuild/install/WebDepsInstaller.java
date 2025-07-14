@@ -15,7 +15,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -93,17 +92,6 @@ public final class WebDepsInstaller {
             }
         }
         PathUtils.deleteRecursive(tmp);
-        Set<String> installedDirs = installed.stream().flatMap(i -> i.dirs().stream()).collect(Collectors.toSet());
-        Set<String> legacyDirs = mvnpmInfo.installed().stream().flatMap(i -> i.dirs().stream())
-                .collect(Collectors.toSet());
-        // we are not deleting all the legacy dependencies, some of the dirs might still be used by new ones (e.g version or classifier change).
-        for (String legacyDir : legacyDirs) {
-            if (!installedDirs.contains(legacyDir)) {
-                changed = true;
-                logger.log(Level.FINE, "removing package as it is not needed anymore ''{0}''", legacyDir);
-                PathUtils.deleteRecursive(nodeModulesDir.resolve(legacyDir));
-            }
-        }
         final MvnpmInfo newMvnpmInfo = new MvnpmInfo(installed);
         WebDepsInstaller.writeMvnpmInfo(mvnpmInfoFile, newMvnpmInfo);
         return changed;
