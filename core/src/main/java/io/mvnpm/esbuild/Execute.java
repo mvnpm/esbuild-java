@@ -96,7 +96,6 @@ public class Execute {
         };
         try {
             final InputStream processStream = process.getInputStream();
-
             executorStreamer.execute(new Streamer(executorBuild, process::isAlive, processStream, (r) -> {
                 if (latch.getCount() == 1) {
                     result.set(r);
@@ -105,6 +104,12 @@ public class Execute {
                     listener.onBuild(r);
                 }
             }, r -> {
+                try {
+                    process.waitFor();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException(e);
+                }
                 if (latch.getCount() == 1) {
                     result.set(r);
                     latch.countDown();
@@ -116,7 +121,6 @@ public class Execute {
             if (!process.isAlive() && !result.get().isSuccess()) {
                 throw result.get().bundleException();
             }
-
             return new WatchStartResult(result.get(), watchProcess);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
