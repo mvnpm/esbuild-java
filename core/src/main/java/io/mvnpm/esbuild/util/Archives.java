@@ -32,7 +32,7 @@ public class Archives {
                 var gzis = new GzipCompressorInputStream(bis);
                 var tar = new TarArchiveInputStream(gzis)) {
             TarArchiveEntry entry;
-            while ((entry = tar.getNextTarEntry()) != null) {
+            while ((entry = tar.getNextEntry()) != null) {
                 extractEntry(target, entry.getName(), entry.isDirectory(), tar);
             }
         }
