@@ -12,7 +12,7 @@
 
     <description>Small wrapper around esbuild to be able to use it in Java</description>
     <properties>
-        <esbuild.mvnpm-build.version>0.0.10</esbuild.mvnpm-build.version>
+        <esbuild.mvnpm-build.version>0.0.11</esbuild.mvnpm-build.version>
         <esbuild.version>0.25.9-mvnpm-${esbuild.mvnpm-build.version}</esbuild.version>
     </properties>
 
