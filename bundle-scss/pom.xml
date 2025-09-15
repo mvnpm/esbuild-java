@@ -10,10 +10,6 @@
     <artifactId>esbuild-java-bundle-scss</artifactId>
     <name>Esbuild wrapper for Java bundled with mvnpm scss binaries</name>
     <packaging>jar</packaging>
-    <properties>
-        <esbuild.mvnpm-build.version>0.0.10</esbuild.mvnpm-build.version>
-        <esbuild.version>0.25.9-mvnpm-${esbuild.mvnpm-build.version}</esbuild.version>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>io.mvnpm</groupId>
