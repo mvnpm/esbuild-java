@@ -1,11 +1,14 @@
 package io.mvnpm.esbuild.resolve;
 
-import static io.mvnpm.esbuild.resolve.Resolvers.*;
+import static io.mvnpm.esbuild.resolve.Resolvers.CLASSIFIER;
+import static io.mvnpm.esbuild.resolve.Resolvers.createDestination;
+import static io.mvnpm.esbuild.resolve.Resolvers.extract;
+import static io.mvnpm.esbuild.resolve.Resolvers.getTgzPath;
+import static io.mvnpm.esbuild.resolve.Resolvers.requireExecutablePath;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -31,7 +34,7 @@ public class DownloadResolver implements Resolver {
         try {
             downloadFile(new URL(url), tarFile);
         } catch (IOException e) {
-            throw new UncheckedIOException("could not download esbuild with version " + version, e);
+            throw new EsbuildResolutionException("could not download esbuild with version " + version, e);
         }
         try {
             final File file = destination.toFile();
@@ -40,7 +43,7 @@ public class DownloadResolver implements Resolver {
             return requireExecutablePath(extracted);
         } catch (IOException e) {
             Files.deleteIfExists(tarFile);
-            throw new UncheckedIOException("could not resolve esbuild with version " + version, e);
+            throw new EsbuildResolutionException("could not resolve esbuild with version " + version, e);
         }
     }
 
@@ -62,7 +65,7 @@ public class DownloadResolver implements Resolver {
         if (version.contains("mvnpm")) {
             return MVNPM_URL_TEMPLATE.formatted(version.substring(version.lastIndexOf("-") + 1)) + tgz;
         }
-        return ESBUILD_URL_TEMPLATE.formatted(CLASSIFIER) + tgz;
+        return (ESBUILD_URL_TEMPLATE.formatted(CLASSIFIER) + tgz).replace("windows", "win32").replace("macos", "darwin");
     }
 
 }

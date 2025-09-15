@@ -13,6 +13,7 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.io.FileUtils;
 
 final class Resolvers {
     private static final Logger logger = Logger.getLogger(Resolvers.class.getName());
@@ -39,10 +40,29 @@ final class Resolvers {
         return bundleDir.resolve(isWindows() ? path + ".exe" : path);
     }
 
-    static Path requireExecutablePath(Path bundleDir) throws IOException {
+    static Path resolveSassExecutablePath(Path bundleDir) {
+        String path = "dart-sass/sass";
+        return bundleDir.resolve(isWindows() ? path + ".bat" : path);
+    }
+
+    static Path getExecutablePath(Path bundleDir) throws IOException {
         final Path path = resolveExecutablePath(bundleDir);
         if (!Files.isExecutable(path)) {
-            throw new IOException("Invalid esbuild executable: " + path);
+            return null;
+        }
+        if (bundleDir.toString().contains("-mvnpm-")) {
+            // check for scss
+            if (!Files.isExecutable(resolveSassExecutablePath(bundleDir))) {
+                return null;
+            }
+        }
+        return path;
+    }
+
+    static Path requireExecutablePath(Path bundleDir) throws IOException {
+        final Path path = getExecutablePath(bundleDir);
+        if (path == null) {
+            throw new IOException("Invalid esbuild executable in: " + bundleDir);
         }
         return path;
     }
@@ -63,26 +83,28 @@ final class Resolvers {
     private static String determineClassifier() {
         final String osName = System.getProperty("os.name").toLowerCase();
         final String osArch = System.getProperty("os.arch").toLowerCase();
-        String classifier;
-
+        String classifier = null;
         if (osName.contains("mac")) {
             if (osArch.equals("aarch64") || osArch.contains("arm")) {
-                classifier = "darwin-arm64";
+                classifier = "macos-arm64";
             } else {
-                classifier = "darwin-x64";
+                classifier = "macos-x64";
             }
         } else if (osName.contains("win")) {
-            classifier = osArch.contains("64") ? "win32-x64" : "win32-ia32";
+            if (osArch.equals("aarch64") || osArch.equals("arm64")) {
+                classifier = "windows-arm64";
+            } else if (osArch.contains("64")) {
+                classifier = "windows-x64";
+            }
         } else {
             if (osArch.equals("aarch64") || osArch.equals("arm64")) {
                 classifier = "linux-arm64";
-            } else if (osArch.contains("arm")) {
-                classifier = "linux-arm";
             } else if (osArch.contains("64")) {
                 classifier = "linux-x64";
-            } else {
-                classifier = "linux-ia32";
             }
+        }
+        if (classifier == null) {
+            throw new EsbuildResolutionException("Incompatible os: '%s' and arch: '%s' for esbuild".formatted(osName, osArch));
         }
         return classifier;
     }
@@ -93,9 +115,10 @@ final class Resolvers {
     }
 
     static Path extract(InputStream archive, File destination) throws IOException {
-        if (!destination.exists()) {
-            destination.mkdirs();
+        if (destination.isDirectory() && destination.exists()) {
+            FileUtils.deleteDirectory(destination);
         }
+        destination.mkdirs();
 
         try (GzipCompressorInputStream gzipIn = new GzipCompressorInputStream(archive);
                 TarArchiveInputStream tarIn = new TarArchiveInputStream(gzipIn)) {
