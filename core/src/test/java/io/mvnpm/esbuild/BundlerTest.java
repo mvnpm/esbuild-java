@@ -11,6 +11,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -67,15 +69,41 @@ public class BundlerTest {
 
     @Test
     public void shouldWatchExitWithError() throws URISyntaxException, IOException, InterruptedException {
-        final BundleOptions options = getBundleOptions(List.of("/mvnpm/stimulus-3.2.1.jar"),
+        final BundleOptions options = getBundleOptions(
+                List.of("/mvnpm/stimulus-3.2.1.jar"),
                 WebDependencyType.MVNPM,
-                "application-mvnpm.js").withEsConfig(EsBuildConfig.builder().fixedEntryNames().define("foo", "\"bar").build())
+                "application-mvnpm.js").withEsConfig(
+                        EsBuildConfig.builder()
+                                .fixedEntryNames()
+                                .define("foo", "\"bar") // <- looks like you might be missing a closing quote here?
+                                .build())
                 .build();
 
-        assertThrows(BundleException.class, () -> {
-            Bundler.watch(options, (r) -> {
-            }, true);
-        });
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+        AtomicReference<Watch> r = new AtomicReference<>();
+        try {
+            for (int i = 0; i < 100; i++) {
+                final int idx = i;
+                executor.submit(() -> {
+                    System.out.println("Running task " + idx);
+                    final Watch watch;
+                    try {
+                        watch = Bundler.watch(options, (wr) -> {
+                        }, true);
+                        r.set(watch);
+                    } catch (IOException e) {
+                        // good
+                    }
+
+                });
+            }
+        } finally {
+            executor.shutdown();
+        }
+        executor.awaitTermination(3, TimeUnit.SECONDS);
+        if (r.get() != null) {
+            throw new RuntimeException(r.get().toString());
+        }
     }
 
     @Test
