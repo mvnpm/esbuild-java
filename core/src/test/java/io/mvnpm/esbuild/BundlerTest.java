@@ -49,7 +49,34 @@ public class BundlerTest {
 
         assertTrue(options.workDir().resolve("dist").resolve("app.js").toFile().exists());
         assertTrue(options.workDir().resolve("dist").resolve("app.css").toFile().exists());
+    }
 
+    @Test
+    void shouldBundleWithScssImports() throws IOException, URISyntaxException {
+        final Path root = new File(getClass().getResource("/scss/").toURI()).toPath();
+
+        final BundleOptions options = BundleOptions.builder()
+                .withWorkDir(root)
+                .withEsConfig(EsBuildConfig.builder().entryNames("[name]").build())
+                .addEntryPoint("import.scss").build();
+
+        Bundler.bundle(options, true);
+
+        assertTrue(options.workDir().resolve("dist").resolve("import.css").toFile().exists());
+    }
+
+    @Test
+    void shouldBundleWithScssImportsFilesBeforeFolders() throws IOException, URISyntaxException {
+        final Path root = new File(getClass().getResource("/scss/partials").toURI()).toPath();
+
+        final BundleOptions options = BundleOptions.builder()
+                .withWorkDir(root)
+                .withEsConfig(EsBuildConfig.builder().entryNames("[name]").build())
+                .addEntryPoint("test.scss").build();
+
+        Bundler.bundle(options, true);
+
+        assertTrue(options.workDir().resolve("dist").resolve("test.css").toFile().exists());
     }
 
     @Test
