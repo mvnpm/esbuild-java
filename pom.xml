@@ -41,7 +41,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <maven.compiler.release>17</maven.compiler.release>
 
-        <esbuild.mvnpm-build.version>0.0.12</esbuild.mvnpm-build.version>
+        <esbuild.mvnpm-build.version>0.0.13</esbuild.mvnpm-build.version>
         <esbuild.version>0.25.9-mvnpm-${esbuild.mvnpm-build.version}</esbuild.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
