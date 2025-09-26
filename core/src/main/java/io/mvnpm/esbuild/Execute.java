@@ -87,7 +87,6 @@ public class Execute {
                     process.waitFor();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    throw new RuntimeException(e);
                 }
                 if (latch.getCount() == 1) {
                     latch.countDown();
@@ -105,10 +104,12 @@ public class Execute {
                 }
             }, r -> {
                 try {
-                    process.waitFor();
+                    if (process.isAlive()) {
+                        process.destroyForcibly();
+                        process.waitFor();
+                    }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    throw new RuntimeException(e);
                 }
                 if (latch.getCount() == 1) {
                     result.set(r);
