@@ -1,0 +1,17 @@
+{
+  "name": "esbuild-java",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mvnpm/esbuild-java"
+  },
+  "private": true,
+  "dependencies": {
+    "esbuild-sass-plugin": "^3.3.1"
+  }
+}

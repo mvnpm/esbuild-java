@@ -18,13 +18,9 @@ public record EsBuildConfig(
         String[] entryPoints,
         boolean minify,
 
-        boolean version,
-
         Map<String, Loader> loader,
         boolean preserveSymlinks,
         Target target,
-
-        boolean watch,
 
         String outdir,
         String packages,
@@ -63,13 +59,9 @@ public record EsBuildConfig(
                 builder.entryPoint,
                 builder.minify,
 
-                builder.version,
-
                 builder.loader,
                 builder.preserveSymlinks,
                 builder.target,
-
-                builder.watch,
 
                 builder.outdir,
                 builder.packages,
@@ -104,11 +96,9 @@ public record EsBuildConfig(
                 .bundle(this.bundle)
                 .entryPoint(this.entryPoints)
                 .minify(this.minify)
-                .version(this.version)
                 .loader(this.loader)
                 .preserveSymlinks(this.preserveSymlinks)
                 .target(this.target)
-                .watch(this.watch)
                 .outDir(this.outdir)
                 .packages(this.packages)
                 .platform(this.platform)
@@ -129,7 +119,12 @@ public record EsBuildConfig(
     public enum Format {
         IIFE,
         CJS,
-        ESM,
+        ESM;
+
+        @Override
+        public String toString() {
+            return this.name().toLowerCase();
+        }
     }
 
     public enum Loader {
@@ -159,7 +154,12 @@ public record EsBuildConfig(
     public enum Platform {
         BROWSER,
         NODE,
-        NEUTRAL
+        NEUTRAL;
+
+        @Override
+        public String toString() {
+            return this.name().toLowerCase();
+        }
     }
 
     public enum Target {
@@ -170,7 +170,12 @@ public record EsBuildConfig(
         EDGE16,
         NODE10,
         IE9,
-        OPERA45
+        OPERA45;
+
+        @Override
+        public String toString() {
+            return this.name().toLowerCase();
+        }
     }
 
     public String[] toParams() {
@@ -225,7 +230,7 @@ public record EsBuildConfig(
                         continue;
 
                     ObjectNode subNode = mapper.createObjectNode();
-                    map.forEach((key, v) -> subNode.put(key.toString(), v.toString().toLowerCase()));
+                    map.forEach((key, v) -> subNode.put(key.toString(), v.toString().replaceAll("_", "-")));
                     node.set(fieldName, subNode);
                 } else if (value instanceof List<?> list) {
                     if (list.isEmpty())
@@ -240,13 +245,12 @@ public record EsBuildConfig(
                     Arrays.stream(list).toList().forEach(arrayNode::add);
                     node.set(fieldName, arrayNode);
                 } else if (value != null) {
-                    node.put(fieldName, value.toString().toLowerCase());
+                    node.put(fieldName, value.toString());
                 }
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
         }
-
         try {
             return mapper.writeValueAsString(node);
         } catch (JsonProcessingException e) {
