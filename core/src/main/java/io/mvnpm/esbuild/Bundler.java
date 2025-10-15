@@ -1,5 +1,6 @@
 package io.mvnpm.esbuild;
 
+import static io.mvnpm.esbuild.script.ScriptRunner.getOutDir;
 import static io.mvnpm.esbuild.util.PathUtils.deleteRecursive;
 import static java.util.Objects.requireNonNull;
 
@@ -7,12 +8,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import io.mvnpm.esbuild.install.EsBuildDeps;
 import io.mvnpm.esbuild.install.WebDepsInstaller;
 import io.mvnpm.esbuild.model.*;
+import io.mvnpm.esbuild.script.ScriptRunner;
 
 public class Bundler {
     private static final Logger logger = Logger.getLogger(Bundler.class.getName());
@@ -46,17 +50,30 @@ public class Bundler {
         if (install) {
             install(workDir, bundleOptions);
         }
-        final String out = bundleOptions.esBuildConfig().outdir() != null ? bundleOptions.esBuildConfig().outdir() : "dist";
-        final Path dist = workDir.resolve(out);
+        final Path dist = getOutDir(workDir, bundleOptions.esBuildConfig());
         final EsBuildConfig esBuildConfig = prepareForBundling(bundleOptions, workDir, dist, false);
 
-        final ExecuteResult executeResult = esBuild(workDir, esBuildConfig);
+        esBuild(workDir, esBuildConfig);
 
         if (!Files.isDirectory(dist)) {
-            throw new BundleException("Unexpected Error during bundling", executeResult.output());
+            throw new BundleException("Unexpected Error during bundling");
         }
 
-        return new BundleResult(dist, workDir, executeResult);
+        return new BundleResult(dist, workDir);
+    }
+
+    public static DevResult dev(BundleOptions bundleOptions, boolean install)
+            throws IOException {
+        final Path workDir = getWorkDir(bundleOptions);
+        if (install) {
+            install(workDir, bundleOptions);
+        }
+        final Path dist = getOutDir(workDir, bundleOptions.esBuildConfig());
+        final EsBuildConfig esBuildConfig = prepareForBundling(bundleOptions, workDir, dist, true);
+
+        final DevResult devResult = esBuildDev(workDir, esBuildConfig);
+        devResult.process().init();
+        return devResult;
     }
 
     private static EsBuildConfig prepareForBundling(BundleOptions bundleOptions, Path workDir, Path dist, boolean watch)
@@ -77,20 +94,6 @@ public class Bundler {
                 .build();
     }
 
-    public static Watch watch(BundleOptions bundleOptions, BuildEventListener eventListener, boolean install)
-            throws IOException {
-        final Path workDir = getWorkDir(bundleOptions);
-        if (install) {
-            install(workDir, bundleOptions);
-        }
-        final String out = bundleOptions.esBuildConfig().outdir() != null ? bundleOptions.esBuildConfig().outdir() : "dist";
-        final Path dist = workDir.resolve(out);
-        final EsBuildConfig esBuildConfig = prepareForBundling(bundleOptions, workDir, dist, true);
-
-        final WatchStartResult r = esBuildWatch(workDir, esBuildConfig, eventListener);
-        return new Watch(r.process(), workDir, dist, r.firstBuildResult());
-    }
-
     private static Path getWorkDir(BundleOptions bundleOptions) throws IOException {
         return bundleOptions.workDir() != null ? bundleOptions.workDir()
                 : Files.createTempDirectory("bundle");
@@ -98,7 +101,9 @@ public class Bundler {
 
     public static boolean install(Path workDir, BundleOptions bundleOptions) throws IOException {
         final Path nodeModulesDir = getNodeModulesDir(workDir, bundleOptions);
-        return WebDepsInstaller.install(nodeModulesDir, bundleOptions.dependencies());
+        final List<WebDependency> dependencies = new ArrayList<>(bundleOptions.dependencies());
+        dependencies.addAll(EsBuildDeps.get().deps());
+        return WebDepsInstaller.install(nodeModulesDir, dependencies);
     }
 
     protected static Path getNodeModulesDir(Path workDir, BundleOptions bundleOptions) {
@@ -111,18 +116,15 @@ public class Bundler {
         deleteRecursive(nodeModulesDir);
     }
 
-    protected static WatchStartResult esBuildWatch(Path workDir, EsBuildConfig esBuildConfig, BuildEventListener listener)
+    protected static DevResult esBuildDev(Path workDir, EsBuildConfig esBuildConfig)
             throws IOException {
-        final Execute execute = getExecute(workDir, esBuildConfig);
-        return execute.watch(listener);
+        final ScriptRunner scriptRunner = new ScriptRunner(workDir, esBuildConfig);
+        return new DevResult(scriptRunner.dev());
     }
 
-    protected static ExecuteResult esBuild(Path workDir, EsBuildConfig esBuildConfig) throws IOException {
-        final Execute execute = getExecute(workDir, esBuildConfig);
-        return execute.executeAndWait();
+    protected static void esBuild(Path workDir, EsBuildConfig esBuildConfig) throws IOException {
+        final ScriptRunner scriptRunner = new ScriptRunner(workDir, esBuildConfig);
+        scriptRunner.build();
     }
 
-    private static Execute getExecute(Path workDir, EsBuildConfig esBuildConfig) throws IOException {
-        return new Execute(workDir, esBuildConfig);
-    }
 }

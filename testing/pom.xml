@@ -1,0 +1,31 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.mvnpm</groupId>
+        <artifactId>esbuild-java-parent</artifactId>
+        <version>999-SNAPSHOT</version>
+    </parent>
+    <artifactId>esbuild-java-testing</artifactId>
+    <name>Esbuild Java - testing</name>
+
+
+    <dependencies>
+
+        <dependency>
+            <groupId>io.mvnpm</groupId>
+            <artifactId>esbuild-java</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- Testing -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <version>1.3</version>
+        </dependency>
+    </dependencies>
+</project>
