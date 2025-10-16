@@ -58,7 +58,7 @@ public class EsBuildConfigBuilder {
 
     List<String> external = new ArrayList<>();
 
-    EsBuildConfigBuilder() {
+    public EsBuildConfigBuilder() {
     }
 
     public EsBuildConfigBuilder withDefault() {

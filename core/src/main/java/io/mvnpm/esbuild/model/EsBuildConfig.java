@@ -7,19 +7,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 public record EsBuildConfig(
         String esBuildVersion,
         boolean bundle,
-        String[] entryPoint,
+        String[] entryPoints,
         boolean minify,
-
-        boolean version,
 
         Map<String, Loader> loader,
         boolean preserveSymlinks,
         Target target,
-
-        boolean watch,
 
         String outdir,
         String packages,
@@ -58,13 +59,9 @@ public record EsBuildConfig(
                 builder.entryPoint,
                 builder.minify,
 
-                builder.version,
-
                 builder.loader,
                 builder.preserveSymlinks,
                 builder.target,
-
-                builder.watch,
 
                 builder.outdir,
                 builder.packages,
@@ -97,13 +94,11 @@ public record EsBuildConfig(
         return new EsBuildConfigBuilder()
                 .esbuildVersion(this.esBuildVersion)
                 .bundle(this.bundle)
-                .entryPoint(this.entryPoint)
+                .entryPoint(this.entryPoints)
                 .minify(this.minify)
-                .version(this.version)
                 .loader(this.loader)
                 .preserveSymlinks(this.preserveSymlinks)
                 .target(this.target)
-                .watch(this.watch)
                 .outDir(this.outdir)
                 .packages(this.packages)
                 .platform(this.platform)
@@ -124,7 +119,12 @@ public record EsBuildConfig(
     public enum Format {
         IIFE,
         CJS,
-        ESM,
+        ESM;
+
+        @Override
+        public String toString() {
+            return this.name().toLowerCase();
+        }
     }
 
     public enum Loader {
@@ -154,7 +154,12 @@ public record EsBuildConfig(
     public enum Platform {
         BROWSER,
         NODE,
-        NEUTRAL
+        NEUTRAL;
+
+        @Override
+        public String toString() {
+            return this.name().toLowerCase();
+        }
     }
 
     public enum Target {
@@ -165,7 +170,12 @@ public record EsBuildConfig(
         EDGE16,
         NODE10,
         IE9,
-        OPERA45
+        OPERA45;
+
+        @Override
+        public String toString() {
+            return this.name().toLowerCase();
+        }
     }
 
     public String[] toParams() {
@@ -182,7 +192,7 @@ public record EsBuildConfig(
                         ((List<?>) value).forEach(e -> result.add("--%s:%s".formatted(convertField(fieldName), e.toString())));
                     } else if (value instanceof Map) {
                         result.addAll(mapToString(fieldName, (Map<?, ?>) value));
-                    } else if ("entryPoint".equals(field.getName())) {
+                    } else if ("entryPoints".equals(field.getName())) {
                         result.addAll(List.of((String[]) value));
                     } else if (!(value instanceof Boolean)) {
                         String fn = convertField(fieldName);
@@ -199,6 +209,53 @@ public record EsBuildConfig(
         }
 
         return result.toArray(String[]::new);
+    }
+
+    public String toJson() {
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode node = mapper.createObjectNode();
+        final Field[] fields = EsBuildConfig.class.getDeclaredFields();
+        for (Field field : fields) {
+            try {
+                final Object value = field.get(this);
+                final String fieldName = field.getName();
+
+                if ("serve".equals(fieldName)) {
+                    continue;
+                }
+                if (value instanceof Boolean) {
+                    node.put(fieldName, (Boolean) value);
+                } else if (value instanceof Map<?, ?> map) {
+                    if (map.isEmpty())
+                        continue;
+
+                    ObjectNode subNode = mapper.createObjectNode();
+                    map.forEach((key, v) -> subNode.put(key.toString(), v.toString().replaceAll("_", "-")));
+                    node.set(fieldName, subNode);
+                } else if (value instanceof List<?> list) {
+                    if (list.isEmpty())
+                        continue;
+                    ArrayNode arrayNode = mapper.createArrayNode();
+                    list.forEach(v -> arrayNode.add(v.toString()));
+                    node.set(fieldName, arrayNode);
+                } else if (value instanceof String[] list) {
+                    if (list.length == 0)
+                        continue;
+                    ArrayNode arrayNode = mapper.createArrayNode();
+                    Arrays.stream(list).toList().forEach(arrayNode::add);
+                    node.set(fieldName, arrayNode);
+                } else if (value != null) {
+                    node.put(fieldName, value.toString());
+                }
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        try {
+            return mapper.writeValueAsString(node);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static String convertField(String field) {
