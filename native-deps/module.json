@@ -1,0 +1,131 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "${pom.groupId}",
+    "module": "${pom.artifactId}",
+    "version": "${pom.version}"
+  },
+  "createdBy": {
+    "maven": {
+      "version": "${maven.version}",
+      "buildId": "${maven.build.version}"
+    }
+  },
+   "variants": [
+    {
+      "name": "darwinArm64Runtime",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.usage": "java-runtime",
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.native.operatingSystem": "macos",
+        "org.gradle.native.architecture": "arm64"
+      },
+      "dependencies": [
+      { "group": "org.mvnpm.at.esbuild", "module": "darwin-arm64", "version": { "requires": "${esbuild.version}" } },
+      { "group": "org.mvnpm.at.deno", "module": "darwin-arm64", "version": { "requires": "${deno.version}" } }
+      ],
+      "files": [
+        {
+          "name": "${project.build.finalName}.jar",
+          "url": "${project.build.finalName}.jar"
+        }
+      ]
+    },
+    {
+      "name": "darwinX64Runtime",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.usage": "java-runtime",
+        "org.gradle.native.operatingSystem": "macos",
+        "org.gradle.native.architecture": "x86-64"
+      },
+      "dependencies": [
+      { "group": "org.mvnpm.at.esbuild", "module": "darwin-x64", "version": { "requires": "${esbuild.version}" } },
+      { "group": "org.mvnpm.at.deno", "module": "darwin-x64", "version": { "requires": "${deno.version}" } }
+      ],
+      "files": [
+        {
+          "name": "${project.build.finalName}.jar",
+          "url": "${project.build.finalName}.jar"
+        }
+      ]
+    },
+    {
+      "name": "linuxX64Runtime",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.usage": "java-runtime",
+        "org.gradle.native.operatingSystem": "linux",
+        "org.gradle.native.architecture": "x86-64"
+      },
+      "dependencies": [
+      { "group": "org.mvnpm.at.esbuild", "module": "linux-x64", "version": { "requires": "${esbuild.version}" } },
+      { "group": "org.mvnpm.at.deno", "module": "linux-x64-glibc", "version": { "requires": "${deno.version}" } }
+      ],
+      "files": [
+        {
+          "name": "${project.build.finalName}.jar",
+          "url": "${project.build.finalName}.jar"
+        }
+      ]
+    },
+    {
+      "name": "linuxArm64Runtime",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.usage": "java-runtime",
+        "org.gradle.native.operatingSystem": "linux",
+        "org.gradle.native.architecture": "arm64"
+      },
+      "dependencies": [
+      { "group": "org.mvnpm.at.esbuild", "module": "linux-arm64", "version": { "requires": "${esbuild.version}" } },
+      { "group": "org.mvnpm.at.deno", "module": "linux-arm64-glibc", "version": { "requires": "${deno.version}" } }
+      ],
+      "files": [
+        {
+          "name": "${project.build.finalName}.jar",
+          "url": "${project.build.finalName}.jar"
+        }
+      ]
+    },
+    {
+      "name": "windowsX64Runtime",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.usage": "java-runtime",
+        "org.gradle.native.operatingSystem": "windows",
+        "org.gradle.native.architecture": "x86-64"
+      },
+      "dependencies": [
+      { "group": "org.mvnpm.at.esbuild", "module": "win32-x64", "version": { "requires": "${esbuild.version}" } },
+      { "group": "org.mvnpm.at.deno", "module": "win32-x64", "version": { "requires": "${deno.version}" } }
+      ],
+      "files": [
+        {
+          "name": "${project.build.finalName}.jar",
+          "url": "${project.build.finalName}.jar"
+        }
+      ]
+    },
+    {
+    "name": "windowsArm64Runtime",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.usage": "java-runtime",
+        "org.gradle.native.operatingSystem": "windows",
+        "org.gradle.native.architecture": "arm64"
+      },
+      "dependencies": [
+      { "group": "org.mvnpm.at.esbuild", "module": "win32-arm64", "version": { "requires": "${esbuild.version}" } },
+      { "group": "org.mvnpm.at.deno", "module": "win32-arm64", "version": { "requires": "${deno.version}" } }
+      ],
+      "files": [
+        {
+          "name": "${project.build.finalName}.jar",
+          "url": "${project.build.finalName}.jar"
+        }
+      ]
+    }
+  ]
+}

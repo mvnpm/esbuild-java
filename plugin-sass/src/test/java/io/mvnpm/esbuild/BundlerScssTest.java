@@ -17,6 +17,7 @@ import io.mvnpm.esbuild.model.BundleOptions;
 import io.mvnpm.esbuild.model.DevResult;
 import io.mvnpm.esbuild.model.EsBuildConfig;
 import io.mvnpm.esbuild.model.WebDependency.WebDependencyType;
+import io.mvnpm.esbuild.plugin.EsBuildPluginSass;
 
 public class BundlerScssTest {
 
@@ -30,6 +31,7 @@ public class BundlerScssTest {
                 .withEsConfig(EsBuildConfig.builder().entryNames("[name]").build())
                 .withDependencies(getJars(List.of("/mvnpm/stimulus-3.2.1.jar", "/mvnpm/bootstrap-5.2.3.jar")),
                         WebDependencyType.MVNPM)
+                .addPlugin(new EsBuildPluginSass())
                 .addEntryPoint("app.js").build();
 
         Bundler.bundle(options, true);
@@ -47,6 +49,7 @@ public class BundlerScssTest {
                 .withEsConfig(EsBuildConfig.builder().entryNames("[name]").build())
                 .withDependencies(getJars(List.of("/mvnpm/stimulus-3.2.1.jar", "/mvnpm/bootstrap-5.2.3.jar")),
                         WebDependencyType.MVNPM)
+                .addPlugin(new EsBuildPluginSass())
                 .addEntryPoint("app.js").build();
 
         try (DevResult dev = Bundler.dev(options, true)) {
@@ -63,6 +66,7 @@ public class BundlerScssTest {
         final BundleOptions options = BundleOptions.builder()
                 .withWorkDir(root)
                 .withEsConfig(EsBuildConfig.builder().entryNames("[name]").build())
+                .addPlugin(new EsBuildPluginSass())
                 .addEntryPoint("import.scss").build();
 
         Bundler.bundle(options, true);
@@ -77,6 +81,7 @@ public class BundlerScssTest {
         final BundleOptions options = BundleOptions.builder()
                 .withWorkDir(root)
                 .withEsConfig(EsBuildConfig.builder().entryNames("[name]").build())
+                .addPlugin(new EsBuildPluginSass())
                 .addEntryPoint("partials/test.scss").build();
 
         Bundler.bundle(options, true);

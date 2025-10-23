@@ -1,6 +1,0 @@
-{
-  "imports" : {
-    "@babel/runtime" : "/_static/babel-runtime/index.js",
-    "@babel/runtime/" : "/_static/babel-runtime/"
-  }
-}

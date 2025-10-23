@@ -16,6 +16,8 @@ public class BundleOptionsBuilder {
 
     EsBuildConfig esBuildConfig = EsBuildConfig.builder().build();
 
+    List<EsBuildPlugin> plugins = new ArrayList<>();
+
     Path workDir;
 
     Path nodeModulesDir;
@@ -51,6 +53,11 @@ public class BundleOptionsBuilder {
         return this;
     }
 
+    protected BundleOptionsBuilder withEntries(List<EntryPoint> entries) {
+        this.entries = entries;
+        return this;
+    }
+
     public BundleOptionsBuilder withNodeModulesDir(Path nodeModulesDir) {
         this.nodeModulesDir = nodeModulesDir;
         return this;
@@ -73,6 +80,16 @@ public class BundleOptionsBuilder {
 
     public BundleOptionsBuilder withEsConfig(EsBuildConfig esBuildConfig) {
         this.esBuildConfig = esBuildConfig;
+        return this;
+    }
+
+    public BundleOptionsBuilder withPlugins(List<EsBuildPlugin> plugins) {
+        this.plugins = plugins;
+        return this;
+    }
+
+    public BundleOptionsBuilder addPlugin(EsBuildPlugin plugin) {
+        this.plugins.add(plugin);
         return this;
     }
 

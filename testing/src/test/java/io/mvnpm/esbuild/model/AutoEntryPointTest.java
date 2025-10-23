@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
+import io.mvnpm.esbuild.BundlerTestHelper;
 import io.mvnpm.esbuild.model.AutoEntryPoint.AutoDeps;
 import io.mvnpm.esbuild.model.AutoEntryPoint.AutoDepsMode;
 
@@ -134,8 +135,8 @@ public class AutoEntryPointTest {
                 """, entryContents);
     }
 
-    private Path getRootScriptsDir() throws URISyntaxException {
-        return new File(getClass().getResource("/multi/").toURI()).toPath();
+    private Path getRootScriptsDir() throws IOException {
+        return BundlerTestHelper.copyTestScriptsDir("auto-entrypoint");
     }
 
     private static String readEntry(EntryPoint entry, Path tempDirectory) throws FileNotFoundException {

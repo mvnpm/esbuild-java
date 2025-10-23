@@ -2,15 +2,12 @@ package io.mvnpm.esbuild;
 
 import static io.mvnpm.esbuild.script.ScriptRunner.getOutDir;
 import static io.mvnpm.esbuild.util.PathUtils.deleteRecursive;
-import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.logging.Logger;
 
 import io.mvnpm.esbuild.install.EsBuildDeps;
@@ -20,22 +17,6 @@ import io.mvnpm.esbuild.script.ScriptRunner;
 
 public class Bundler {
     private static final Logger logger = Logger.getLogger(Bundler.class.getName());
-
-    public static final String ESBUILD_EMBEDDED_VERSION = resolveEmbeddedVersion();
-
-    private static String resolveEmbeddedVersion() {
-        Properties properties = new Properties();
-        try {
-            final InputStream resource = Bundler.class.getResourceAsStream("/esbuild-java-version.properties");
-            if (resource != null) {
-                properties.load(resource);
-            }
-        } catch (IOException e) {
-            // ignore we use the default
-        }
-        String version = properties.getProperty("esbuild.version");
-        return requireNonNull(version, "Make sure the esbuild-java-version.properties contains 'esbuild.version'.");
-    }
 
     /**
      * Use esbuild to bundle either webjar or mvnpm dependencies into a bundle.
@@ -47,36 +28,37 @@ public class Bundler {
      */
     public static BundleResult bundle(BundleOptions bundleOptions, boolean install) throws IOException {
         final Path workDir = getWorkDir(bundleOptions);
+        final Path nodeModulesDir = getNodeModulesDir(workDir, bundleOptions);
         if (install) {
-            install(workDir, bundleOptions);
+            install(nodeModulesDir, bundleOptions.dependencies());
         }
         final Path dist = getOutDir(workDir, bundleOptions.esBuildConfig());
-        final EsBuildConfig esBuildConfig = prepareForBundling(bundleOptions, workDir, dist, false);
-
-        esBuild(workDir, esBuildConfig);
+        final BundleOptions effectiveBundleOptions = prepareForBundling(bundleOptions, nodeModulesDir, workDir, dist);
+        String output = esBuild(workDir, nodeModulesDir, effectiveBundleOptions);
 
         if (!Files.isDirectory(dist)) {
             throw new BundleException("Unexpected Error during bundling");
         }
 
-        return new BundleResult(dist, workDir);
+        return new BundleResult(dist, workDir, output);
     }
 
     public static DevResult dev(BundleOptions bundleOptions, boolean install)
             throws IOException {
         final Path workDir = getWorkDir(bundleOptions);
+        final Path nodeModulesDir = getNodeModulesDir(workDir, bundleOptions);
         if (install) {
-            install(workDir, bundleOptions);
+            install(nodeModulesDir, bundleOptions.dependencies());
         }
         final Path dist = getOutDir(workDir, bundleOptions.esBuildConfig());
-        final EsBuildConfig esBuildConfig = prepareForBundling(bundleOptions, workDir, dist, true);
+        final BundleOptions effectiveBundleOptions = prepareForBundling(bundleOptions, nodeModulesDir, workDir, dist);
 
-        final DevResult devResult = esBuildDev(workDir, esBuildConfig);
+        final DevResult devResult = esBuildDev(workDir, nodeModulesDir, effectiveBundleOptions);
         devResult.process().init();
         return devResult;
     }
 
-    private static EsBuildConfig prepareForBundling(BundleOptions bundleOptions, Path workDir, Path dist, boolean watch)
+    private static BundleOptions prepareForBundling(BundleOptions bundleOptions, Path nodeModulesDir, Path workDir, Path dist)
             throws IOException {
         final EsBuildConfig esBuildConfig = bundleOptions.esBuildConfig();
         // Clean the dist directory from a previous bundling
@@ -87,10 +69,12 @@ public class Bundler {
             throw new IllegalArgumentException("At least one entry point is required");
         }
         final List<String> paths = bundleOptions.entries().stream().map(entry -> entry.process(workDir).toString()).toList();
-        return esBuildConfig.edit()
-                .outDir(dist.toString())
-                .watch(watch)
-                .entryPoint(paths.toArray(String[]::new))
+        return bundleOptions.edit()
+                .withNodeModulesDir(nodeModulesDir)
+                .withEsConfig(esBuildConfig.edit()
+                        .outDir(dist.toString())
+                        .entryPoint(paths.toArray(String[]::new))
+                        .build())
                 .build();
     }
 
@@ -99,15 +83,14 @@ public class Bundler {
                 : Files.createTempDirectory("bundle");
     }
 
-    public static boolean install(Path workDir, BundleOptions bundleOptions) throws IOException {
-        final Path nodeModulesDir = getNodeModulesDir(workDir, bundleOptions);
-        final List<WebDependency> dependencies = new ArrayList<>(bundleOptions.dependencies());
+    public static boolean install(Path nodeModulesDir, List<WebDependency> webDeps) throws IOException {
+        final List<WebDependency> dependencies = new ArrayList<>(webDeps);
         dependencies.addAll(EsBuildDeps.get().deps());
         return WebDepsInstaller.install(nodeModulesDir, dependencies);
     }
 
     protected static Path getNodeModulesDir(Path workDir, BundleOptions bundleOptions) {
-        return bundleOptions.nodeModulesDir() == null
+        return bundleOptions == null || bundleOptions.nodeModulesDir() == null
                 ? workDir.resolve(BundleOptions.NODE_MODULES)
                 : bundleOptions.nodeModulesDir();
     }
@@ -116,15 +99,17 @@ public class Bundler {
         deleteRecursive(nodeModulesDir);
     }
 
-    protected static DevResult esBuildDev(Path workDir, EsBuildConfig esBuildConfig)
+    protected static DevResult esBuildDev(Path workDir, Path nodeModulesDir,
+            BundleOptions bundleOptions)
             throws IOException {
-        final ScriptRunner scriptRunner = new ScriptRunner(workDir, esBuildConfig);
+        final ScriptRunner scriptRunner = new ScriptRunner(workDir, nodeModulesDir, bundleOptions);
         return new DevResult(scriptRunner.dev());
     }
 
-    protected static void esBuild(Path workDir, EsBuildConfig esBuildConfig) throws IOException {
-        final ScriptRunner scriptRunner = new ScriptRunner(workDir, esBuildConfig);
-        scriptRunner.build();
+    protected static String esBuild(Path workDir, Path nodeModulesDir, BundleOptions bundleOptions)
+            throws IOException {
+        final ScriptRunner scriptRunner = new ScriptRunner(workDir, nodeModulesDir, bundleOptions);
+        return scriptRunner.build();
     }
 
 }

@@ -3,7 +3,6 @@ package io.mvnpm.esbuild.install;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -15,10 +14,13 @@ import java.util.stream.Collectors;
 
 import io.mvnpm.esbuild.model.WebDependency;
 
-public record EsBuildDeps(List<WebDependency> deps, List<String> plugins) {
+public record EsBuildDeps(List<WebDependency> deps) {
 
     private static AtomicReference<EsBuildDeps> DEPS = new AtomicReference<>();
-    private static final Pattern GAV_PATTERN = Pattern.compile(".*/(org/mvnpm(?:/[^/]+)*)/([^/]+)/([^/]+)/\\2-\\3\\.jar$");
+    private static final Pattern MAVEN_GAV_PATTERN = Pattern
+            .compile(".*/(org/mvnpm(?:/[^/]+)*)/([^/]+)/([^/]+)/\\2-\\3\\.jar$");
+    private static final Pattern GRADLE_GAV_PATTERN = Pattern
+            .compile(".*/(org\\.mvnpm(?:\\.[^/]+)*)/([^/]+)/([^/]+).*/[^/]+\\.jar$");
 
     public static EsBuildDeps get() {
         return DEPS.updateAndGet(c -> {
@@ -32,7 +34,6 @@ public record EsBuildDeps(List<WebDependency> deps, List<String> plugins) {
     private static EsBuildDeps fromClasspath() {
         String classpath = System.getProperty("java.class.path");
         String[] entries = classpath.split(File.pathSeparator);
-        final List<String> plugins = new ArrayList<>();
         final List<WebDependency> deps = Arrays.stream(entries)
                 .map(Paths::get)
                 .map(path -> {
@@ -46,27 +47,33 @@ public record EsBuildDeps(List<WebDependency> deps, List<String> plugins) {
                     if (type.isEmpty()) {
                         return null;
                     }
-                    if (gav.artifactId.matches("^esbuild-[a-z]+-plugin$")) {
-                        plugins.add(gav.artifactId);
-                    }
                     return WebDependency.of(gavString, path, type.get());
                 })
                 .filter(Objects::nonNull) // only keep dependencies with recognized type
                 .collect(Collectors.toList());
-        return new EsBuildDeps(deps, plugins);
+        return new
+
+        EsBuildDeps(deps);
     }
 
     private static GAV extractGav(Path jarPath) {
         String path = jarPath.toString().replace("\\", "/"); // normalize for Windows
-        Matcher matcher = GAV_PATTERN.matcher(path);
-        if (!matcher.matches()) {
-            return null;
+        Matcher mavenMatcher = MAVEN_GAV_PATTERN.matcher(path);
+        if (mavenMatcher.matches()) {
+            String groupId = mavenMatcher.group(1).replace("/", ".");
+            String artifactId = mavenMatcher.group(2);
+            String version = mavenMatcher.group(3);
+            return new GAV(groupId, artifactId, version);
         }
 
-        String groupId = matcher.group(1).replace("/", ".");
-        String artifactId = matcher.group(2);
-        String version = matcher.group(3);
-        return new GAV(groupId, artifactId, version);
+        Matcher gradleMatcher = GRADLE_GAV_PATTERN.matcher(path);
+        if (gradleMatcher.matches()) {
+            String groupId = gradleMatcher.group(1); // already dot-separated
+            String artifactId = gradleMatcher.group(2);
+            String version = gradleMatcher.group(3);
+            return new GAV(groupId, artifactId, version);
+        }
+        return null;
     }
 
     private record GAV(String groupId, String artifactId, String version) {
