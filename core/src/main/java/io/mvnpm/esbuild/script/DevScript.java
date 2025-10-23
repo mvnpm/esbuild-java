@@ -1,140 +1,172 @@
 package io.mvnpm.esbuild.script;
 
+import static io.mvnpm.esbuild.deno.DenoRunner.formatScript;
+
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Logger;
 
-import com.caoccao.javet.enums.V8AwaitMode;
-import com.caoccao.javet.exceptions.JavetException;
-import com.caoccao.javet.interop.NodeRuntime;
-import com.caoccao.javet.interop.V8Host;
-import com.caoccao.javet.values.reference.V8ValueGlobalObject;
-import com.caoccao.javet.values.reference.V8ValueObject;
-import com.caoccao.javet.values.reference.V8ValuePromise;
-
-import io.mvnpm.esbuild.BundleException;
-import io.mvnpm.esbuild.install.EsBuildDeps;
-import io.mvnpm.esbuild.model.EsBuildConfig;
+import io.mvnpm.esbuild.deno.DenoRunner;
+import io.mvnpm.esbuild.model.BundleOptions;
 
 /**
  * Calling build is Threadsafe as soon as init has been called before without a risk of race
  */
 public class DevScript implements DevProcess {
+    private static final Logger logger = Logger.getLogger(DevScript.class.getName());
     private final Path workDir;
-    private final EsBuildConfig config;
+    private final BundleOptions bundleOptions;
     private final Path outDir;
-    private final AtomicReference<NodeRuntime> nodeRuntime = new AtomicReference<>();
-    private final AtomicReference<V8ValueGlobalObject> globalObject = new AtomicReference<>();
-    private final Object lock = new Object();
+    private final AtomicReference<Process> process = new AtomicReference<>();
+    private final ReentrantLock lock = new ReentrantLock();
 
     // language=JavaScript
-    private static final String SCRIPT = """
+    private static final String SCRIPT = CommonScript.COMMON + """
 
-                        const esbuild = require('esbuild');
-
-            const requiredPlugins = [];
-
-            for (let plugin of plugins) {
-                console.debug(`Adding ${plugin}`);
-                requiredPlugins.push(require(plugin).default.call());
-            }
-
-
-            let options = JSON.parse(config);
-
+            const resolvedPlugins = resolvePlugins();
+            const options = %s;
             let context = null;
 
-
-            async function build() {
-                console.log(`Running esbuild (${esbuild.version})`);
+            async function build () {
+                console.log("--BUILD--")
+                console.debug(`[DEBUG] Running esbuild (${esbuild.version})`);
                 try {
-                    console.debug("Esbuild config:" + config);
                     if (context == null) {
                         context = await esbuild.context({
                             ...options,
                             logLevel: "warning",
-                            plugins: requiredPlugins
+                            plugins: resolvedPlugins
                         });
                     }
                     let result = await context.rebuild();
                     if (result.errors.length > 0) {
-                        console.debug("build finished with errors: " + result.errors);
-                        return {success: false, error: result.errors[0].text};
+                        console.log(errors);
+                        console.log("--BUILD-ERROR--");
+                        return;
                     }
-
-                    return {success: true};
-                } catch (e) {
-                    console.debug("build exception", e);
-                    return {success: false, error: e.message};
+                    console.log("--BUILD-SUCCESS--");
+                } catch (err) {
+                    console.error(`[ERROR] Exception during bundling:`, err);
+                    console.log("--BUILD-ERROR--");
                 }
             }
 
             async function close() {
-                console.debug('Closing Esbuild Dev.');
+                console.debug('[DEBUG] Closing Esbuild Dev.');
                 if (context) {
                     await context.dispose();
+                    context = null;
                     console.log('Esbuild Dev process closed.');
                 }
                 esbuild.stop();
-                options = null;
+                Deno.exit(0);
             };
 
+            // listen.ts
+            // Run with: deno run --allow-read listen.ts
 
-            process.on('unhandledRejection', (reason, promise) => {
-                close();
-            });
+            const decoder = new TextDecoder();
+            const reader = Deno.stdin.readable.getReader();
+
+            const handlers = {
+              BUILD: async () => await build(),
+              CLOSE: async () => await close()
+            };
+
+            async function listenForTriggers() {
+              console.debug("[DEBUG] Listening for Java triggers...");
+              console.log("--READY--");
+              try {
+                while (true) {
+                  const { value, done } = await reader.read();
+                  if (done) break;
+
+                  const message = decoder.decode(value).trim();
+                  if (!message) continue;
+
+                  console.debug("[DEBUG] Java triggered:", message);
+
+                  const [trigger, ...rest] = message.split(" ");
+                  const payload = rest.join(" ");
+
+                  const handler = handlers[trigger.toUpperCase()];
+                  if (handler) {
+                    try {
+                      await handler(payload);
+                    } catch (err) {
+                      console.error(`[ERROR] Handler for ${trigger} failed:`, err);
+                    }
+                  } else {
+                    console.warn(`[WARN] Unknown trigger: "${trigger}"`);
+                  }
+                }
+              } catch (err) {
+                console.error("[FATAL] Error while reading stdin:", err);
+              } finally {
+                reader.releaseLock();
+                console.log("[INFO] Listener stopped.");
+              }
+            }
+
+            await listenForTriggers();
             """;
 
-    public DevScript(Path workDir, EsBuildConfig config) {
+    public DevScript(Path workDir, BundleOptions bundleOptions) {
         this.workDir = workDir;
-        this.config = config;
-        final String out = config.outdir() != null ? config.outdir() : "dist";
+        this.bundleOptions = bundleOptions;
+        final String out = bundleOptions.esBuildConfig().outdir() != null ? bundleOptions.esBuildConfig().outdir() : "dist";
         this.outDir = workDir.resolve(out);
     }
 
     @Override
     public void init() {
-        if (nodeRuntime.get() != null) {
+        if (process.get() != null) {
             throw new IllegalStateException("DevScript has already been initialized");
         }
+        lock.lock();
         try {
-            nodeRuntime.set(V8Host.getNodeInstance().createV8Runtime());
-            nodeRuntime.get().allowEval(true);
-            globalObject.set(nodeRuntime.get().getGlobalObject());
-            globalObject.get().set("plugins", EsBuildDeps.get().plugins());
-            globalObject.get().set("config", config.toJson());
-            globalObject.get().set("workDir", workDir.toString());
-            nodeRuntime.get().getExecutor(SCRIPT).setResourceName(workDir.resolve("build.js").toString()).executeVoid();
-        } catch (JavetException e) {
-            close();
+            final String scriptContent = formatScript(SCRIPT, workDir, bundleOptions);
+            final Process p = DenoRunner.devDenoScript(workDir, bundleOptions.nodeModulesDir(), scriptContent);
+            process.set(p);
+            final String output = DenoRunner.waitForResult(p);
+            logger.info("Ready for bundling:\n" + output);
+        } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            lock.unlock();
         }
     }
 
     @Override
     public void build() throws IOException {
-        if (nodeRuntime.get() == null) {
+        if (process.get() == null) {
             throw new IllegalStateException("DevScript has not been initialized");
         }
-        invokeBuild();
+        if (!isAlive()) {
+            throw new IOException("DevScript process is closed");
+        }
+        lock.lock();
+        try {
+            invokeBuild();
+        } finally {
+            lock.unlock();
+        }
     }
 
     private void invokeBuild() {
-        try (V8ValuePromise promise = globalObject.get().invoke("build")) {
-            while (!promise.isFulfilled() && !Thread.currentThread().isInterrupted()) {
-                nodeRuntime.get().await(V8AwaitMode.RunOnce);
-            }
-            try (final V8ValueObject result = promise.getResult()) {
-                final boolean success = result.getBoolean("success");
-                if (!success) {
-                    throw new BundleException("Error while executing Esbuild", result.getString("error"));
-                }
-            }
-
-        } catch (JavetException e) {
+        final Process p = process.get();
+        try {
+            BufferedWriter bufferedWriter = p.outputWriter();
+            bufferedWriter.write("BUILD");
+            bufferedWriter.flush();
+            final String output = DenoRunner.waitForResult(p);
+            logger.info("Bundling succeeded:\n" + output);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     @Override
@@ -149,29 +181,27 @@ public class DevScript implements DevProcess {
 
     @Override
     public boolean isAlive() {
-        return nodeRuntime.get() != null && !nodeRuntime.get().isClosed();
+        return process.get() != null && process.get().isAlive();
     }
 
     @Override
     public void close() {
-        final NodeRuntime runtime = this.nodeRuntime.getAndSet(null);
-        final V8ValueGlobalObject obj = this.globalObject.getAndSet(null);
-        if (runtime != null) {
-            try {
-                if (obj.has("close")) {
-                    try (final V8ValuePromise promise = obj.invoke("close")) {
-                        while (!promise.isFulfilled() && !Thread.currentThread().isInterrupted()) {
-                            runtime.await(V8AwaitMode.RunOnce);
-                        }
-                    }
+        lock.lock();
+        try {
+            final Process p = this.process.getAndSet(null);
+            if (p != null) {
+                try (BufferedWriter bufferedWriter = p.outputWriter()) {
+                    bufferedWriter.write("CLOSE");
+                    bufferedWriter.flush();
+                    final String output = DenoRunner.waitForProcess(p);
+                    logger.info("Stopped DevScript process:\n" + output);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
-                runtime.lowMemoryNotification();
-                runtime.close();
-            } catch (JavetException e) {
-                throw new RuntimeException(e);
             }
+        } finally {
+            lock.unlock();
         }
-
     }
 
 }

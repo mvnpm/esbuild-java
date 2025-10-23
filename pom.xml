@@ -4,15 +4,18 @@
 
     <groupId>io.mvnpm</groupId>
     <artifactId>esbuild-java-parent</artifactId>
-    <name>Esbuild Java - parent</name>
+    <name>Esbuild Java - Parent</name>
     <version>999-SNAPSHOT</version>
 
     <description>Small wrapper around esbuild to be able to use it in Java</description>
     <packaging>pom</packaging>
     <modules>
-        <module>testing</module>
+        <module>native-deps</module>
         <module>core</module>
+        <module>testing</module>
+        <module>plugin-sass/locker</module>
         <module>plugin-sass</module>
+        <module>plugin-tailwind</module>
     </modules>
     <url>https://github.com/mvnpm/esbuild-java/</url>
     <scm>
@@ -40,13 +43,11 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <maven.compiler.release>17</maven.compiler.release>
-
-        <esbuild.mvnpm-build.version>0.0.13</esbuild.mvnpm-build.version>
-        <esbuild.version>0.25.9-mvnpm-${esbuild.mvnpm-build.version}</esbuild.version>
-
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <quarkus.version>3.26.3</quarkus.version>
+        <esbuild.version>0.25.10</esbuild.version>
+        <deno.version>2.5.4</deno.version>
 
         <commons-compress.version>1.28.0</commons-compress.version>
         <formatter.plugin.version>2.23.0</formatter.plugin.version>
@@ -228,6 +229,18 @@
                 </plugins>
 
             </build>
+        </profile>
+        <profile>
+            <id>gradle-test</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>!true</value>
+                </property>
+            </activation>
+            <modules>
+                <module>gradle-test</module>
+            </modules>
         </profile>
     </profiles>
 </project>

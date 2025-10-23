@@ -4,3 +4,8 @@ target/
 **/src/main/resources/**.tgz
 /nbactions.xml
 **node_modules**
+
+**/.gradle/
+
+**/build/
+**/out/
