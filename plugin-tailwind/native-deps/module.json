@@ -18,8 +18,9 @@
         "org.gradle.category": "library",
         "org.gradle.usage": "java-runtime",
         "org.gradle.libraryelements": "jar",
+        "org.gradle.jvm.version": "17",
         "org.gradle.native.operatingSystem": "macos",
-        "org.gradle.native.architecture": "arm64"
+        "org.gradle.native.architecture": "aarch64"
       },
       "dependencies": [
         { "group": "org.mvnpm", "module": "lightningcss-darwin-arm64", "version": { "requires": "${lightningcss.version}" } },
@@ -37,6 +38,8 @@
       "attributes": {
         "org.gradle.category": "library",
         "org.gradle.usage": "java-runtime",
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.jvm.version": "17",
         "org.gradle.native.operatingSystem": "macos",
         "org.gradle.native.architecture": "x86-64"
       },
@@ -56,6 +59,8 @@
       "attributes": {
         "org.gradle.category": "library",
         "org.gradle.usage": "java-runtime",
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.jvm.version": "17",
         "org.gradle.native.operatingSystem": "linux",
         "org.gradle.native.architecture": "x86-64"
       },
@@ -75,8 +80,10 @@
       "attributes": {
         "org.gradle.category": "library",
         "org.gradle.usage": "java-runtime",
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.jvm.version": "17",
         "org.gradle.native.operatingSystem": "linux",
-        "org.gradle.native.architecture": "arm64"
+        "org.gradle.native.architecture": "aarch64"
       },
       "dependencies": [
         { "group": "org.mvnpm", "module": "lightningcss-linux-arm64-gnu", "version": { "requires": "${lightningcss.version}" } },
@@ -94,6 +101,8 @@
       "attributes": {
         "org.gradle.category": "library",
         "org.gradle.usage": "java-runtime",
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.jvm.version": "17",
         "org.gradle.native.operatingSystem": "windows",
         "org.gradle.native.architecture": "x86-64"
       },
@@ -113,8 +122,10 @@
       "attributes": {
         "org.gradle.category": "library",
         "org.gradle.usage": "java-runtime",
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.jvm.version": "17",
         "org.gradle.native.operatingSystem": "windows",
-        "org.gradle.native.architecture": "arm64"
+        "org.gradle.native.architecture": "aarch64"
       },
       "dependencies": [
         { "group": "org.mvnpm", "module": "lightningcss-win32-arm64-msvc", "version": { "requires": "${lightningcss.version}" } },

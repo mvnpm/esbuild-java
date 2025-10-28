@@ -1,9 +1,11 @@
 plugins {
     java
+    id("io.mvnpm.gradle.plugin.native-java-plugin") version "1.0.0"
 }
 
 group = "com.example"
 version = "0.0"
+
 
 repositories {
 
@@ -24,17 +26,11 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.0.0")
     testImplementation("io.mvnpm:esbuild-java-testing:${esbuildJavaVersion}")
-    testImplementation("io.mvnpm:esbuild-java:${esbuildJavaVersion}")
+    implementation("io.mvnpm:esbuild-java:${esbuildJavaVersion}")
 }
 
 tasks.test {
     useJUnitPlatform() // or useTestNG() if relevant
 }
 
-// Apply a specific Java toolchain to ease working on different environments.
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-}
 
