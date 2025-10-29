@@ -10,7 +10,9 @@
         <version>999-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
+    <name>Esbuild Java - Plugin Sass - Locker</name>
     <artifactId>esbuild-java-plugin-sass-locker</artifactId>
+
     <packaging>pom</packaging>
 
     <!-- Locked dependencies (Update with 'mvn io.mvnpm:locker-maven-plugin:LATEST:lock -Dunlocked') -->
