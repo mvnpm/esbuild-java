@@ -32,7 +32,7 @@ jobs:
 
       - name: Import GPG key
         id: import_gpg
-        uses: crazy-max/ghaction-import-gpg@v5
+        uses: crazy-max/ghaction-import-gpg@v6
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
@@ -54,7 +54,7 @@ jobs:
 
       - name: Maven release ${{steps.metadata.outputs.current-version}}
         run: |
-          mvn -B release:prepare -DreleaseVersion=${{steps.metadata.outputs.current-version}} -DdevelopmentVersion=${{steps.metadata.outputs.next-version}} -Prelease
+          mvn -B release:prepare -DreleaseVersion=${{steps.metadata.outputs.current-version}} -DdevelopmentVersion=${{steps.metadata.outputs.next-version}} -DperformRelease -Prelease
           mvn -B release:perform -Darguments=-DperformRelease -DperformRelease -Prelease
         env:
           MAVEN_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
