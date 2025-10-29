@@ -14,7 +14,7 @@ public record EsBuildPluginSass() implements EsBuildPlugin {
     }
 
     @Override
-    public String requireScript() {
-        return "sassPlugin()";
+    public String buildConfigMapper() {
+        return "(config) => { config.plugins.push(sassPlugin()); return config; }";
     }
 }

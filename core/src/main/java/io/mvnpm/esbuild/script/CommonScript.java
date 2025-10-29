@@ -9,15 +9,23 @@ public class CommonScript {
 
             const plugins = %s;
 
-            function resolvePlugins() {
-                const requiredPlugins = [];
-                console.log(plugins);
+            function applyPlugins(config) {
+                let newConfig = config;
+                if (!newConfig.plugins) {
+                    newConfig.plugins = [];
+                }
                 for (const plugin of plugins) {
                     console.debug(`Adding ${plugin.name}`);
-                    const data = plugin.data;
-                    requiredPlugins.push(eval(plugin.requireScript));
+                    try {
+                        const mapper = eval(plugin.buildConfigMapper);
+                        newConfig = mapper(config, plugin.data);
+                    } catch (err) {
+                        console.error(`[FATAL] Error while applying plugin ${plugin.name}`, err);
+                        process.exit(1);
+                    }
+
                 }
-                return requiredPlugins;
+                return newConfig;
             }
 
             """;
