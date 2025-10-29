@@ -25,8 +25,6 @@ public class DevScript implements DevProcess {
 
     // language=JavaScript
     private static final String SCRIPT = CommonScript.COMMON + """
-
-            const resolvedPlugins = resolvePlugins();
             const options = %s;
             let context = null;
 
@@ -35,11 +33,10 @@ public class DevScript implements DevProcess {
                 console.debug(`[DEBUG] Running esbuild (${esbuild.version})`);
                 try {
                     if (context == null) {
-                        context = await esbuild.context({
+                        context = await esbuild.context(applyPlugins({
                             ...options,
                             logLevel: "warning",
-                            plugins: resolvedPlugins
-                        });
+                        }));
                     }
                     let result = await context.rebuild();
                     if (result.errors.length > 0) {
@@ -62,7 +59,7 @@ public class DevScript implements DevProcess {
                     console.log('Esbuild Dev process closed.');
                 }
                 esbuild.stop();
-                Deno.exit(0);
+                process.exit(0);
             };
 
             // listen.ts

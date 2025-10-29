@@ -28,8 +28,7 @@ public record EsBuildPluginTailwind() implements EsBuildPlugin {
     }
 
     @Override
-    public String requireScript() {
-        return "esbuildPluginTailwind()";
+    public String buildConfigMapper() {
+        return "(config) => { config.plugins.push(esbuildPluginTailwind()); return config; }";
     }
-
 }

@@ -12,18 +12,14 @@ public class BuildScript {
 
     // language=JavaScript
     private static final String SCRIPT = CommonScript.COMMON + """
-
-            const resolvedPlugins = resolvePlugins();
-
             async function build () {
                 const options = %s;
                 console.log(`Running EsBuild (${esbuild.version})`);
                 try {
-                   await esbuild.build({
+                   await esbuild.build(applyPlugins({
                     ...options,
-                    logLevel: "warning",
-                    plugins: resolvedPlugins
-                    });
+                    logLevel: "warning"
+                    }));
                     console.log("Bundling completed successfully");
                     esbuild.stop();
                     process.exit(0);
