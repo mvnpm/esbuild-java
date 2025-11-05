@@ -1,0 +1,1 @@
+log(typeof x == "null")

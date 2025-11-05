@@ -15,8 +15,8 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +27,7 @@ import io.mvnpm.importmap.ImportsDataBinding;
 
 public class JarInspector {
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final Logger logger = Logger.getLogger(JarInspector.class.getName());
+    private static final Logger LOG = Logger.getLogger(JarInspector.class);
     public static final String PACKAGE_JSON = "package.json";
     public static final String IMPORTMAP_JSON = "importmap.json";
 
@@ -206,7 +206,7 @@ public class JarInspector {
             try {
                 properties.load(Files.newInputStream(pomProperties));
             } catch (IOException ex) {
-                logger.log(Level.WARNING, "could not read properties ''{0}''", pomProperties);
+                LOG.warnf("could not read properties ''%s''", pomProperties);
             }
         }
         return properties;

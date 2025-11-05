@@ -24,16 +24,15 @@ public class BundlerTestHelper {
 
     public static final String ESBUILD_TEST_DIR = "testing/esbuild-test-dir";
 
-    public static void executeTest(List<String> jarNames, WebDependencyType type, String scriptName, boolean check)
+    public static BundleResult executeTest(List<String> jarNames, WebDependencyType type, String scriptName, boolean check)
             throws URISyntaxException, IOException {
         final BundleOptions bundleOptions = getBundleOptions(jarNames, type, scriptName).build();
         final BundleResult result = Bundler.bundle(bundleOptions, true);
-        System.out.println(result.output());
         if (check) {
-            System.out.println(result.dist());
             assertTrue(result.dist().toFile().exists());
             assertTrue(Files.list(result.dist()).count() > 0);
         }
+        return result;
 
     }
 

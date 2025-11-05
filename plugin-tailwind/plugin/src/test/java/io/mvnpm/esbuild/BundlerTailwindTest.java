@@ -31,7 +31,6 @@ public class BundlerTailwindTest {
                 .addEntryPoint("app.js").build();
 
         final BundleResult result = Bundler.bundle(options, true);
-        System.out.println(result.output());
         assertTrue(options.workDir().resolve("dist").resolve("app.js").toFile().exists());
         assertTrue(options.workDir().resolve("dist").resolve("app.css").toFile().exists());
     }
@@ -48,6 +47,7 @@ public class BundlerTailwindTest {
 
         try (DevResult dev = Bundler.dev(options, true)) {
             dev.process().build();
+
         }
         assertTrue(options.workDir().resolve("dist").resolve("app.js").toFile().exists());
         assertTrue(options.workDir().resolve("dist").resolve("app.css").toFile().exists());

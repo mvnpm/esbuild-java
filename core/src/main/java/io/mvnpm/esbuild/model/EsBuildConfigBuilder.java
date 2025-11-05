@@ -17,45 +17,27 @@ public class EsBuildConfigBuilder {
 
     String esBuildVersion;
     boolean bundle;
-
     String[] entryPoint;
     boolean minify;
-
     boolean version;
-
     Map<String, EsBuildConfig.Loader> loader;
-
     boolean preserveSymlinks;
-
     EsBuildConfig.Target target;
-
     boolean watch;
-
     String outdir;
     String packages;
-
     EsBuildConfig.Platform platform;
-
     boolean serve;
     boolean sourceMap;
-
     boolean splitting;
-
     final Map<String, String> alias = new HashMap<>();
     final Map<String, String> define = new HashMap<>();
-
     List<String> excludes;
-
     EsBuildConfig.Format format;
-
     String chunkNames;
-
     String entryNames;
-
     String assetNames;
-
     String publicPath;
-
     List<String> external = new ArrayList<>();
 
     public EsBuildConfigBuilder() {

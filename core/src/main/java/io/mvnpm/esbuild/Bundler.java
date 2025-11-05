@@ -8,15 +8,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
+import org.jboss.logging.Logger;
+
+import io.mvnpm.esbuild.deno.ScriptLog;
 import io.mvnpm.esbuild.install.EsBuildDeps;
 import io.mvnpm.esbuild.install.WebDepsInstaller;
 import io.mvnpm.esbuild.model.*;
 import io.mvnpm.esbuild.script.ScriptRunner;
 
 public class Bundler {
-    private static final Logger logger = Logger.getLogger(Bundler.class.getName());
+    private static final Logger LOG = Logger.getLogger(Bundler.class);
 
     /**
      * Use esbuild to bundle either webjar or mvnpm dependencies into a bundle.
@@ -27,24 +29,27 @@ public class Bundler {
      * @throws IOException when something could not be written
      */
     public static BundleResult bundle(BundleOptions bundleOptions, boolean install) throws IOException {
-        final Path workDir = getWorkDir(bundleOptions);
-        final Path nodeModulesDir = getNodeModulesDir(workDir, bundleOptions);
-        if (install) {
-            install(nodeModulesDir, bundleOptions.dependencies());
-        }
-        final Path dist = getOutDir(workDir, bundleOptions.esBuildConfig());
-        final BundleOptions effectiveBundleOptions = prepareForBundling(bundleOptions, nodeModulesDir, workDir, dist);
-        String output = esBuild(workDir, nodeModulesDir, effectiveBundleOptions);
+        final Bundling bundling = getBundling(bundleOptions, install);
+        ScriptLog log = esBuild(bundling.workDir(), bundling.nodeModulesDir(), bundling.bundleOptions());
 
-        if (!Files.isDirectory(dist)) {
-            throw new BundleException("Unexpected Error during bundling");
+        if (!Files.isDirectory(bundling.dist())) {
+            throw new BundlingException("Unexpected Error during bundling", log);
         }
 
-        return new BundleResult(dist, workDir, output);
+        log.logAll();
+
+        return new BundleResult(bundling.dist(), bundling.workDir(), log);
     }
 
     public static DevResult dev(BundleOptions bundleOptions, boolean install)
             throws IOException {
+        final Bundling bundling = getBundling(bundleOptions, install);
+        final DevResult devResult = esBuildDev(bundling.workDir(), bundling.nodeModulesDir(), bundling.bundleOptions());
+        devResult.process().init();
+        return devResult;
+    }
+
+    private static Bundling getBundling(BundleOptions bundleOptions, boolean install) throws IOException {
         final Path workDir = getWorkDir(bundleOptions);
         final Path nodeModulesDir = getNodeModulesDir(workDir, bundleOptions);
         if (install) {
@@ -52,10 +57,10 @@ public class Bundler {
         }
         final Path dist = getOutDir(workDir, bundleOptions.esBuildConfig());
         final BundleOptions effectiveBundleOptions = prepareForBundling(bundleOptions, nodeModulesDir, workDir, dist);
+        return new Bundling(workDir, nodeModulesDir, dist, effectiveBundleOptions);
+    }
 
-        final DevResult devResult = esBuildDev(workDir, nodeModulesDir, effectiveBundleOptions);
-        devResult.process().init();
-        return devResult;
+    private record Bundling(Path workDir, Path nodeModulesDir, Path dist, BundleOptions bundleOptions) {
     }
 
     private static BundleOptions prepareForBundling(BundleOptions bundleOptions, Path nodeModulesDir, Path workDir, Path dist)
@@ -106,7 +111,7 @@ public class Bundler {
         return new DevResult(scriptRunner.dev());
     }
 
-    protected static String esBuild(Path workDir, Path nodeModulesDir, BundleOptions bundleOptions)
+    protected static ScriptLog esBuild(Path workDir, Path nodeModulesDir, BundleOptions bundleOptions)
             throws IOException {
         final ScriptRunner scriptRunner = new ScriptRunner(workDir, nodeModulesDir, bundleOptions);
         return scriptRunner.build();
