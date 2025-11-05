@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.mvnpm</groupId>
         <artifactId>esbuild-java-parent</artifactId>
-        <version>2.0.0-beta-2</version>
+        <version>999-SNAPSHOT</version>
     </parent>
     <artifactId>esbuild-java-plugin-tailwind-parent</artifactId>
     <name>Esbuild Java - Plugin Tailwind Parent</name>
