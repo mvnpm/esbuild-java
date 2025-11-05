@@ -18,6 +18,8 @@ public class BundleOptionsBuilder {
 
     List<EsBuildPlugin> plugins = new ArrayList<>();
 
+    long timeoutSeconds = 60;
+
     Path workDir;
 
     Path nodeModulesDir;
@@ -90,6 +92,11 @@ public class BundleOptionsBuilder {
 
     public BundleOptionsBuilder addPlugin(EsBuildPlugin plugin) {
         this.plugins.add(plugin);
+        return this;
+    }
+
+    public BundleOptionsBuilder withTimeout(long timeoutSeconds) {
+        this.timeoutSeconds = timeoutSeconds;
         return this;
     }
 

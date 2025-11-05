@@ -17,36 +17,23 @@ public record EsBuildConfig(
         boolean bundle,
         String[] entryPoints,
         boolean minify,
-
         Map<String, Loader> loader,
         boolean preserveSymlinks,
         Target target,
-
         String outdir,
         String packages,
-
         Platform platform,
-
         boolean serve,
         boolean sourcemap,
-
         boolean splitting,
-
         Map<String, String> alias,
-
         Map<String, String> define,
-
         List<String> excludes,
         Format format,
-
         String chunkNames,
-
         String entryNames,
-
         String assetNames,
-
         String publicPath,
-
         List<String> external) {
 
     public static EsBuildConfigBuilder builder() {
@@ -58,35 +45,23 @@ public record EsBuildConfig(
                 builder.bundle,
                 builder.entryPoint,
                 builder.minify,
-
                 builder.loader,
                 builder.preserveSymlinks,
                 builder.target,
-
                 builder.outdir,
                 builder.packages,
-
                 builder.platform,
-
                 builder.serve,
                 builder.sourceMap,
-
                 builder.splitting,
-
                 builder.alias,
                 builder.define,
-
                 builder.excludes,
                 builder.format,
-
                 builder.chunkNames,
-
                 builder.entryNames,
-
                 builder.assetNames,
-
                 builder.publicPath,
-
                 builder.external);
     }
 

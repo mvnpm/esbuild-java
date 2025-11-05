@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +27,7 @@ import io.mvnpm.esbuild.util.PathUtils;
 
 public final class WebDepsInstaller {
 
-    private static final Logger logger = Logger.getLogger(WebDepsInstaller.class.getName());
+    private static final Logger LOG = Logger.getLogger(WebDepsInstaller.class);
 
     private static final String MVNPM_DIR = ".mvnpm";
 
@@ -53,7 +53,7 @@ public final class WebDepsInstaller {
             final Optional<MvnpmInfo.InstalledDependency> alreadyInstalled = mvnpmInfo.installed().stream()
                     .filter(i -> i.id().equals(dep.id())).findFirst();
             if (alreadyInstalled.isPresent()) {
-                logger.log(Level.FINE, "skipping package as it already exists ''{0}''", dep.id());
+                LOG.debugf("skipping package as it already exists ''%s''", dep.id());
                 installed.add(alreadyInstalled.get());
                 continue;
             }
@@ -64,11 +64,11 @@ public final class WebDepsInstaller {
             if (dep.type() == WebDependency.WebDependencyType.MVNPM) {
                 final Path mvnpmMoreArchive = findMvnpmMoreArchive(extractDir);
                 if (mvnpmMoreArchive != null) {
-                    logger.log(Level.FINE, "Found more archive ''{0}''", mvnpmMoreArchive);
+                    LOG.debugf("Found more archive ''%s''", mvnpmMoreArchive);
                     try {
                         Archives.unTgz(mvnpmMoreArchive, mvnpmMoreArchive.getParent());
                     } catch (IOException e) {
-                        logger.log(Level.WARNING, "Could not extract .more.tgz archive '" + mvnpmMoreArchive + "'", e);
+                        LOG.warnf("Could not extract .more.tgz archive '%s'", mvnpmMoreArchive, e);
                     }
                 }
             }
@@ -83,12 +83,12 @@ public final class WebDepsInstaller {
                     PathUtils.deleteRecursive(target);
                     Files.createDirectories(target.getParent());
                     PathUtils.safeMove(source, target);
-                    logger.log(Level.FINE, "installed package ''{0}''", packageName);
+                    LOG.debugf("installed package ''%s''", packageName);
                 }
                 installed.add(new MvnpmInfo.InstalledDependency(dep.id(), dirs));
-                logger.log(Level.FINE, "installed dep ''{0}'' (''{1}'')", new Object[] { dep.path(), dep.id() });
+                LOG.debugf("installed dep ''%s'' (''%s}'')", new Object[] { dep.path(), dep.id() });
             } else {
-                logger.log(Level.WARNING, "package.json not found in dep: ''{0}'' (''{1}'')",
+                LOG.warnf("package.json not found in dep: ''%s'' (''%s'')",
                         new Object[] { dep.path(), dep.id() });
             }
         }
@@ -100,7 +100,7 @@ public final class WebDepsInstaller {
         for (String legacyDir : legacyDirs) {
             if (!installedDirs.contains(legacyDir)) {
                 changed = true;
-                logger.log(Level.FINE, "removing package as it is not needed anymore ''{0}''", legacyDir);
+                LOG.debugf("removing package as it is not needed anymore ''%s''", legacyDir);
                 PathUtils.deleteRecursive(nodeModulesDir.resolve(legacyDir));
             }
         }

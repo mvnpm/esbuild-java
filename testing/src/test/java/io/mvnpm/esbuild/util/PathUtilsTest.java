@@ -93,7 +93,7 @@ public class PathUtilsTest {
             final String sourceHash = data.hashes.get(sourcePath);
             final String targetHash = PathUtils.hash(targetPath);
 
-            // typically you would do something like Assertions.equals(sourceHash, targetHash) but the output of that isn't particularly helpful
+            // typically you would do something like Assertions.equals(sourceHash, targetHash) but the logs of that isn't particularly helpful
             if (!Objects.equals(sourceHash, targetHash)) {
                 Assertions
                         .fail(String.format("The content of '%s' does not match the content of '%s'", sourcePath, targetPath));
@@ -154,7 +154,7 @@ public class PathUtilsTest {
                 depth++;
             }
 
-            // create the output file where we need it
+            // create the logs file where we need it
             final Path created = Files.createTempFile(sourceRoot, "temp-file-", ".data");
 
             // add some random data to the file, this should cause most of the files to be the size of the buffer

@@ -12,13 +12,13 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Comparator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
+
+import org.jboss.logging.Logger;
 
 public class PathUtils {
 
-    private static final Logger logger = Logger.getLogger(PathUtils.class.getName());
+    private static final Logger LOG = Logger.getLogger(PathUtils.class);
 
     public static void copyEntries(Path rootDir, List<String> entries, Path targetDir) {
         for (String entry : entries) {
@@ -72,7 +72,7 @@ public class PathUtils {
             // the method of going and walking the entire file tree is used because
             // some methods (like Files.copy) can silently fail when one file in the
             // batch fails as in the PathUtilsTest.safeMoveWithContention case.
-            logger.log(Level.WARNING, "encountered ''{0}'' while moving ''{1}'' to ''{2}'', falling back to secondary method",
+            LOG.warnf("encountered ''%s'' while moving ''%s'' to ''%s'', falling back to secondary method",
                     new Object[] { exception.getClass().getName(), source, target });
 
             // this is the list of the files that are copied and not moved so we
@@ -106,7 +106,7 @@ public class PathUtils {
                 try {
                     Files.deleteIfExists(toDelete);
                 } catch (Exception ex) {
-                    logger.warning("could not delete ''{0}'' after copy");
+                    LOG.warnf("could not delete ''%s'' after copy", toDelete);
                 }
             }
 

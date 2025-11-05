@@ -2,14 +2,16 @@ package io.mvnpm.esbuild.script;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.logging.Logger;
 
+import org.jboss.logging.Logger;
+
+import io.mvnpm.esbuild.deno.ScriptLog;
 import io.mvnpm.esbuild.model.BundleOptions;
 import io.mvnpm.esbuild.model.EsBuildConfig;
 
 public class ScriptRunner {
 
-    private static final Logger logger = Logger.getLogger(ScriptRunner.class.getName());
+    private static final Logger LOG = Logger.getLogger(ScriptRunner.class);
 
     private final Path workDir;
     private final Path nodeModulesDir;
@@ -26,7 +28,7 @@ public class ScriptRunner {
         return workDir.resolve(out);
     }
 
-    public String build() throws IOException {
+    public ScriptLog build() throws IOException {
         return BuildScript.build(workDir, nodeModulesDir, bundleOptions);
     }
 

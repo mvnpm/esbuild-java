@@ -18,6 +18,10 @@ import io.mvnpm.esbuild.model.WebDependency.WebDependencyType;
 
 public class BundlerBuildTestBase {
 
+    private static void execute() {
+
+    }
+
     @Test
     void printOs() {
         System.out.println("OS Name: " + System.getProperty("os.name"));
@@ -56,9 +60,22 @@ public class BundlerBuildTestBase {
 
     @Test
     public void shouldThrowException() {
-        assertThrows(BundleException.class, () -> {
+        assertThrows(BundlingException.class, () -> {
             executeTest(List.of("/mvnpm/stimulus-3.2.1.jar"), WebDependencyType.MVNPM, "application-error.js", false);
         });
+    }
+
+    @Test
+    public void shouldThrowException2() {
+        assertThrows(BundlingException.class, () -> {
+            executeTest(List.of(), WebDependencyType.MVNPM, "simple-error.js", false);
+        });
+    }
+
+    @Test
+    public void simpleWarning() throws URISyntaxException, IOException {
+        final BundleResult bundleResult = executeTest(List.of(), WebDependencyType.MVNPM, "simple-warning.js", false);
+        assertTrue(bundleResult.logs().countWarnings() > 0);
     }
 
     @Test

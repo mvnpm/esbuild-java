@@ -3,17 +3,30 @@ package io.mvnpm.esbuild.deno;
 import java.io.*;
 import java.nio.file.*;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
+
+import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.mvnpm.esbuild.BundleException;
+import io.mvnpm.esbuild.BundlingException;
 import io.mvnpm.esbuild.model.BundleOptions;
 import io.mvnpm.esbuild.model.EsBuildPlugin;
 
 public class DenoRunner {
-
+    private static final Logger LOG = Logger.getLogger(DenoRunner.class);
+    private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r);
+        t.setDaemon(true);
+        t.setName("DenoRunner-Thread");
+        return t;
+    });
     private static final Map<String, String> DENO_BINARIES = Map.of(
             "macos-arm64", "darwin-arm64",
             "macos-x64", "darwin-x64",
@@ -22,14 +35,14 @@ public class DenoRunner {
             "windows-arm64", "win32-arm64",
             "windows-x64", "win32-x64");
 
-    public static String runDenoScript(Path workDir, Path nodeModules, String scriptContent)
+    public static ScriptLog runDenoScript(Path workDir, Path nodeModules, String scriptContent, long timeoutSeconds)
             throws IOException {
         final Path denoBinary = getDenoBinary(nodeModules);
 
         final Path scriptFile = prepareScript(workDir, scriptContent);
 
         final Process process = startProcess(workDir, denoBinary, scriptFile);
-        return waitForProcess(process);
+        return waitForExit(process, timeoutSeconds);
     }
 
     public static Process devDenoScript(Path workDir, Path nodeModules, String scriptContent)
@@ -47,50 +60,109 @@ public class DenoRunner {
                 .collect(Collectors.joining("\n"));
         final String pluginsJs = mapper
                 .writeValueAsString(bundleOptions.plugins().stream().map(EsBuildPlugin::toMap).toList());
-        return template.formatted(importPluginsJs, pluginsJs, bundleOptions.esBuildConfig().toJson());
+        return template.formatted(importPluginsJs, supportsColor().toString(), pluginsJs,
+                bundleOptions.esBuildConfig().toJson());
     }
 
-    public static String waitForResult(Process process) throws IOException {
-        StringBuilder output = new StringBuilder();
+    private static Boolean supportsColor() {
+        return System.console() != null && System.getenv().get("TERM") != null;
+    }
+
+    public static ScriptLog waitForExit(Process process, long timeoutSeconds) {
         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        String line;
-        while ((line = reader.readLine()) != null && process.isAlive()) {
-            switch (line) {
-                case "--BUILD--" -> {
-                    continue;
+
+        Future<ScriptLog> future = EXECUTOR.submit(() -> {
+            ScriptLog log = new ScriptLog();
+            try (reader) {
+                String line;
+                while ((line = reader.readLine()) != null && process.isAlive()) {
+                    log.add(line);
                 }
-                case "--READY--", "--BUILD-SUCCESS--" -> {
-                    return output.toString();
-                }
-                case "--BUILD-ERROR--" -> throw new BundleException("Error while executing Esbuild", output.toString());
+            } catch (IOException ignored) {
+                // Reader closed due to timeout or interruption
             }
-            output.append(line).append("\n");
-        }
-        throw new BundleException("Bundling exited unexpectedly.");
+            return log;
+        });
+
+        return scriptLog(process, reader, future, true, timeoutSeconds);
     }
 
-    public static String waitForProcess(Process process) throws IOException {
-        StringBuilder output = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-            reader.lines().forEach(line -> output.append(line).append(System.lineSeparator()));
-        }
-
+    private static void closeQuietly(Closeable closeable) {
         try {
-            final boolean exited = process.waitFor(30, TimeUnit.SECONDS);
-            if (!exited) {
-                process.destroy();
-                throw new BundleException("Bundling did not stop after 30 seconds.");
-            }
-            int exitCode = process.exitValue();
-            if (exitCode != 0) {
-                throw new BundleException("EsBuild Bundling failed:\n" + output);
-            }
-            return output.toString();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
+            closeable.close();
+        } catch (IOException ignored) {
         }
+    }
 
+    public static ScriptLog waitForResult(Process process, long timeoutSeconds) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+        Future<ScriptLog> future = EXECUTOR.submit(() -> {
+            ScriptLog log = new ScriptLog();
+            try {
+                String line;
+                while ((line = reader.readLine()) != null && process.isAlive()) {
+                    switch (line) {
+                        case "--BUILD--" -> {
+                            continue;
+                        }
+                        case "--READY--", "--BUILD-SUCCESS--" -> {
+                            return log;
+                        }
+                        case "--BUILD-ERROR--" -> {
+                            log.logAll();
+                            throw new BundlingException("EsBuild Bundling failed", log);
+                        }
+                    }
+                    log.add(line);
+                }
+            } catch (IOException ignored) {
+                // Reader closed due to timeout or interruption
+            }
+            return log;
+        });
+
+        return scriptLog(process, reader, future, false, timeoutSeconds);
+    }
+
+    private static ScriptLog scriptLog(Process process, BufferedReader reader, Future<ScriptLog> future, boolean waitForExit,
+            long timeoutSeconds) {
+        try {
+            ScriptLog log = future.get(timeoutSeconds, TimeUnit.SECONDS);
+            if (waitForExit) {
+                boolean finished = process.waitFor(50, TimeUnit.MILLISECONDS);
+                int exitCode = finished ? process.exitValue() : -1;
+                if (exitCode != 0) {
+                    log.logAll();
+                    throw new BundlingException("EsBuild Bundling failed", log);
+                }
+            } else if (!process.isAlive()) {
+                log.logAll();
+                throw new RuntimeException("Bundling process exited unexpectedly");
+            }
+
+            return log;
+
+        } catch (TimeoutException | InterruptedException e) {
+            future.cancel(true);
+            closeQuietly(reader);
+            process.destroy();
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException("Bundling process was interrupted", e);
+            }
+            throw new BundlingException("Bundling process did not stop after " + timeoutSeconds + " seconds");
+
+        } catch (ExecutionException e) {
+            if (waitForExit) {
+                closeQuietly(reader);
+                process.destroy();
+            }
+            if (e.getCause() instanceof BundlingException) {
+                throw (BundlingException) e.getCause();
+            }
+            throw new RuntimeException("Bundling process exited unexpectedly", e);
+        }
     }
 
     private static Process startProcess(Path workDir, Path denoBinary, Path scriptFile) throws IOException {
@@ -100,7 +172,7 @@ public class DenoRunner {
                 "--allow-all",
                 "--node-modules-dir=manual",
                 scriptFile.toAbsolutePath().toString());
-        System.out.println("Running esbuild script: " + workDir);
+        LOG.debugf("Running esbuild script ''%s'' ", workDir);
         pb.redirectErrorStream(true);
         Process process = pb.start();
         return process;
@@ -119,7 +191,7 @@ public class DenoRunner {
                 .resolve("@deno/%s/deno%s".formatted(name, getExecutableExtension()));
 
         if (!Files.isRegularFile(denoBinary)) {
-            throw new BundleException("Deno binary file not found for EsBuild Java: " + denoBinary);
+            throw new BundlingException("Deno binary file not found for EsBuild Java: " + denoBinary);
         }
 
         denoBinary.toFile().setExecutable(true);
@@ -150,7 +222,7 @@ public class DenoRunner {
             }
         }
         if (classifier == null) {
-            throw new BundleException("Incompatible os: '%s' and arch: '%s' for EsBuild Java".formatted(osName, osArch));
+            throw new BundlingException("Incompatible os: '%s' and arch: '%s' for EsBuild Java".formatted(osName, osArch));
         }
         return classifier;
     }

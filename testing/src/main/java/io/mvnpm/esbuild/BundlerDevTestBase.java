@@ -37,7 +37,7 @@ public class BundlerDevTestBase {
                 "application-mvnpm.js").withEsConfig(EsBuildConfig.builder().fixedEntryNames().build()).build();
 
         // when
-        AtomicReference<BundleException> bundleException = new AtomicReference<>();
+        AtomicReference<BundlingException> bundleException = new AtomicReference<>();
         final DevResult devResult = Bundler.dev(options, true);
 
         // then
@@ -85,7 +85,7 @@ public class BundlerDevTestBase {
                 try (final DevResult result = Bundler.dev(options, true)) {
                     result.process().build();
                     r.set(result);
-                } catch (BundleException e) {
+                } catch (BundlingException e) {
                     // good
                     counter.incrementAndGet();
                     System.out.println("good");
@@ -128,7 +128,7 @@ public class BundlerDevTestBase {
                     try {
                         result.process().build();
                         r.set(result);
-                    } catch (BundleException e) {
+                    } catch (BundlingException e) {
                         // good
                         counter.incrementAndGet();
                         System.out.println("good");
@@ -163,7 +163,7 @@ public class BundlerDevTestBase {
         assertTrue(process.isAlive(), "process is alive");
         try (process) {
 
-            assertThrows(BundleException.class, process::build);
+            assertThrows(BundlingException.class, process::build);
             assertTrue(process.isAlive(), "process is alive");
 
             final Path app = process.workDir().resolve("application-error.js");

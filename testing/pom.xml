@@ -24,7 +24,10 @@
     </build>
 
     <dependencies>
-
+        <dependency>
+            <groupId>org.jboss.logmanager</groupId>
+            <artifactId>jboss-logmanager</artifactId>
+        </dependency>
         <dependency>
             <groupId>io.mvnpm</groupId>
             <artifactId>esbuild-java</artifactId>
