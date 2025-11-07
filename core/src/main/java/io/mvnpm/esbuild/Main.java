@@ -1,13 +1,10 @@
 package io.mvnpm.esbuild;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 
-import io.mvnpm.esbuild.install.EsBuildDeps;
 import io.mvnpm.esbuild.model.BundleOptions;
 import io.mvnpm.esbuild.model.BundleResult;
-import io.mvnpm.esbuild.model.EsBuildConfig;
 
 public class Main {
 

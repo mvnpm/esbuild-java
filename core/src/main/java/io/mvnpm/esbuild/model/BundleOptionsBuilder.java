@@ -44,7 +44,7 @@ public class BundleOptionsBuilder {
     }
 
     public BundleOptionsBuilder addEntryPoint(Path script) {
-        if(!Files.exists(script)) {
+        if (!Files.exists(script)) {
             throw new IllegalArgumentException(String.format("script %s does not exist", script));
         }
         addEntryPoint(new FileEntryPoint(script.toAbsolutePath().getParent(), script.getFileName().toString()));
