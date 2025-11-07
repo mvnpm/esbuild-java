@@ -6,35 +6,55 @@ esbuild-java
 [![Maven Central](https://img.shields.io/maven-central/v/io.mvnpm/esbuild-java.svg?label=Maven%20Central)](https://search.maven.org/artifact/io.mvnpm/esbuild-java)
 [![Apache License, Version 2.0, January 2004](https://img.shields.io/github/license/apache/maven.svg?label=License)](https://www.apache.org/licenses/LICENSE-2.0)
 
-This is a wrapper around the esbuild executable, so that you can invoke it from java.
+
+This library provides a **Java binding for [Esbuild](https://esbuild.github.io/)**, allowing you to invoke Esbuild directly from Java.  
+It uses [Deno](https://deno.com/) under the hood to run Esbuild and its plugins.
+
+Originally created for [Quarkus](https://quarkus.io/) via [quarkiverse/quarkus-web-bundler](https://github.com/quarkiverse/quarkus-web-bundler),  
+it can also be used standalone or through Maven with the [mvnpm/esbuild-maven-plugin](https://github.com/mvnpm/esbuild-maven-plugin).
+
+### Key Features
+- Native Java API for Esbuild
+- Supports plugins via Deno
+- Works with Quarkus or standalone
+- Maven integration available
+
+---
+
+## Quick Example
 
 ```java
-// create the command line parameters 
-final EsBuildConfig esBuildConfig = EsBuildConfig.builder().bundle().entryPoint(new String[]{"main.js"}).outDir("dist").build();
-String workingDirectory = System.getProperty("user.dir");
+public class Main {
+    public static void main(String[] args) throws IOException {
+        String entrypoint = args.length > 0 ? args[0] : "example.js";
+        System.out.println("Using entrypoint: " + entrypoint);
 
-// use the resolver to get the esbuild executable
-final Path esBuildExec = new ExecutableResolver().resolve("0.17.1");
-// it will use a bundled version of es build or download the right version
+        BundleOptions options = BundleOptions.builder()
+                .addEntryPoint(Path.of(entrypoint))
+                .build();
 
-//execute
-final ExecuteResult executeResult = new Execute(Paths.get(workingDirectory), esBuildExec.toFile()).executeAndWait();
-System.out.println(executeResult.output());
+        BundleResult result = Bundler.bundle(options, true);
+        System.out.println(result.logs());
+        System.out.println("Bundling output: " + result.dist());
+    }
+}
 ```
 
-Another option is to use `java -jar` e.g.
+---
 
-```bash
-java -jar target/esbuild-java-*-jar-with-dependencies.jar --help
-```
+## Bundling with Dependencies
 
-Additionally, it has a utility to bundle a javascript file with webjar or mvnpm dependencies:
+You can also bundle JavaScript files that depend on **WebJars** or **mvnpm** packages:
 
 ```java
-final BundleOptions bundleOptions = new BundleOptions.builder().withDependencies(dependencies)
-        .withEntry(entry).build();
-final BundleResult result = Bundler.bundle(bundleOptions, true);
+BundleOptions options = BundleOptions.builder()
+        .withDependencies(dependencies) // List of WebJar or mvnpm JARs
+        .addEntryPoint(Path.of(entrypoint))
+        .build();
+
+BundleResult result = Bundler.bundle(options, true);
 ```
 
-Dependencies are a list of either webjar or mvnpm jars.
-Returned is the folder that contains the result of the transformation.
+---
+
+

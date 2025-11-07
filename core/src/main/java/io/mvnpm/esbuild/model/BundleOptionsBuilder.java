@@ -1,5 +1,6 @@
 package io.mvnpm.esbuild.model;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,14 @@ public class BundleOptionsBuilder {
 
     public BundleOptionsBuilder addEntryPoint(Path rootDir, String script) {
         addEntryPoint(new FileEntryPoint(rootDir, script));
+        return this;
+    }
+
+    public BundleOptionsBuilder addEntryPoint(Path script) {
+        if(!Files.exists(script)) {
+            throw new IllegalArgumentException(String.format("script %s does not exist", script));
+        }
+        addEntryPoint(new FileEntryPoint(script.toAbsolutePath().getParent(), script.getFileName().toString()));
         return this;
     }
 
