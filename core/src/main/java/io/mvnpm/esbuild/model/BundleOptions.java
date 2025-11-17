@@ -8,6 +8,7 @@ public record BundleOptions(
         List<WebDependency> dependencies,
         EsBuildConfig esBuildConfig,
         List<EsBuildPlugin> plugins,
+        boolean debugBuild,
         long timeoutSeconds,
         Path workDir,
         Path nodeModulesDir) {
@@ -15,7 +16,8 @@ public record BundleOptions(
     public static final String NODE_MODULES = "node_modules";
 
     public BundleOptions(BundleOptionsBuilder builder) {
-        this(builder.entries, builder.dependencies, builder.esBuildConfig, builder.plugins, builder.timeoutSeconds,
+        this(builder.entries, builder.dependencies, builder.esBuildConfig, builder.plugins, builder.debugBuild,
+                builder.timeoutSeconds,
                 builder.workDir,
                 builder.nodeModulesDir);
     }
@@ -34,6 +36,7 @@ public record BundleOptions(
                 .withDependencies(dependencies)
                 .withEsConfig(esBuildConfig)
                 .withPlugins(plugins)
+                .debugBuild(debugBuild)
                 .withTimeout(timeoutSeconds)
                 .withWorkDir(workDir)
                 .withNodeModulesDir(nodeModulesDir);

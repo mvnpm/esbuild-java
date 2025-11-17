@@ -14,7 +14,15 @@ public record EsBuildPluginSass() implements EsBuildPlugin {
     }
 
     @Override
-    public String buildConfigMapper() {
-        return "(config) => { config.plugins.push(sassPlugin()); return config; }";
+    public String configurePlugin() {
+        // language=JavaScript
+        return """
+                (function (config) {
+                    config.plugins.push(sassPlugin({
+                        quietDeps: true
+                    }));
+                    return config;
+                })
+                """;
     }
 }

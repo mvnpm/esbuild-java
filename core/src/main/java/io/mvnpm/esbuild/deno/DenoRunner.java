@@ -2,6 +2,8 @@ package io.mvnpm.esbuild.deno;
 
 import java.io.*;
 import java.nio.file.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -41,16 +43,22 @@ public class DenoRunner {
 
         final Path scriptFile = prepareScript(workDir, scriptContent);
 
-        final Process process = startProcess(workDir, denoBinary, scriptFile);
-        return waitForExit(process, timeoutSeconds);
+        final Process process = startProcess(workDir, denoBinary, scriptFile, false);
+        final Thread destroyHook = new Thread(process::destroyForcibly);
+        Runtime.getRuntime().addShutdownHook(destroyHook);
+        try {
+            return waitForExit(process, timeoutSeconds);
+        } finally {
+            Runtime.getRuntime().removeShutdownHook(destroyHook);
+        }
     }
 
-    public static Process devDenoScript(Path workDir, Path nodeModules, String scriptContent)
+    public static Process devDenoScript(Path workDir, Path nodeModules, String scriptContent, boolean debug)
             throws IOException {
         final Path denoBinary = getDenoBinary(nodeModules);
         final Path scriptFile = prepareScript(workDir, scriptContent);
 
-        return startProcess(workDir, denoBinary, scriptFile);
+        return startProcess(workDir, denoBinary, scriptFile, debug);
     }
 
     public static String formatScript(String template, Path workDir, BundleOptions bundleOptions) throws IOException {
@@ -60,7 +68,8 @@ public class DenoRunner {
                 .collect(Collectors.joining("\n"));
         final String pluginsJs = mapper
                 .writeValueAsString(bundleOptions.plugins().stream().map(EsBuildPlugin::toMap).toList());
-        return template.formatted(importPluginsJs, supportsColor().toString(), pluginsJs,
+        final String nodeModulesDir = workDir.relativize(bundleOptions.nodeModulesDir()).toString();
+        return template.formatted(importPluginsJs, nodeModulesDir, supportsColor().toString(), pluginsJs,
                 bundleOptions.esBuildConfig().toJson());
     }
 
@@ -103,6 +112,12 @@ public class DenoRunner {
                 String line;
                 while ((line = reader.readLine()) != null && process.isAlive()) {
                     switch (line) {
+                        case "Deno is waiting for debugger to connect." -> {
+                            log.add(line);
+                            log.logAll();
+                            log.clear();
+                            continue;
+                        }
                         case "--BUILD--" -> {
                             continue;
                         }
@@ -128,7 +143,7 @@ public class DenoRunner {
     private static ScriptLog scriptLog(Process process, BufferedReader reader, Future<ScriptLog> future, boolean waitForExit,
             long timeoutSeconds) {
         try {
-            ScriptLog log = future.get(timeoutSeconds, TimeUnit.SECONDS);
+            ScriptLog log = timeoutSeconds > 0 ? future.get(timeoutSeconds, TimeUnit.SECONDS) : future.get();
             if (waitForExit) {
                 boolean finished = process.waitFor(50, TimeUnit.MILLISECONDS);
                 int exitCode = finished ? process.exitValue() : -1;
@@ -144,9 +159,9 @@ public class DenoRunner {
             return log;
 
         } catch (TimeoutException | InterruptedException e) {
+            process.destroyForcibly();
             future.cancel(true);
             closeQuietly(reader);
-            process.destroy();
             if (e instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
                 throw new RuntimeException("Bundling process was interrupted", e);
@@ -165,13 +180,19 @@ public class DenoRunner {
         }
     }
 
-    private static Process startProcess(Path workDir, Path denoBinary, Path scriptFile) throws IOException {
-        ProcessBuilder pb = new ProcessBuilder(
+    private static Process startProcess(Path workDir, Path denoBinary, Path scriptFile, boolean debug) throws IOException {
+        final List<String> args = new ArrayList<>(List.of(
                 denoBinary.toAbsolutePath().toString(),
                 "run",
                 "--allow-all",
-                "--node-modules-dir=manual",
-                scriptFile.toAbsolutePath().toString());
+                "--node-modules-dir=manual"));
+        if (debug) {
+            args.add("--inspect-wait");
+        }
+
+        args.add(scriptFile.toAbsolutePath().toString());
+        ProcessBuilder pb = new ProcessBuilder(args);
+        pb.directory(workDir.toFile());
         LOG.debugf("Running esbuild script ''%s'' ", workDir);
         pb.redirectErrorStream(true);
         Process process = pb.start();

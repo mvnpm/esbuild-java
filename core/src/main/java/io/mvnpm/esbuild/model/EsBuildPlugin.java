@@ -13,7 +13,7 @@ public interface EsBuildPlugin {
     default void beforeBuild(Path workDir) {
     };
 
-    String buildConfigMapper();
+    String configurePlugin();
 
     default Object data() {
         return null;
@@ -22,7 +22,7 @@ public interface EsBuildPlugin {
     default Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("name", name());
-        map.put("buildConfigMapper", buildConfigMapper());
+        map.put("buildConfigMapper", configurePlugin());
         map.put("data", data());
         return map;
     }

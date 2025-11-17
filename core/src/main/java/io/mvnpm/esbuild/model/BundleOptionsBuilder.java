@@ -11,6 +11,7 @@ import io.mvnpm.esbuild.model.AutoEntryPoint.AutoDepsMode;
 
 public class BundleOptionsBuilder {
 
+    boolean debugBuild;
     List<EntryPoint> entries = new ArrayList<>();
 
     List<WebDependency> dependencies = new ArrayList<>();
@@ -113,4 +114,8 @@ public class BundleOptionsBuilder {
         return new BundleOptions(this);
     }
 
+    public BundleOptionsBuilder debugBuild(boolean debugBuild) {
+        this.debugBuild = debugBuild;
+        return this;
+    }
 }

@@ -118,15 +118,22 @@ public class DevScript implements DevProcess {
             throw new IllegalStateException("DevScript has already been initialized");
         }
         lock.lock();
+        Thread destroyHook = null;
         try {
             final String scriptContent = formatScript(SCRIPT, workDir, bundleOptions);
-            final Process p = DenoRunner.devDenoScript(workDir, bundleOptions.nodeModulesDir(), scriptContent);
+            final Process p = DenoRunner.devDenoScript(workDir, bundleOptions.nodeModulesDir(), scriptContent,
+                    bundleOptions.debugBuild());
             process.set(p);
-            final ScriptLog log = DenoRunner.waitForResult(p, bundleOptions.timeoutSeconds());
+            destroyHook = new Thread(p::destroyForcibly);
+            Runtime.getRuntime().addShutdownHook(destroyHook);
+            final ScriptLog log = DenoRunner.waitForResult(p, bundleOptions.debugBuild() ? -1 : bundleOptions.timeoutSeconds());
             log.logAll();
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            if (destroyHook != null) {
+                Runtime.getRuntime().removeShutdownHook(destroyHook);
+            }
             lock.unlock();
         }
     }
