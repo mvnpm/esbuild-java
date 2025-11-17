@@ -43,7 +43,7 @@ public record EsBuildPluginTailwind(String basePath) implements EsBuildPlugin {
     @Override
     public String configurePlugin() {
         // language=JavaScript
-        return """ 
+        return """
                 (function(config, data) { config.plugins.push(esbuildPluginTailwind(data)); return config; })
                 """;
     }
