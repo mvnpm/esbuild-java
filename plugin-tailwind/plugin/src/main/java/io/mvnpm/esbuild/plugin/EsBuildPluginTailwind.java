@@ -32,6 +32,9 @@ public record EsBuildPluginTailwind(String basePath) implements EsBuildPlugin {
 
     @Override
     public Object data() {
+        if (basePath == null) {
+            return null;
+        }
         return Map.of("base", basePath);
     }
 
