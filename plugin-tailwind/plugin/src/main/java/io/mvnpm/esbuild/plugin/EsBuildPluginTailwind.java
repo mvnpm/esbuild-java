@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -32,10 +33,9 @@ public record EsBuildPluginTailwind(String basePath) implements EsBuildPlugin {
 
     @Override
     public Object data() {
-        if (basePath == null) {
-            return null;
-        }
-        return Map.of("base", basePath);
+        final var data = new HashMap<String, String>();
+        data.put("base", basePath);
+        return data;
     }
 
     @Override

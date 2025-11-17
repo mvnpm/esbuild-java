@@ -88,14 +88,14 @@ public class DevScript implements DevProcess {
                     try {
                       await handler(payload);
                     } catch (err) {
-                      console.log(`[ERROR] Handler for ${trigger} failed:`, err);
+                      console.log(`[ERROR] Handler for ${trigger} failed:`, cleanLog(err.stack));
                     }
                   } else {
                     console.error(`[ERROR] Unknown trigger: "${trigger}"`);
                   }
                 }
               } catch (err) {
-                console.error("[ERROR] Error while reading stdin:", err);
+                console.error("[ERROR] Error while reading stdin:", cleanLog(err.stack));
               } finally {
                 reader.releaseLock();
                 console.log("[INFO] Listener stopped.");
@@ -187,7 +187,7 @@ public class DevScript implements DevProcess {
         lock.lock();
         try {
             final Process p = this.process.getAndSet(null);
-            if (p != null) {
+            if (p != null && p.isAlive()) {
                 try (BufferedWriter bufferedWriter = p.outputWriter()) {
                     bufferedWriter.write("CLOSE");
                     bufferedWriter.flush();

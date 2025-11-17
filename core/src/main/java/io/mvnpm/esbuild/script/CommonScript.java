@@ -45,7 +45,7 @@ public class CommonScript {
                         const configurePlugin = eval(plugin.buildConfigMapper);
                         newConfig = configurePlugin(config, plugin.data);
                     } catch (err) {
-                        console.error(`[FATAL] Error while applying plugin ${plugin.name}`, err);
+                        console.error(`[FATAL] Error while applying plugin ${plugin.name}:`, cleanLog(err.stack));
                         process.exit(1);
                     }
 
