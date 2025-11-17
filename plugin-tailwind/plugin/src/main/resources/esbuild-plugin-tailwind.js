@@ -23,8 +23,9 @@ export default function esbuildPluginTailwind(opts = {}) {
     const minify =
         typeof opts.optimize === 'object' ? opts.optimize.minify !== false : true
 
+    let base = opts.base || process.cwd();
     const roots = new DefaultMap(
-        (id) => new Root(id, process.cwd(), /* enableSourceMaps */ false)
+        (id) => new Root(id, base, /* enableSourceMaps */ false)
     )
 
     return {

@@ -8,6 +8,7 @@ public class CommonScript {
 
             %s
 
+            const nodeModulesDir = "%s";
             const color = %s;
             const plugins = %s;
 
@@ -41,8 +42,8 @@ public class CommonScript {
                 for (const plugin of plugins) {
                     console.log(`[DEBUG] Adding ${plugin.name}`);
                     try {
-                        const mapper = eval(plugin.buildConfigMapper);
-                        newConfig = mapper(config, plugin.data);
+                        const configurePlugin = eval(plugin.buildConfigMapper);
+                        newConfig = configurePlugin(config, plugin.data);
                     } catch (err) {
                         console.error(`[FATAL] Error while applying plugin ${plugin.name}`, err);
                         process.exit(1);

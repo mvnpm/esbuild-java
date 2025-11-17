@@ -4,10 +4,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
+import java.util.Objects;
 
 import io.mvnpm.esbuild.model.EsBuildPlugin;
 
-public record EsBuildPluginTailwind() implements EsBuildPlugin {
+public record EsBuildPluginTailwind(String basePath) implements EsBuildPlugin {
+
+    public EsBuildPluginTailwind() {
+        this(null);
+    }
+
     @Override
     public String name() {
         return "tailwind";
@@ -15,11 +22,17 @@ public record EsBuildPluginTailwind() implements EsBuildPlugin {
 
     @Override
     public void beforeBuild(Path workDir) {
-        try (InputStream resourceAsStream = EsBuildPluginTailwind.class.getResourceAsStream("/esbuild-plugin-tailwind.js")) {
-            Files.copy(resourceAsStream, workDir.resolve("esbuild-plugin-tailwind.js"));
+        try (InputStream tailwindPlugin = EsBuildPluginTailwind.class.getResourceAsStream("/esbuild-plugin-tailwind.js")) {
+            Objects.requireNonNull(tailwindPlugin, "tailwindPlugin is required");
+            Files.copy(tailwindPlugin, workDir.resolve("esbuild-plugin-tailwind.js"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public Object data() {
+        return Map.of("base", basePath);
     }
 
     @Override
@@ -28,7 +41,10 @@ public record EsBuildPluginTailwind() implements EsBuildPlugin {
     }
 
     @Override
-    public String buildConfigMapper() {
-        return "(config) => { config.plugins.push(esbuildPluginTailwind()); return config; }";
+    public String configurePlugin() {
+        // language=JavaScript
+        return """ 
+                (function(config, data) { config.plugins.push(esbuildPluginTailwind(data)); return config; })
+                """;
     }
 }
