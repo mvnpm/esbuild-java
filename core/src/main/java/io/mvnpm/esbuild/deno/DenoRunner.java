@@ -166,7 +166,7 @@ public class DenoRunner {
                 Thread.currentThread().interrupt();
                 throw new RuntimeException("Bundling process was interrupted", e);
             }
-            throw new BundlingException("Bundling process did not stop after " + timeoutSeconds + " seconds");
+            throw new BundlingException("Bundling timed out after " + timeoutSeconds + " seconds");
 
         } catch (ExecutionException e) {
             if (waitForExit) {
