@@ -8,8 +8,6 @@ import java.util.stream.Collectors;
 
 import org.jboss.logging.Logger;
 
-import io.mvnpm.esbuild.script.DevScript;
-
 public class ScriptLog {
     private static final Logger LOG = Logger.getLogger(ScriptLog.class);
     private static final Pattern LOG_PATTERN = Pattern.compile("^.*?\\[(\\w+)]\\s*(.*)$");
