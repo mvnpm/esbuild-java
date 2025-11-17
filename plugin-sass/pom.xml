@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.mvnpm</groupId>
         <artifactId>esbuild-java-parent</artifactId>
-        <version>2.0.0-CR2</version>
+        <version>999-SNAPSHOT</version>
     </parent>
     <artifactId>esbuild-java-plugin-sass</artifactId>
     <name>Esbuild Java - Plugin Sass</name>
