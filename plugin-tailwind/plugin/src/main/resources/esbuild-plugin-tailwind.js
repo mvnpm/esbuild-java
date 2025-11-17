@@ -24,8 +24,9 @@ export default function esbuildPluginTailwind(opts = {}) {
         typeof opts.optimize === 'object' ? opts.optimize.minify !== false : true
 
     let base = opts.base || process.cwd();
+    let pattern = opts.pattern || "**.html";
     const roots = new DefaultMap(
-        (id) => new Root(id, base, /* enableSourceMaps */ false)
+        (id) => new Root(id, base, pattern, /* enableSourceMaps */ false)
     )
 
     return {
@@ -103,16 +104,17 @@ class Root {
     candidates = new Set()
     buildDependencies = new Map()
 
-    constructor(id, base, enableSourceMaps) {
+    constructor(id, base, pattern, enableSourceMaps) {
         this.id = id
         this.base = base
+        this.pattern = pattern
         this.enableSourceMaps = enableSourceMaps
     }
 
     async generate(content, I) {
         const inputPath = idToPath(this.id)
         const requiresBuild = await this.requiresBuild()
-        const inputBase = path.dirname(inputPath)
+        const inputBase = this.base
 
         if (!this.compiler || !this.scanner || requiresBuild) {
             clearRequireCache([...this.buildDependencies.keys()])
@@ -132,9 +134,9 @@ class Root {
             const sources = (() => {
                 if (this.compiler.root === 'none') return []
                 if (this.compiler.root === null)
-                    return [{ base: this.base, pattern: '**/*', negated: false }]
+                    return [{ base: this.base, pattern: this.pattern, negated: false }]
                 return [{ ...this.compiler.root, negated: false }]
-            })().concat(this.compiler.sources)
+            })().concat(this.compiler.sources.map(s => ({ ...s, base: this.base })))
             this.scanner = new Scanner({ sources })
             DEBUG && I.end('Setup scanner')
         }

@@ -5,14 +5,16 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import io.mvnpm.esbuild.model.EsBuildPlugin;
 
-public record EsBuildPluginTailwind(String basePath) implements EsBuildPlugin {
+public record EsBuildPluginTailwind(String basePath, String basePattern, boolean optimize,
+        boolean minify) implements EsBuildPlugin {
 
     public EsBuildPluginTailwind() {
-        this(null);
+        this(null, "**/*.{html,md,adoc,markdown,asciidoc}", true, true);
     }
 
     @Override
@@ -32,8 +34,14 @@ public record EsBuildPluginTailwind(String basePath) implements EsBuildPlugin {
 
     @Override
     public Object data() {
-        final var data = new HashMap<String, String>();
+        final var data = new HashMap<String, Object>();
         data.put("base", basePath);
+        data.put("pattern", basePattern);
+        if (optimize) {
+            data.put("optimize", Map.of("minify", minify));
+        } else {
+            data.put("optimize", false);
+        }
         return data;
     }
 

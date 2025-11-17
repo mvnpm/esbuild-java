@@ -160,7 +160,7 @@ public class DevScript implements DevProcess {
             BufferedWriter bufferedWriter = p.outputWriter();
             bufferedWriter.write("BUILD");
             bufferedWriter.flush();
-            final ScriptLog log = DenoRunner.waitForResult(p, bundleOptions.timeoutSeconds());
+            final ScriptLog log = DenoRunner.waitForResult(p, bundleOptions.debugBuild() ? -1 : bundleOptions.timeoutSeconds());
             log.logAll();
         } catch (IOException e) {
             throw new RuntimeException(e);
