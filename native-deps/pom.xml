@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.mvnpm</groupId>
         <artifactId>esbuild-java-parent</artifactId>
-        <version>2.0.0-CR3</version>
+        <version>999-SNAPSHOT</version>
     </parent>
     <artifactId>esbuild-java-native-deps</artifactId>
     <name>Esbuild Java - Native dependencies</name>
