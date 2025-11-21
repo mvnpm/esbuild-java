@@ -38,6 +38,10 @@ public class PathUtils {
         }
     }
 
+    public static String toUnixPath(String path) {
+        return path.replaceAll("\\\\", "/");
+    }
+
     public static void deleteRecursive(Path source) throws IOException {
         if (!Files.exists(source)) {
             return;

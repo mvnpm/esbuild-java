@@ -5,16 +5,18 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 import io.mvnpm.esbuild.model.EsBuildPlugin;
+import io.mvnpm.esbuild.util.PathUtils;
 
-public record EsBuildPluginTailwind(String basePath, String basePattern, boolean optimize,
+public record EsBuildPluginTailwind(Source base, List<Source> sources, boolean optimize,
         boolean minify) implements EsBuildPlugin {
 
     public EsBuildPluginTailwind() {
-        this(null, "**/*.{html,md,adoc,markdown,asciidoc}", true, true);
+        this(new Source(null, "**/*.{html,md,adoc,markdown,asciidoc}", false), null, true, true);
     }
 
     @Override
@@ -35,8 +37,8 @@ public record EsBuildPluginTailwind(String basePath, String basePattern, boolean
     @Override
     public Object data() {
         final var data = new HashMap<String, Object>();
-        data.put("base", basePath);
-        data.put("pattern", basePattern);
+        data.put("base", base);
+        data.put("sources", sources);
         if (optimize) {
             data.put("optimize", Map.of("minify", minify));
         } else {
@@ -56,5 +58,14 @@ public record EsBuildPluginTailwind(String basePath, String basePattern, boolean
         return """
                 (function(config, data) { config.plugins.push(esbuildPluginTailwind(data)); return config; })
                 """;
+    }
+
+    public record Source(String base, String pattern, boolean negated) {
+
+        public Source(String base, String pattern, boolean negated) {
+            this.base = base == null ? null : PathUtils.toUnixPath(base);
+            this.pattern = pattern;
+            this.negated = negated;
+        }
     }
 }
