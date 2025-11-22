@@ -38,6 +38,13 @@
             <groupId>org.mvnpm.at.tailwindcss</groupId>
             <artifactId>typography</artifactId>
             <version>0.5.19</version>
+            <exclusions>
+            <!-- See https://github.com/mvnpm/mvnpm/issues/36027-->
+                <exclusion>
+                    <groupId>org.mvnpm.at.isaacs</groupId>
+                    <artifactId>cliui</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.mvnpm</groupId>
