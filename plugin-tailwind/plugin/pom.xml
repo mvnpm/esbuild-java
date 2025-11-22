@@ -35,6 +35,11 @@
             <version>${tailwindcss.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.mvnpm.at.tailwindcss</groupId>
+            <artifactId>typography</artifactId>
+            <version>0.5.19</version>
+        </dependency>
+        <dependency>
             <groupId>io.mvnpm</groupId>
             <artifactId>esbuild-java-testing</artifactId>
             <version>${project.version}</version>

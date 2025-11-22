@@ -115,7 +115,7 @@ class Root {
     async generate(content, I) {
         const inputPath = idToPath(this.id)
         const requiresBuild = await this.requiresBuild()
-        //const inputBase = path.dirname(inputPath)
+        const inputBase = path.dirname(inputPath)
 
         if (!this.compiler || !this.scanner || requiresBuild) {
             clearRequireCache([...this.buildDependencies.keys()])
@@ -125,18 +125,19 @@ class Root {
             DEBUG && I.start('Setup compiler')
             this.compiler = await compile(content, {
                 from: this.enableSourceMaps ? this.id : undefined,
-                base: this.base,
+                base: inputBase,
                 shouldRewriteUrls: true,
                 onDependency: (dep) => this.addBuildDependency(dep),
             })
             DEBUG && I.end('Setup compiler')
 
             DEBUG && I.start('Setup scanner')
+            const baseSource = { base: this.base, pattern: this.pattern, negated: false };
             const sources = (() => {
                 if (this.compiler.root === 'none') return []
                 if (this.compiler.root === null)
-                    return [{ base: this.base, pattern: this.pattern, negated: false }]
-                return [{ ...this.compiler.root, negated: false }]
+                    return [baseSource]
+                return [{ ...this.compiler.root, negated: false }, baseSource]
             })()
                 .concat(this.sources)
                 .concat(this.compiler.sources.map(s => ({ ...s, base: this.base })))
