@@ -17,6 +17,7 @@ import java.util.function.Predicate;
 public record AutoEntryPoint(Path rootDir, String name, List<Source> sources, AutoDeps autoDeps) implements EntryPoint {
 
     private static final Set<String> SCRIPTS = Set.of("js", "ts", "jsx", "tsx", "mjs", "mts", "cjs", "cts");
+
     public AutoEntryPoint {
         requireNonNull(name, "name is required");
         requireNonNull(rootDir, "rootDir is required");
@@ -71,6 +72,9 @@ public record AutoEntryPoint(Path rootDir, String name, List<Source> sources, Au
         try (StringWriter sw = new StringWriter()) {
             sw.write("// Auto-generated imports for project sources\n");
             for (Source source : sources) {
+                if (source.isIgnored()) {
+                    continue;
+                }
                 String line;
                 if (source.isScript()) {
                     line = EXPORT.formatted(source.relativePathWithoutExt());
@@ -98,6 +102,10 @@ public record AutoEntryPoint(Path rootDir, String name, List<Source> sources, Au
 
         public String relativePathWithoutExt() {
             return relativePath.substring(0, relativePath.lastIndexOf("."));
+        }
+
+        public boolean isIgnored() {
+            return relativePath.contains("/_") || relativePath.startsWith("_");
         }
 
         public boolean isScript() {
