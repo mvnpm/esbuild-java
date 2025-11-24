@@ -47,12 +47,12 @@
             <dependency>
                 <groupId>org.mvnpm.at.tailwindcss</groupId>
                 <artifactId>node</artifactId>
-                <version>4.1.14</version>
+                <version>4.1.16</version>
             </dependency>
             <dependency>
                 <groupId>org.mvnpm.at.tailwindcss</groupId>
                 <artifactId>oxide</artifactId>
-                <version>4.1.14</version>
+                <version>4.1.16</version>
             </dependency>
             <dependency>
                 <groupId>org.mvnpm.at.tailwindcss</groupId>
