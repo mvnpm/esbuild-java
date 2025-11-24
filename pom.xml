@@ -50,7 +50,7 @@
         <deno.version>2.5.4</deno.version>
 
         <commons-compress.version>1.28.0</commons-compress.version>
-        <formatter.plugin.version>2.23.0</formatter.plugin.version>
+        <formatter.plugin.version>2.29.0</formatter.plugin.version>
         <impsort.plugin.version>1.9.0</impsort.plugin.version>
         <quarkus.ide-config.version>3.29.1</quarkus.ide-config.version>
         <surefire.plugin.version>3.1.2</surefire.plugin.version>
