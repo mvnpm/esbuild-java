@@ -10,7 +10,7 @@
     <name>Esbuild Java - Plugin Tailwind</name>
     <description>Tailwind plugin for Esbuild Java</description>
     <properties>
-        <tailwindcss.version>4.1.14</tailwindcss.version>
+        <tailwindcss.version>4.1.16</tailwindcss.version>
     </properties>
     <dependencies>
         <dependency>
