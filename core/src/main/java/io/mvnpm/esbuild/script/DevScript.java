@@ -41,6 +41,10 @@ public class DevScript implements DevProcess {
                     console.log("[DEBUG] Bundling completed successfully");
                     console.log("--BUILD-SUCCESS--");
                 } catch (err) {
+                    if (!err.errors) {
+                        // We only print non bundling error, because bundling errors are already printed
+                        console.log("[ERROR] EsBuild Error: " + cleanLog(err.message));
+                    }
                     console.log("--BUILD-ERROR--");
                 }
             }
@@ -55,9 +59,6 @@ public class DevScript implements DevProcess {
                 esbuild.stop();
                 process.exit(0);
             };
-
-            // listen.ts
-            // Run with: deno run --allow-read listen.ts
 
             const decoder = new TextDecoder();
             const reader = Deno.stdin.readable.getReader();

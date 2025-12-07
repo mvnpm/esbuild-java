@@ -21,7 +21,11 @@ public class BuildScript {
                     console.log("[DEBUG] Bundling completed successfully");
                     esbuild.stop();
                     process.exit(0);
-                } catch(e) {
+                } catch(err) {
+                    if (!err.errors) {
+                        // We only print non bundling error, because bundling errors are already printed
+                        console.log("[ERROR] EsBuild Error: " + cleanLog(err.message));
+                    }
                     esbuild.stop();
                     process.exit(1);
                 }

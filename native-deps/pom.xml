@@ -127,7 +127,7 @@
         </profile>
 
         <profile>
-            <id>linux-arm</id>
+            <id>linux-arm64</id>
             <activation>
                 <os>
                     <arch>aarch64</arch>
@@ -137,7 +137,7 @@
             <dependencies>
                 <dependency>
                     <groupId>org.mvnpm.at.esbuild</groupId>
-                    <artifactId>linux-arm</artifactId>
+                    <artifactId>linux-arm64</artifactId>
                     <version>${esbuild.version}</version>
                 </dependency>
                 <dependency>
