@@ -40,15 +40,15 @@ public class CommonScript {
                     newConfig.plugins = [captureLogsPlugin()];
                 }
                 for (const plugin of plugins) {
-                    console.log(`[DEBUG] Adding ${plugin.name}`);
+                    console.log(`[DEBUG] Adding plugin ${plugin.name}`);
                     try {
                         const configurePlugin = eval(plugin.buildConfigMapper);
                         newConfig = configurePlugin(config, plugin.data);
                     } catch (err) {
-                        console.error(`[FATAL] Error while applying plugin ${plugin.name}:`, cleanLog(err.stack));
+                        console.error(`[ERROR] Error while applying plugin ${plugin.name}:`, cleanLog(err.stack));
                         process.exit(1);
                     }
-
+                    console.log(`[DEBUG] ${plugin.name} plugin added`);
                 }
                 return newConfig;
             }
