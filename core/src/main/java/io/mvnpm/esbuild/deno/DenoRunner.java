@@ -180,11 +180,17 @@ public class DenoRunner {
         }
     }
 
-    private static Process startProcess(Path workDir, Path denoBinary, Path scriptFile, boolean debug) throws IOException {
+    private static Process startProcess(Path workDir, Path denoBinary, Path scriptFile, boolean debug)
+            throws IOException {
         final List<String> args = new ArrayList<>(List.of(
                 denoBinary.toAbsolutePath().toString(),
                 "run",
-                "--allow-all",
+                "-R",
+                "-W=.",
+                "--allow-ffi",
+                "--allow-env",
+                "--allow-sys",
+                "--allow-run",
                 "--node-modules-dir=manual"));
         if (debug) {
             args.add("--inspect-wait");
