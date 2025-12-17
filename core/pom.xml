@@ -9,16 +9,11 @@
     <artifactId>esbuild-java</artifactId>
     <name>Esbuild Java</name>
     <description>Small wrapper around esbuild to be able to use it in Java</description>
-    <properties>
-        <immutable.version>5.1.2</immutable.version>
-        <safe-identifier.version>0.4.2</safe-identifier.version>
-        <importmap.version>1.0.11</importmap.version>
-        <jackson-databind.version>2.19.2</jackson-databind.version>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>org.jboss.logging</groupId>
             <artifactId>jboss-logging</artifactId>
+            <version>${jboss-logging.version}</version>
         </dependency>
         <!-- Common esbuild package -->
         <dependency>
@@ -41,10 +36,12 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
+            <version>${commons-compress.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+            <version>${jackson-databind.version}</version>
         </dependency>
     </dependencies>
 

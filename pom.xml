@@ -49,6 +49,13 @@
         <esbuild.version>0.25.10</esbuild.version>
         <deno.version>2.5.4</deno.version>
 
+        <junit.version>5.13.4</junit.version>
+        <immutable.version>5.1.2</immutable.version>
+        <safe-identifier.version>0.4.2</safe-identifier.version>
+        <importmap.version>1.0.11</importmap.version>
+        <jackson-databind.version>2.20.1</jackson-databind.version>
+        <jboss-logging.version>3.6.1.Final</jboss-logging.version>
+        <jboss-logmanager.version>3.1.2.Final</jboss-logmanager.version>
         <commons-compress.version>1.28.0</commons-compress.version>
         <formatter.plugin.version>2.29.0</formatter.plugin.version>
         <impsort.plugin.version>1.12.0</impsort.plugin.version>
@@ -60,19 +67,8 @@
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
         <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
         <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
+        <maven-model-builder.version>3.9.11</maven-model-builder.version>
     </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>io.quarkus</groupId>
-                <artifactId>quarkus-bom</artifactId>
-                <version>${quarkus.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <build>
         <pluginManagement>

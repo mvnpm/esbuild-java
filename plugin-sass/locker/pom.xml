@@ -104,7 +104,7 @@
             <dependency>
                 <groupId>org.mvnpm</groupId>
                 <artifactId>sass-embedded</artifactId>
-                <version>1.93.3</version>
+                <version>1.93.2</version>
             </dependency>
             <dependency>
                 <groupId>org.mvnpm</groupId>
