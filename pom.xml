@@ -26,16 +26,22 @@
     </scm>
     <licenses>
         <license>
-            <name>MIT License</name>
-            <url>http://www.opensource.org/licenses/mit-license.php</url>
+            <name>Apache License 2.0</name>
+            <url>https://opensource.org/license/apache-2-0</url>
         </license>
     </licenses>
     <developers>
         <developer>
+            <name>Andy Damevin</name>
+            <email>ia3andy@gmail.com</email>
+            <organization>commonhaus</organization>
+            <organizationUrl>https://www.commonhaus.org/</organizationUrl>
+        </developer>
+        <developer>
             <name>Erik Jan de Wit</name>
             <email>erikjan.dewit@gmail.com</email>
-            <organization>Red Hat</organization>
-            <organizationUrl>http://blog.nerdin.ch</organizationUrl>
+            <organization>commonhaus</organization>
+            <organizationUrl>https://www.commonhaus.org/</organizationUrl>
         </developer>
     </developers>
 
