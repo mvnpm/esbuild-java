@@ -11,6 +11,7 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <artifactId>esbuild-java-plugin-svelte-locker</artifactId>
+  <name>Esbuild Java - Plugin Svelte - Locker</name>
   <packaging>pom</packaging>
 
   <!-- Locked dependencies (Update with 'mvn io.mvnpm:locker-maven-plugin:LATEST:lock -Dunlocked') -->
