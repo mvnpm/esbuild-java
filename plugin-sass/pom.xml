@@ -11,7 +11,7 @@
     <description>Sass plugin for Esbuild Java</description>
     <properties>
         <esbuild-sass-plugin.version>3.3.1</esbuild-sass-plugin.version>
-        <sass.version>1.94.2</sass.version>
+        <sass.version>1.97.0</sass.version>
     </properties>
     <profiles>
         <profile>
