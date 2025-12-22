@@ -5,8 +5,7 @@ import java.util.HashMap;
 import io.mvnpm.esbuild.model.EsBuildPlugin;
 
 public record EsBuildPluginSvelte(
-        boolean customElement
-) implements EsBuildPlugin {
+        boolean customElement) implements EsBuildPlugin {
     @Override
     public String name() {
         return "svelte";
