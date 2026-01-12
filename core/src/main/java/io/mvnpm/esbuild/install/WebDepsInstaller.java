@@ -79,6 +79,10 @@ public final class WebDepsInstaller {
                     final String packageName = nameAndRoot.getKey();
                     final Path source = nameAndRoot.getValue();
                     final Path target = nodeModulesDir.resolve(packageName);
+                    if (!Files.isDirectory(source)) {
+                        LOG.debugf("ignored package ''%s'' probably installed through another package.json", packageName);
+                        continue;
+                    }
                     dirs.add(packageName);
                     PathUtils.deleteRecursive(target);
                     Files.createDirectories(target.getParent());
