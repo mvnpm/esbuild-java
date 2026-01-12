@@ -117,7 +117,9 @@ public class JarInspector {
         List<Path> foundFiles = searchFiles(root, PACKAGE_JSON, shouldDoMultiple);
         for (Path path : foundFiles) {
             String packageName = readPackageName(path);
-            paths.putIfAbsent(packageName, path.getParent());
+            if (packageName != null) {
+                paths.putIfAbsent(packageName, path.getParent());
+            }
         }
 
         return paths;
@@ -187,6 +189,9 @@ public class JarInspector {
     private static String readPackageName(Path path) {
         try {
             JsonNode object = objectMapper.readTree(path.toFile());
+            if (!object.has("name")) {
+                return null;
+            }
             return object.get("name").asText();
         } catch (IOException ex) {
             throw new UncheckedIOException(ex);
