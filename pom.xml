@@ -57,7 +57,7 @@
         <esbuild.version>0.25.10</esbuild.version>
         <deno.version>2.5.4</deno.version>
 
-        <junit.version>6.0.1</junit.version>
+        <junit.version>6.0.2</junit.version>
         <immutable.version>5.1.2</immutable.version>
         <safe-identifier.version>0.4.2</safe-identifier.version>
         <importmap.version>1.0.11</importmap.version>
