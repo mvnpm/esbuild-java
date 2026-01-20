@@ -52,6 +52,14 @@ public class Bundler {
     private static Bundling getBundling(BundleOptions bundleOptions, boolean install) throws IOException {
         final Path workDir = getWorkDir(bundleOptions);
         final Path nodeModulesDir = getNodeModulesDir(workDir, bundleOptions);
+
+        if (nodeModulesDir.getParent() == null
+                || !workDir.toAbsolutePath().startsWith(nodeModulesDir.getParent().toAbsolutePath())) {
+            throw new BundlingException(
+                    "Invalid node_modules directory: '%s'. It must be located in an ancestor of the working directory '%s' to enable module resolution."
+                            .formatted(nodeModulesDir, workDir));
+        }
+
         if (install) {
             install(nodeModulesDir, bundleOptions.dependencies());
         }
@@ -84,7 +92,7 @@ public class Bundler {
     }
 
     private static Path getWorkDir(BundleOptions bundleOptions) throws IOException {
-        return bundleOptions.workDir() != null ? bundleOptions.workDir()
+        return bundleOptions.workDir() != null ? bundleOptions.workDir().normalize()
                 : Files.createTempDirectory("bundle");
     }
 
@@ -97,7 +105,7 @@ public class Bundler {
     protected static Path getNodeModulesDir(Path workDir, BundleOptions bundleOptions) {
         return bundleOptions == null || bundleOptions.nodeModulesDir() == null
                 ? workDir.resolve(BundleOptions.NODE_MODULES)
-                : bundleOptions.nodeModulesDir();
+                : bundleOptions.nodeModulesDir().normalize();
     }
 
     public static void clearDependencies(Path nodeModulesDir) throws IOException {
