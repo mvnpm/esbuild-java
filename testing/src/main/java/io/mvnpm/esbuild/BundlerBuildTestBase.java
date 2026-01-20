@@ -1,11 +1,13 @@
 package io.mvnpm.esbuild;
 
 import static io.mvnpm.esbuild.BundlerTestHelper.executeTest;
+import static io.mvnpm.esbuild.BundlerTestHelper.getBundleOptions;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -62,6 +64,18 @@ public class BundlerBuildTestBase {
     public void shouldThrowException() {
         assertThrows(BundlingException.class, () -> {
             executeTest(List.of("/mvnpm/stimulus-3.2.1.jar"), WebDependencyType.MVNPM, "application-error.js", false);
+        });
+    }
+
+    @Test
+    public void shouldThrowExceptionNodeModulesNotAncestor() {
+        assertThrows(BundlingException.class, () -> {
+            final Path parent = Files.createTempDirectory("foo");
+            final Path work = Files.createDirectories(parent.resolve("work"));
+            final BundleOptions bundleOptions = getBundleOptions(List.of(), WebDependencyType.MVNPM, "application-mvnpm.js")
+                    .withWorkDir(work)
+                    .withNodeModulesDir(parent.resolve("foo/node_modules")).build();
+            Bundler.bundle(bundleOptions, true);
         });
     }
 
