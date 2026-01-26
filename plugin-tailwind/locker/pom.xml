@@ -97,7 +97,7 @@
             <dependency>
                 <groupId>org.mvnpm</groupId>
                 <artifactId>lightningcss</artifactId>
-                <version>1.30.2</version>
+                <version>1.31.1</version>
             </dependency>
             <dependency>
                 <groupId>org.mvnpm</groupId>
