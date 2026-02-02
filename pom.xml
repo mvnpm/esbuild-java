@@ -67,7 +67,7 @@
         <commons-compress.version>1.28.0</commons-compress.version>
         <formatter.plugin.version>2.29.0</formatter.plugin.version>
         <impsort.plugin.version>1.13.0</impsort.plugin.version>
-        <quarkus.ide-config.version>3.29.1</quarkus.ide-config.version>
+        <quarkus.ide-config.version>3.31.1</quarkus.ide-config.version>
         <surefire.plugin.version>3.5.4</surefire.plugin.version>
         <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
         <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
