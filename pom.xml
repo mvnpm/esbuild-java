@@ -61,7 +61,7 @@
         <immutable.version>5.1.2</immutable.version>
         <safe-identifier.version>0.4.2</safe-identifier.version>
         <importmap.version>1.0.11</importmap.version>
-        <jackson-databind.version>2.20.1</jackson-databind.version>
+        <jackson-databind.version>2.21.0</jackson-databind.version>
         <jboss-logging.version>3.6.1.Final</jboss-logging.version>
         <jboss-logmanager.version>3.2.1.Final</jboss-logmanager.version>
         <commons-compress.version>1.28.0</commons-compress.version>
