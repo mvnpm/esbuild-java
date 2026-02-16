@@ -63,7 +63,7 @@
         <importmap.version>1.0.11</importmap.version>
         <jackson-databind.version>2.20.1</jackson-databind.version>
         <jboss-logging.version>3.6.1.Final</jboss-logging.version>
-        <jboss-logmanager.version>3.1.2.Final</jboss-logmanager.version>
+        <jboss-logmanager.version>3.2.1.Final</jboss-logmanager.version>
         <commons-compress.version>1.28.0</commons-compress.version>
         <formatter.plugin.version>2.29.0</formatter.plugin.version>
         <impsort.plugin.version>1.13.0</impsort.plugin.version>
