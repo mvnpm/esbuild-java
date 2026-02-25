@@ -43,7 +43,7 @@
       <dependency>
         <groupId>org.mvnpm.at.sveltejs</groupId>
         <artifactId>acorn-typescript</artifactId>
-        <version>1.0.8</version>
+        <version>1.0.9</version>
       </dependency>
       <dependency>
         <groupId>org.mvnpm.at.types</groupId>
