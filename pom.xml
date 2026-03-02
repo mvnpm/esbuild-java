@@ -68,7 +68,7 @@
         <formatter.plugin.version>2.29.0</formatter.plugin.version>
         <impsort.plugin.version>1.13.0</impsort.plugin.version>
         <quarkus.ide-config.version>3.31.3</quarkus.ide-config.version>
-        <surefire.plugin.version>3.5.4</surefire.plugin.version>
+        <surefire.plugin.version>3.5.5</surefire.plugin.version>
         <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
         <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
         <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
