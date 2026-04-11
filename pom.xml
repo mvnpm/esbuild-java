@@ -18,6 +18,8 @@
         <module>plugin-svelte/locker</module>
         <module>plugin-svelte</module>
         <module>plugin-tailwind</module>
+		<module>plugin-vue/locker</module>
+		<module>plugin-vue</module>
     </modules>
     <url>https://github.com/mvnpm/esbuild-java/</url>
     <scm>
