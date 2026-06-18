@@ -53,6 +53,26 @@ public class BundlerTailwindTest {
         assertTrue(options.workDir().resolve("dist").resolve("app.css").toFile().exists());
     }
 
+    @Test
+    void shouldBundleWithSourceInline() throws IOException, URISyntaxException {
+        final Path temp = Files.createTempDirectory("test-tailwind-source-inline");
+        final Path root = new File(BundlerTailwindTest.class.getResource("/tailwind-source-inline/").toURI()).toPath();
+        FileUtils.copyDirectory(root.toFile(), temp.toFile());
+
+        final BundleOptions options = BundleOptions.builder()
+                .withWorkDir(temp)
+                .withEsConfig(EsBuildConfig.builder().fixedEntryNames().build())
+                .addPlugin(new EsBuildPluginTailwind())
+                .addEntryPoint("app.js").build();
+
+        final BundleResult result = Bundler.bundle(options, true);
+        final Path cssOutput = options.workDir().resolve("dist").resolve("app.css");
+        assertTrue(cssOutput.toFile().exists());
+        final String css = Files.readString(cssOutput);
+        assertTrue(css.contains("underline"), "should contain underline utility from @source inline");
+        assertTrue(css.contains("font-bold"), "should contain font-bold utility from @source inline");
+    }
+
     static Path prepareTest() throws IOException, URISyntaxException {
         final Path temp = Files.createTempDirectory("test-tailwind");
         final Path root = new File(BundlerTailwindTest.class.getResource("/tailwind/").toURI()).toPath();
