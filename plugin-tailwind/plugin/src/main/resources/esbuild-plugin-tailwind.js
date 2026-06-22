@@ -140,7 +140,7 @@ class Root {
                 return [{ ...this.compiler.root, negated: false }, baseSource]
             })()
                 .concat(this.sources)
-                .concat(this.compiler.sources.map(s => ({ ...s, base: this.base })))
+                .concat(this.compiler.sources.map(s => s.pattern ? { ...s, base: this.base } : s))
             this.scanner = new Scanner({ sources })
             DEBUG && I.end('Setup scanner')
         }
