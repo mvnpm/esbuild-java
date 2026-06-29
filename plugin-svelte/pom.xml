@@ -10,7 +10,7 @@
     <name>Esbuild Java - Plugin Svelte</name>
     <description>Svelte plugin for Esbuild Java</description>
     <properties>
-        <esbuild-svelte-plugin.version>0.9.4</esbuild-svelte-plugin.version>
+        <esbuild-svelte-plugin.version>0.9.5</esbuild-svelte-plugin.version>
     </properties>
     <profiles>
         <profile>
