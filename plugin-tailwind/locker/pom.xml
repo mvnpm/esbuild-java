@@ -13,7 +13,14 @@
   <artifactId>esbuild-java-plugin-tailwind-locker</artifactId>
   <packaging>pom</packaging>
 
-  <!-- Locked dependencies (Update with 'mvn io.mvnpm:locker-maven-plugin:LATEST:lock -Dunlocked') -->
+  <!--
+    Locked dependencies (Update with 'mvn io.mvnpm:locker-maven-plugin:LATEST:lock -Dunlocked' from ../plugin).
+    The plugin writes the result to ../plugin/locker/pom.xml, so after updating:
+    - move it over this file and remove the <relativePath> from the parent
+    - restore the <name> element above (Maven Central rejects the release without it)
+    - remove platform specific native artifacts (org.mvnpm.at.deno, org.mvnpm.at.esbuild, lightningcss-*, oxide-*)
+    - restore this comment
+  -->
 
   <dependencyManagement>
     <dependencies>
