@@ -37,7 +37,7 @@
         <dependency>
             <groupId>org.mvnpm.at.tailwindcss</groupId>
             <artifactId>typography</artifactId>
-            <version>0.5.19</version>
+            <version>0.5.20</version>
             <exclusions>
             <!-- See https://github.com/mvnpm/mvnpm/issues/36027-->
                 <exclusion>

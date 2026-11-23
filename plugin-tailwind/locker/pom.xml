@@ -59,7 +59,7 @@
       <dependency>
         <groupId>org.mvnpm.at.tailwindcss</groupId>
         <artifactId>typography</artifactId>
-        <version>0.5.19</version>
+        <version>0.5.20</version>
       </dependency>
       <dependency>
         <groupId>org.mvnpm</groupId>
