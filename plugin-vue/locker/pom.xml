@@ -199,7 +199,7 @@
       <dependency>
         <groupId>org.mvnpm</groupId>
         <artifactId>dom-serializer</artifactId>
-        <version>2.0.0</version>
+        <version>3.1.1</version>
       </dependency>
       <dependency>
         <groupId>org.mvnpm</groupId>
