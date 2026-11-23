@@ -79,7 +79,7 @@
       <dependency>
         <groupId>org.mvnpm</groupId>
         <artifactId>devalue</artifactId>
-        <version>5.9.4</version>
+        <version>6.0.3</version>
       </dependency>
       <dependency>
         <groupId>org.mvnpm</groupId>
