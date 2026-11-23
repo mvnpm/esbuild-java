@@ -1,6 +1,6 @@
 plugins {
     java
-    id("io.mvnpm.gradle.plugin.native-java-plugin") version "1.0.0"
+    id("io.mvnpm.gradle.plugin.native-java-plugin") version "1.1.2"
 }
 
 group = "com.example"
