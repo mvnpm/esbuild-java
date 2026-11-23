@@ -14,7 +14,13 @@
   <artifactId>esbuild-java-plugin-svelte-locker</artifactId>
   <packaging>pom</packaging>
 
-  <!-- Locked dependencies (Update with 'mvn io.mvnpm:locker-maven-plugin:LATEST:lock -Dunlocked') -->
+  <!--
+    Locked dependencies (Update with 'mvn io.mvnpm:locker-maven-plugin:LATEST:lock -Dunlocked').
+    The plugin rewrites this file, so after updating:
+    - restore the <name> element above (Maven Central rejects the release without it)
+    - remove platform specific native artifacts (org.mvnpm.at.deno, org.mvnpm.at.esbuild)
+    - restore this comment
+  -->
 
   <dependencyManagement>
     <dependencies>
