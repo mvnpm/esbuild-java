@@ -428,7 +428,7 @@
       <dependency>
         <groupId>org.mvnpm</groupId>
         <artifactId>postcss</artifactId>
-        <version>8.5.9</version>
+        <version>8.5.16</version>
       </dependency>
       <dependency>
         <groupId>org.mvnpm</groupId>
