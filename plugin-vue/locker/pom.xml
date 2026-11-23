@@ -10,6 +10,7 @@
     <version>999-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
+  <name>Esbuild Java - Plugin Vue - Locker</name>
   <artifactId>esbuild-java-plugin-vue-locker</artifactId>
   <packaging>pom</packaging>
 
