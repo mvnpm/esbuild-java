@@ -7,10 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 public record EsBuildConfig(
         String esBuildVersion,
@@ -226,11 +225,7 @@ public record EsBuildConfig(
                 throw new RuntimeException(e);
             }
         }
-        try {
-            return mapper.writeValueAsString(node);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return mapper.writeValueAsString(node);
     }
 
     private static String convertField(String field) {

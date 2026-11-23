@@ -18,12 +18,11 @@ import java.util.Set;
 
 import org.jboss.logging.Logger;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.mvnpm.esbuild.install.InstallException;
 import io.mvnpm.esbuild.model.WebDependency;
 import io.mvnpm.importmap.ImportsDataBinding;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 public class JarInspector {
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -187,15 +186,11 @@ public class JarInspector {
     }
 
     private static String readPackageName(Path path) {
-        try {
-            JsonNode object = objectMapper.readTree(path.toFile());
-            if (!object.has("name")) {
-                return null;
-            }
-            return object.get("name").asText();
-        } catch (IOException ex) {
-            throw new UncheckedIOException(ex);
+        JsonNode object = objectMapper.readTree(path.toFile());
+        if (!object.has("name")) {
+            return null;
         }
+        return object.get("name").asString();
     }
 
     private static Properties getPomProperties(Path extractDir) {
