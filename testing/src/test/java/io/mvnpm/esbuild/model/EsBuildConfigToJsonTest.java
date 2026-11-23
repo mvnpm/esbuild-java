@@ -9,8 +9,8 @@ import java.util.stream.StreamSupport;
 
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 public class EsBuildConfigToJsonTest {
 
@@ -24,7 +24,7 @@ public class EsBuildConfigToJsonTest {
 
         JsonNode node = new ObjectMapper().readTree(json);
         assertTrue(node.get("bundle").asBoolean());
-        assertEquals("esm", node.get("format").asText());
+        assertEquals("esm", node.get("format").asString());
     }
 
     @Test
@@ -36,8 +36,8 @@ public class EsBuildConfigToJsonTest {
 
         JsonNode node = new ObjectMapper().readTree(json);
         JsonNode loaderNode = node.get("loader");
-        assertEquals("jsx", loaderNode.get(".js").asText());
-        assertEquals("local-css", loaderNode.get(".css").asText());
+        assertEquals("jsx", loaderNode.get(".js").asString());
+        assertEquals("local-css", loaderNode.get(".css").asString());
     }
 
     @Test
@@ -48,7 +48,7 @@ public class EsBuildConfigToJsonTest {
         final String json = esBuildConfig.build().toJson();
 
         JsonNode node = new ObjectMapper().readTree(json);
-        assertEquals("https://www.example.com/v1", node.get("publicPath").asText());
+        assertEquals("https://www.example.com/v1", node.get("publicPath").asString());
     }
 
     @Test
@@ -61,12 +61,12 @@ public class EsBuildConfigToJsonTest {
         JsonNode node = new ObjectMapper().readTree(json);
         assertTrue(node.get("bundle").asBoolean());
         assertTrue(node.get("minify").asBoolean());
-        assertEquals("/tmp", node.get("outdir").asText());
+        assertEquals("/tmp", node.get("outdir").asString());
 
         JsonNode entryPoints = node.get("entryPoints");
         assertTrue(entryPoints.isArray());
         assertTrue(StreamSupport.stream(entryPoints.spliterator(), false)
-                .map(JsonNode::asText)
+                .map(JsonNode::asString)
                 .collect(Collectors.toSet())
                 .containsAll(List.of("main.js", "bundle.js")));
     }
@@ -83,7 +83,7 @@ public class EsBuildConfigToJsonTest {
         JsonNode externalNode = node.get("external");
         assertTrue(externalNode.isArray());
         assertTrue(StreamSupport.stream(externalNode.spliterator(), false)
-                .map(JsonNode::asText)
+                .map(JsonNode::asString)
                 .collect(Collectors.toSet())
                 .containsAll(List.of("*.png", "/images/*")));
     }
@@ -96,7 +96,7 @@ public class EsBuildConfigToJsonTest {
         final String json = esBuildConfig.build().toJson();
 
         JsonNode node = new ObjectMapper().readTree(json);
-        assertEquals("chunks/[name]-[hash]", node.get("chunkNames").asText());
+        assertEquals("chunks/[name]-[hash]", node.get("chunkNames").asString());
     }
 
     @Test
@@ -109,7 +109,7 @@ public class EsBuildConfigToJsonTest {
 
         JsonNode node = new ObjectMapper().readTree(json);
         JsonNode defineNode = node.get("define");
-        assertEquals("bar", defineNode.get("foo").asText());
-        assertEquals("BAR", defineNode.get("FOO").asText()); // values are lowercased
+        assertEquals("bar", defineNode.get("foo").asString());
+        assertEquals("BAR", defineNode.get("FOO").asString()); // values are lowercased
     }
 }

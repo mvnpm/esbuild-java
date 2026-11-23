@@ -17,13 +17,13 @@ import java.util.stream.Collectors;
 
 import org.jboss.logging.Logger;
 
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.mvnpm.esbuild.model.WebDependency;
 import io.mvnpm.esbuild.util.Archives;
 import io.mvnpm.esbuild.util.JarInspector;
 import io.mvnpm.esbuild.util.PathUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.util.DefaultPrettyPrinter;
+import tools.jackson.databind.ObjectMapper;
 
 public final class WebDepsInstaller {
 
@@ -123,7 +123,7 @@ public final class WebDepsInstaller {
         }
         try (InputStream s = Files.newInputStream(path)) {
             return mapper.readValue(s, MvnpmInfo.class);
-        } catch (IOException e) {
+        } catch (IOException | JacksonException e) {
             try {
                 Files.deleteIfExists(path);
             } catch (IOException ex) {
@@ -137,7 +137,7 @@ public final class WebDepsInstaller {
         try {
             Files.deleteIfExists(path);
             Files.createDirectories(path.getParent());
-            mapper.writer(new DefaultPrettyPrinter()).writeValue(path.toFile(), root);
+            mapper.writer().with(new DefaultPrettyPrinter()).writeValue(path.toFile(), root);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

@@ -15,11 +15,10 @@ import java.util.stream.Collectors;
 
 import org.jboss.logging.Logger;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.mvnpm.esbuild.BundlingException;
 import io.mvnpm.esbuild.model.BundleOptions;
 import io.mvnpm.esbuild.model.EsBuildPlugin;
+import tools.jackson.databind.ObjectMapper;
 
 public class DenoRunner {
     private static final Logger LOG = Logger.getLogger(DenoRunner.class);

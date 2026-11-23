@@ -5,8 +5,6 @@ import static io.mvnpm.esbuild.model.AutoEntryPoint.isScript;
 import static io.mvnpm.esbuild.util.JarInspector.PACKAGE_JSON;
 import static java.util.function.Predicate.not;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -15,11 +13,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.mvnpm.esbuild.install.MvnpmInfo;
 import io.mvnpm.esbuild.install.WebDepsInstaller;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 public class DependenciesAutoImports {
     private static final String[] FIELDS = new String[] { "name", "module", "main", "style", "sass", "browser" };
@@ -60,18 +57,14 @@ public class DependenciesAutoImports {
 
     private static Map<String, String> readPackage(Path path) {
         Map<String, String> contents = new HashMap<>(FIELDS.length);
-        try {
-            JsonNode object = objectMapper.readTree(path.toFile());
-            for (String field : FIELDS) {
-                if (object.has(field)) {
-                    final JsonNode node = object.get(field);
-                    contents.put(field, node.isValueNode() ? node.asText() : "[object]");
-                }
+        JsonNode object = objectMapper.readTree(path.toFile());
+        for (String field : FIELDS) {
+            if (object.has(field)) {
+                final JsonNode node = object.get(field);
+                contents.put(field, node.isValueNode() ? node.asString() : "[object]");
             }
-            return contents;
-        } catch (IOException ex) {
-            throw new UncheckedIOException(ex);
         }
+        return contents;
     }
 
     private static final String IMPORT = "import \"%s\";";

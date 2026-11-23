@@ -57,27 +57,27 @@
 
         <quarkus.version>3.26.3</quarkus.version>
         <esbuild.version>0.28.2</esbuild.version>
-        <deno.version>2.5.4</deno.version>
+        <deno.version>2.9.6</deno.version>
 
-        <junit.version>6.0.2</junit.version>
+        <junit.version>6.1.3</junit.version>
         <immutable.version>5.1.2</immutable.version>
         <safe-identifier.version>0.4.2</safe-identifier.version>
-        <importmap.version>1.0.11</importmap.version>
-        <jackson-databind.version>2.21.1</jackson-databind.version>
-        <jboss-logging.version>3.6.1.Final</jboss-logging.version>
+        <importmap.version>2.0.0</importmap.version>
+        <jackson-databind.version>3.1.8</jackson-databind.version>
+        <jboss-logging.version>3.6.3.Final</jboss-logging.version>
         <jboss-logmanager.version>3.2.2.Final</jboss-logmanager.version>
         <commons-compress.version>1.28.0</commons-compress.version>
         <formatter.plugin.version>2.29.0</formatter.plugin.version>
         <impsort.plugin.version>1.13.0</impsort.plugin.version>
-        <quarkus.ide-config.version>3.31.3</quarkus.ide-config.version>
-        <surefire.plugin.version>3.5.5</surefire.plugin.version>
-        <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
+        <quarkus.ide-config.version>4.0.0</quarkus.ide-config.version>
+        <surefire.plugin.version>3.6.1</surefire.plugin.version>
+        <maven-antrun-plugin.version>3.2.0</maven-antrun-plugin.version>
         <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
         <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
         <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
         <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
-        <maven-model-builder.version>3.9.16</maven-model-builder.version>
+        <maven-model-builder.version>3.10.2</maven-model-builder.version>
     </properties>
 
     <build>
@@ -171,7 +171,7 @@
                     <plugin>
                         <groupId>org.sonatype.central</groupId>
                         <artifactId>central-publishing-maven-plugin</artifactId>
-                        <version>0.10.0</version>
+                        <version>0.12.0</version>
                         <extensions>true</extensions>
                         <configuration>
                             <publishingServerId>central</publishingServerId>

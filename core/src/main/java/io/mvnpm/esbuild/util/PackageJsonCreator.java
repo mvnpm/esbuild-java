@@ -5,10 +5,10 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.util.DefaultPrettyPrinter;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectWriter;
+import tools.jackson.databind.node.ObjectNode;
 
 public class PackageJsonCreator {
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -19,7 +19,7 @@ public class PackageJsonCreator {
 
     public static void createPackageJson(Path root, String name, String version, String main) {
         try {
-            ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
+            ObjectWriter writer = mapper.writer().with(new DefaultPrettyPrinter());
             ObjectNode content = createNode(name, version, main);
             Path packageJson = root.resolve("package.json");
             writer.writeValue(Files.newOutputStream(packageJson), content);
