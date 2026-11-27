@@ -139,7 +139,7 @@
       <dependency>
         <groupId>org.mvnpm</groupId>
         <artifactId>camel-case</artifactId>
-        <version>3.0.0</version>
+        <version>5.0.0</version>
       </dependency>
       <dependency>
         <groupId>org.mvnpm</groupId>
